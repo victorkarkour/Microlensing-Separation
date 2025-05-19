@@ -107,6 +107,12 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
             linelabel = dataproj[0]
         
     fig.legend([Circ1,Circ2,Circ3,linelabel],["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], fontsize = "small")
+    plt.text(-11.5,7.90,"e=0")
+    plt.text(-11.5,3.90,"e=0.5")
+    plt.text(-11.5,-0.90,"e=0.9")
+    plt.text(-8,10.5,"i=0")
+    plt.text(-4,10.5,"i=45")
+    plt.text(-0.5,10.5,"i=90")
     plt.show()
     
     return None

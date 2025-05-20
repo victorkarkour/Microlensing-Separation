@@ -62,64 +62,158 @@ def OrbGeo(t, a=1, w = 0, W = 0, i = 0, e = 0):
     yt = B*Xt + G*Yt
     
     return(xt, yt)
+
+def InvVelocity(t,x,y):
+    changet = np.abs(t[1] - t[0])
+    vel = []
+    for i in range(len(t)):
+        t1 = t[i] - changet
+        t2 = t[i] + changet
+        x1 = x[i]
+        y1 = y[i]
+        if i == len(t)-1:
+            # THIS SOLUTION FORCES
+            # OUR TIME FUNCTION TO ALWAYS BE 
+            # AN EVEN INTEGER NUMBER OF PI
+            x2 = x[-1]
+            y2 = y[-1]
+        else:
+            x2 = x[i+1]
+            y2 = y[i+1]
+        
+        changedeg = np.sqrt((x1-x2)**2+(y1-y2)**2)
+        
+        if changedeg == 0:
+            vel.append(0)
+        else:
+            vel.append(1/(changedeg/changet))
+    return vel
+
 def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     
-    x1, y1 = OrbGeo(t, e=0)
-    x11, y2 = OrbGeo(t, e=0.5)
-    x111, y3 = OrbGeo(t, e=0.9)
+    k=0.5
+    list1=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t,a=k,e=0)
+        list1.append((x1,y1))
+        k+=0.5
+    k=0.5
+    list2=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t,a=k,e=0.5)
+        list2.append((x1,y1))
+        k+=0.5
+    k=0.5
+    list3=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t,a=k,e=0.9)
+        list3.append((x1,y1))
+        k+=0.5
     
-    x2, y11 = OrbGeo(t,e = 0, i = 45, w = np.pi/2)
-    x22, y22 = OrbGeo(t,e = 0.5, i = 45, w = np.pi)
-    x222, y33 = OrbGeo(t,e = 0.9, i = 45, w = 3*np.pi/2)
+    # x1, y1 = OrbGeo(t,e = 0,)
+    # x11, y2 = OrbGeo(t,e = 0.5)
+    # x111, y3 = OrbGeo(t,e = 0.9)
     
-    x3, y111 = OrbGeo(t, e = 0, i = 90)
-    x33, y222 = OrbGeo(t, e=0.5, i = 90)
-    x333, y333 = OrbGeo(t, e = 0.9, i = 90)
+    k=0.5
+    list4=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t,a=k, e = 0, i = np.pi/4, w = np.pi/2)
+        list4.append((x1,y1))
+        k+=0.5
+    k=0.5
+    list5=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t,a=k, e = 0.5, i = np.pi/4, w = np.pi)
+        list5.append((x1,y1))
+        k+=0.5
+    k=0.5
+    list6=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/4, w = 3*np.pi/2)
+        list6.append((x1,y1))
+        k+=0.5
+    
+    # x2, y11 = OrbGeo(t,e = 0, i = np.pi/4, w = np.pi/2)
+    # x22, y22 = OrbGeo(t,e = 0.5, i = np.pi/4, w = np.pi)
+    # x222, y33 = OrbGeo(t,e = 0.9, i = np.pi/4, w = 3*np.pi/2)
+    
+    k=0.5
+    list7=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t, a = k, e = 0, i = np.pi/2)
+        list7.append((x1,y1))
+        k+=0.5
+    k=0.5
+    list8=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t, a = k, e = 0.5, i = np.pi/2)
+        list8.append((x1,y1))
+        k+=0.5
+    k=0.5
+    list9=[]
+    while k <= 1.5:
+        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/2)
+        list9.append((x1,y1))
+        k+=0.5
+    
+    # x3, y111 = OrbGeo(t, e = 0, i = np.pi/2)
+    # x33, y222 = OrbGeo(t, e=0.5, i = np.pi/2)
+    # x333, y333 = OrbGeo(t, e = 0.9, i = np.pi/2)
     
     list = [
-        (x1,y1),(x2,y11),(x3,y111),
-        (x11,y2),(x22,y22),(x33,y222),
-        (x111,y3),(x222,y33),(x333,y333)
+        list1,list4,list7,
+        list2,list5,list8,
+        list3,list6,list9
     ]
     
-    fig, axs = plt.subplots(n,n, figsize = (7,7), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-    # Circ1 = patches.Circle((0,0),0.5, ec= "b",fill=False)
-    # Circ2 = patches.Circle((0,0),1,ec="purple",fill=False)
-    # Circ3 = patches.Circle((0,0),1.5,ec="r",fill=False)                
-    fig.suptitle("Orbital Projection with Alterations in e, i, and $\omega$")
+    fig, axs = plt.subplots(n,n, figsize = (7,7), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
+    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$")
     for j, ax  in enumerate(axs.flatten()):
         
-        initialx, initialy = list[j] 
+        iterlist = list[j]
+        g = 0
+        for g in range(len(iterlist)):
+            initialx, initialy = iterlist[g]
+            vel = InvVelocity(t,initialx,initialy) 
+            if g == 0:
+                color = "g"
+                label = "a = 0.5"
+            elif g == 1:
+                color = "r"
+                label = "a = 1.0"
+            else:
+                color = "b"
+                label = "a = 1.5"    
+            dataproj = ax.scatter(initialx, initialy,s = vel, color = color, label = label)
+            ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
+        if j == 0:
+            handles, labels = ax.get_legend_handles_labels()
+        # Circ1 = patches.Circle((0,0), 0.5, ec= "b", fill=False, linestyle = ":", linewidth = 1)
+        # Circ2 = patches.Circle((0,0), 1, ec="purple", fill=False, linestyle = ":", linewidth = 1)
+        # Circ3 = patches.Circle((0,0), 1.5, ec="r", fill=False, linestyle = ":", linewidth = 1)
         
-        dataproj = ax.plot(initialx, initialy, color = "g")
-        
-        Circ1 = patches.Circle((0,0), 0.5, ec= "b", fill=False, linestyle = ":", linewidth = 1)
-        Circ2 = patches.Circle((0,0), 1, ec="purple", fill=False, linestyle = ":", linewidth = 1)
-        Circ3 = patches.Circle((0,0), 1.5, ec="r", fill=False, linestyle = ":", linewidth = 1)
-        
-        ax.add_patch(Circ1)
-        ax.add_patch(Circ2)
-        ax.add_patch(Circ3)
+        # ax.add_patch(Circ1)
+        # ax.add_patch(Circ2)
+        # ax.add_patch(Circ3)
         
         ax.set_xlim(-2,2)
         ax.set_ylim(-2,2)
-        if j == 0:
-            linelabel = dataproj[0]
-        
-    fig.legend([Circ1,Circ2,Circ3,linelabel],["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], fontsize = "small")
+    # fig.legend([Circ1,Circ2,Circ3,linelabel],["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], fontsize = "small")
+    fig.legend(handles,labels,fontsize="small")
     plt.text(-11.5,7.90,"e=0")
     plt.text(-11.5,3.90,"e=0.5")
-    plt.text(-11.5,-0.90,"e=0.9")
+    plt.text(-11.5,-0.1,"e=0.9")
     plt.text(-8,10.5,"i=0")
     plt.text(-4,10.5,"i=45")
     plt.text(-0.5,10.5,"i=90")
     plt.show()
     
-    return None
+    return n
 
-t = np.linspace(0,2*np.pi,5000)
+t = np.linspace(0,4*np.pi,400)
 MultiPlot(t)
 # x,y = OrbGeo(t, e=0)
+# print(InvVelocity(t,x,y)[-1])
 # fig, ax = plt.subplots()
 # ax.plot(x,y)
 # ax.set_xlabel("x-axis")

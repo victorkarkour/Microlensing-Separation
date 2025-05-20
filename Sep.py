@@ -89,6 +89,21 @@ def InvVelocity(t,x,y):
             vel.append(1/(changedeg/changet))
     return vel
 
+def Rchange(t,x,y):
+    rlist = [] # Time at which it was less than 0.001
+    num = [] # Position in list given length of x,y,& t
+    r0 = 1 # Einstein Ring Radius
+    for i in range(len(t)):
+        x1 = x[i]
+        y1 = y[i]
+        
+        r = np.sqrt(x1**2+y1**2)
+        
+        if np.abs(r-r0) <= 0.001:
+            rlist.append(t[i])
+            num.append(i)
+    return rlist , num
+
 def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     
     k=0.5

@@ -6,6 +6,26 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 def NewtRaf(M, e):
+    """
+    Uses scipy functions to produce a 
+    root of a real function using the
+    Newton-Raphson method.
+    
+    -------------------------------
+    ### Parameters
+    
+    M : array-like <br>
+        A combination of Period and semimajor axis.
+    
+    e : float <br>
+        Constant of eccentricity.
+    
+    -------------------------------
+    ### Returns
+    
+    Solution : array-like <br>
+        Solution to Kepler Equation
+    """
     initial = M+e*np.sin(M) # Bascially starting with M as our initial guess
     Solution = np.zeros_like(M)
     
@@ -28,15 +48,92 @@ def NewtRaf(M, e):
     return(Solution)
 
 def Kepler(En,Mn,ec):
+    """
+    Returns the Kepler Transcendental Equation.
+    
+    -------------------------------
+    ### Parameters
+    
+    En : arraylike <br>
+        
+        Eccentric Anomaly
+        
+    Mn : arraylike <br>
+        
+        Combination of Period and semimajor axis
+        
+    ec : float <br>
+        
+        Eccentricity
+        
+    -------------------------------
+    ### Returns
+    
+        Kepler Equation
+    """
     # print(En)
     return(En-ec*np.sin(En)-Mn)
 
 def DKepler(En,Mn,ec):
+    """
+    Returns the Derivative of the Kepler Equation.
+    
+    -------------------------------
+    ### Parameters
+    
+    En : arraylike <br>
+        
+        Eccentric Anomaly
+        
+    Mn : arraylike <br>
+        
+        Combination of Period and semimajor axis
+        
+    ec : float <br>
+        
+        Eccentricity
+        
+    -------------------------------
+    ### Returns
+    
+        Derivative of Kepler Equation
+    """
     return(1-ec*np.cos(En))
 
 def OrbGeo(t, a=1, w = 0, W = 0, i = 0, e = 0):
     """
-    Creates and calculates the X and Y axis of a planet's orbit
+    Creates and calculates the X and Y axis of a planet's orbit.
+    
+    --------
+    ### Parameters
+    
+    t : arraylike <br>
+        time function of planet's orbit
+        
+    a : float <br>
+        semimajor axis 
+    
+    w : float (in radians) <br>
+        argument of periapsis
+        
+    W : float (in radians) <br>
+        longitude of ascending node
+    
+    i : float (in radians) <br>
+        inclination angle
+        
+    e : float <br>
+        eccentricity
+        
+    -------
+    ### Returns 
+    
+    x : arraylike <br>
+        position of planet's orbit on the x-axis according to time
+    
+    y :arraylike <br>
+        position of planet's orbit on the y-axis according to time
+    
     """
     # Assume time at periastron (closest point to star),
     # t0, as our starting time so t0 = 0
@@ -64,6 +161,27 @@ def OrbGeo(t, a=1, w = 0, W = 0, i = 0, e = 0):
     return(xt, yt)
 
 def InvVelocity(t,x,y):
+    """
+    Calculates the inverse velocity of a planet's orbit.
+    
+    ------
+    ### Parameters
+    
+    t : arraylike <br>
+        time function of a planet's orbit
+        
+    x : arraylike <br>
+        x position of a planet's orbit according to time
+        
+    y : arraylike <br>
+        y position of a planet's orbit according to time
+        
+    ------
+    ### Returns
+    
+    vel : list of floats <br>
+        inverse velocity of a planet's orbit
+    """
     changet = np.abs(t[1] - t[0])
     vel = []
     for i in range(len(t)):
@@ -81,15 +199,42 @@ def InvVelocity(t,x,y):
             x2 = x[i+1]
             y2 = y[i+1]
         
-        changedeg = np.sqrt((x1-x2)**2+(y1-y2)**2)
+        changedeg = np.sqrt(((x2-x1))**2+((y2-y1))**2)
         
         if changedeg == 0:
             vel.append(0)
         else:
-            vel.append(1/(changedeg/changet))
+            # vel.append(np.abs(np.log10(1/np.abs((changedeg/(t2-t1))))))
+            vel.append(np.abs(changedeg/(t2-t1)))
     return vel
 
 def Rchange(t,x,y):
+    """
+    Stores all the points in the data where the radius of the orbit
+    is very close to the Einstein ring radius.
+    
+    --------
+    ### Parameters
+    
+    t : arraylike <br>
+        time function of a planet's orbit
+        
+    x : arraylike <br>
+        x position of a planet's orbit according to time
+        
+    y : arraylike <br>
+        y position of a planet's orbit according to time
+        
+    ------
+    ### Returns
+    
+    rlist : list of floats <br>
+        times at which the radius was close to the ring radius
+    
+    num : list of integers <br>
+        position of times in time function
+    """
+    
     rlist = [] # Time at which it was less than 0.001
     num = [] # Position in list given length of x,y,& t
     r0 = 1 # Einstein Ring Radius
@@ -105,23 +250,56 @@ def Rchange(t,x,y):
     return rlist , num
 
 def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
+    """
+    Creates a 3 by 3 plot of 3 planetary orbits each with varying semimajor axes
+    according to differing parameters.
     
+    --------
+    ### Parameters
+    
+    t : arraylike <br>
+        time function of planet's orbit
+        
+    a : integer <br>
+        semimajor axis 
+    
+    w : float (in radians) <br>
+        argument of periapsis
+        
+    W : float (in radians) <br>
+        longitude of ascending node
+    
+    i : float (in radians) <br>
+        inclination angle
+        
+    e : integer <br>
+        eccentricity
+        
+    n : integer <br>
+        number of figures in the plot
+        (will likely remove)
+    -------
+    ### Returns 
+     
+     3 by 3 Plot of Planetary Orbits
+    
+    """
     k=0.5
     list1=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k,e=0)
+        x1, y1 = OrbGeo(t,a=k,e=0, w=np.pi/2)
         list1.append((x1,y1))
         k+=0.5
     k=0.5
     list2=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k,e=0.5)
+        x1, y1 = OrbGeo(t,a=k,e=0.5, w=np.pi/2)
         list2.append((x1,y1))
         k+=0.5
     k=0.5
     list3=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k,e=0.9)
+        x1, y1 = OrbGeo(t,a=k,e=0.9, w=np.pi/2)
         list3.append((x1,y1))
         k+=0.5
     
@@ -138,13 +316,13 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     k=0.5
     list5=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k, e = 0.5, i = np.pi/4, w = np.pi)
+        x1, y1 = OrbGeo(t,a=k, e = 0.5, i = np.pi/4, w = np.pi/2)
         list5.append((x1,y1))
         k+=0.5
     k=0.5
     list6=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/4, w = 3*np.pi/2)
+        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/4, w = np.pi/2)
         list6.append((x1,y1))
         k+=0.5
     
@@ -155,19 +333,19 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     k=0.5
     list7=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0, i = np.pi/2)
+        x1, y1 = OrbGeo(t, a = k, e = 0, i = np.pi/2, w=np.pi/2)
         list7.append((x1,y1))
         k+=0.5
     k=0.5
     list8=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0.5, i = np.pi/2)
+        x1, y1 = OrbGeo(t, a = k, e = 0.5, i = np.pi/2, w=np.pi/2)
         list8.append((x1,y1))
         k+=0.5
     k=0.5
     list9=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/2)
+        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/2, w=np.pi/2)
         list9.append((x1,y1))
         k+=0.5
     
@@ -201,16 +379,16 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
                 label = "a = 1.5"    
             dataproj = ax.scatter(initialx, initialy,s = vel, color = color, label = label)
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
-        if j == 0:
-            handles, labels = ax.get_legend_handles_labels()
+        
         # Circ1 = patches.Circle((0,0), 0.5, ec= "b", fill=False, linestyle = ":", linewidth = 1)
-        # Circ2 = patches.Circle((0,0), 1, ec="purple", fill=False, linestyle = ":", linewidth = 1)
+        Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
         # Circ3 = patches.Circle((0,0), 1.5, ec="r", fill=False, linestyle = ":", linewidth = 1)
         
         # ax.add_patch(Circ1)
-        # ax.add_patch(Circ2)
+        ax.add_patch(Circ2)
         # ax.add_patch(Circ3)
-        
+        if j == 0:
+            handles, labels = ax.get_legend_handles_labels()
         ax.set_xlim(-2,2)
         ax.set_ylim(-2,2)
     # fig.legend([Circ1,Circ2,Circ3,linelabel],["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], fontsize = "small")
@@ -225,9 +403,14 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     
     return n
 
-t = np.linspace(0,4*np.pi,400)
-MultiPlot(t)
-# x,y = OrbGeo(t, e=0)
+t = np.linspace(0,4*np.pi,10000)
+# MultiPlot(t)
+x,y = OrbGeo(t,a=1, e=0.9,i=np.pi/4)
+# vel = InvVelocity(t,x,y)
+# print(min(vel))
+rlist, num = Rchange(t,x,y)
+print(num)
+print(rlist)
 # print(InvVelocity(t,x,y)[-1])
 # fig, ax = plt.subplots()
 # ax.plot(x,y)

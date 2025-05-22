@@ -14,7 +14,7 @@ def NewtRaf(M, e):
     -------------------------------
     ### Parameters
     
-    M : array-like <br>
+    M : float <br>
         A combination of Period and semimajor axis.
     
     e : float <br>
@@ -23,19 +23,17 @@ def NewtRaf(M, e):
     -------------------------------
     ### Returns
     
-    Solution : array-like <br>
+    Solution : float <br>
         Solution to Kepler Equation
     """
     initial = M+e*np.sin(M) # Bascially starting with M as our initial guess
     Solution = np.zeros_like(M)
     
-    # For loop to consider every value of within M
-    for i in range(len(M)):
-        Ei = initial[i] # Initial Guess
-        Mi = M[i] # Iterating through M
+    Ei = initial # Initial Guess
+    Mi = M # Iterating through M
         
-        # Uses Kepler's Equation and Derivative to solve
-        Solution[i] = sc.newton(Kepler, Ei, fprime = DKepler, args = (Mi,e))
+    # Uses Kepler's Equation and Derivative to solve
+    Solution = sc.newton(Kepler, Ei, fprime = DKepler, args = (Mi,e))
     
     # Previous attempt at solving for E
     # Elist = []
@@ -102,15 +100,15 @@ def DKepler(En,Mn,ec):
     """
     return(1-ec*np.cos(En))
 
-def OrbGeo(t, a=1, w = 0, W = 0, i = 0, e = 0):
+def OrbGeo(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     """
     Creates and calculates the X and Y axis of a planet's orbit.
     
     --------
     ### Parameters
     
-    t : arraylike <br>
-        time function of planet's orbit
+    t0 : float <br>
+        time of periapsis (closest to star)
         
     a : float <br>
         semimajor axis 
@@ -130,13 +128,15 @@ def OrbGeo(t, a=1, w = 0, W = 0, i = 0, e = 0):
     -------
     ### Returns 
     
-    x : arraylike <br>
+    x : list <br>
         position of planet's orbit on the x-axis according to time
     
-    y :arraylike <br>
+    y : list <br>
         position of planet's orbit on the y-axis according to time
     
     """
+    xt = []
+    yt = []
     # Assume time at periastron (closest point to star),
     # t0, as our starting time so t0 = 0
     # Check with Scott to see if we can do this
@@ -148,21 +148,27 @@ def OrbGeo(t, a=1, w = 0, W = 0, i = 0, e = 0):
     F = a*(-np.cos(W)*np.sin(w) - np.sin(W)*np.cos(w)*np.cos(i))
     G = a*(-np.sin(W)*np.sin(w) + np.cos(W)*np.cos(w)*np.cos(i))
     
-    # Equation for E (G*M_sun = 1 in Solar Units)
+    # Equation for P (G*M_sun = 1 in Solar Units)
     P = np.sqrt((4*np.pi)/(1)*a**3)
-    # Function for E
-    M = (2*np.pi/P) * (t-t0)
-    Et = NewtRaf(M, e)
     
-    # Function of X and Y according to E
-    Xt = np.cos(Et) - e
-    Yt = np.sqrt(1-e**2)*np.sin(Et)
+    t = np.linspace(t0, t0 + P, 4000)
     
-    # Actual x any y functions of t
-    xt = A*Xt + F*Yt
-    yt = B*Xt + G*Yt
+    for k in t:
+        # Function for E
+        M = (2*np.pi/P) * (k-t0)
+        
+        # Solve Kepler Equation
+        Et = NewtRaf(M, e)
     
-    return(xt, yt)
+        # Function of X and Y according to E
+        Xt = np.cos(Et) - e
+        Yt = np.sqrt(1-e**2)*np.sin(Et)
+    
+        # Actual x any y functions of t
+        xt.append(A*Xt + F*Yt)
+        yt.append(B*Xt + G*Yt)
+    
+    return(xt, yt, t)
 
 def InvVelocity(t,x,y):
     """
@@ -278,7 +284,7 @@ def Rchange(t,x,y):
             num.append(i)
     return rlist , num
 
-def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
+def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     """
     Creates a 3 by 3 plot of 3 planetary orbits each with varying semimajor axes
     according to differing parameters.
@@ -286,8 +292,8 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     --------
     ### Parameters
     
-    t : arraylike <br>
-        time function of planet's orbit
+    t0 : float <br>
+        time at periapsis of planet's orbit
         
     a : integer <br>
         semimajor axis 
@@ -318,23 +324,25 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     
     # Top Left
     k=0.5
-    list1=[]
+    listt = []
+    list1 = []
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k,e=0, w=np.pi/2)
+        x1, y1, t1 = OrbGeo(a=k,e=0, w=np.pi/2)
         list1.append((x1,y1))
+        listt.append(t1)
         k+=0.5
     # Middle Left
     k=0.5
     list2=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k,e=0.5, w=np.pi/2)
+        x1, y1, t1 = OrbGeo(a=k,e=0.5, w=np.pi/2)
         list2.append((x1,y1))
         k+=0.5
     # Bottom Left    
     k=0.5
     list3=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k,e=0.9, w=np.pi/2)
+        x1, y1, t1 = OrbGeo(a=k,e=0.9, w=np.pi/2)
         list3.append((x1,y1))
         k+=0.5
     
@@ -346,21 +354,21 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     k=0.5
     list4=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k, e = 0, i = np.pi/4, w = np.pi/2)
+        x1, y1, t1 = OrbGeo(a=k, e = 0, i = np.pi/4, w = np.pi/2)
         list4.append((x1,y1))
         k+=0.5
     # Center
     k=0.5
     list5=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t,a=k, e = 0.5, i = np.pi/4, w = np.pi/2)
+        x1, y1, t1 = OrbGeo(a=k, e = 0.5, i = np.pi/4, w = np.pi/2)
         list5.append((x1,y1))
         k+=0.5
     # Bottom Middle
     k=0.5
     list6=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/4, w = np.pi/2)
+        x1, y1, t1 = OrbGeo(a = k, e = 0.9, i = np.pi/4, w = np.pi/2)
         list6.append((x1,y1))
         k+=0.5
     
@@ -372,21 +380,21 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     k=0.5
     list7=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0, i = np.pi/2, w=np.pi/2)
+        x1, y1, t1 = OrbGeo(a = k, e = 0, i = np.pi/2, w=np.pi/2)
         list7.append((x1,y1))
         k+=0.5
     # Middle Right
     k=0.5
     list8=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0.5, i = np.pi/2, w=np.pi/2)
+        x1, y1, t1 = OrbGeo(a = k, e = 0.5, i = np.pi/2, w=np.pi/2)
         list8.append((x1,y1))
         k+=0.5
     # Bottom Right
     k=0.5
     list9=[]
     while k <= 1.5:
-        x1, y1 = OrbGeo(t, a = k, e = 0.9, i = np.pi/2, w=np.pi/2)
+        x1, y1, t1 = OrbGeo(a = k, e = 0.9, i = np.pi/2, w=np.pi/2)
         list9.append((x1,y1))
         k+=0.5
     
@@ -413,6 +421,7 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
         for g in range(len(iterlist)):
             # This contains each data set in the data clump
             initialx, initialy = iterlist[g]
+            t = listt[g]
             # Calculates the velocity of each data point in the data set
             invvel = InvVelocity(t,initialx,initialy)
             
@@ -468,9 +477,8 @@ def MultiPlot(t, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     
     return n
 
-t = np.linspace(0,4*np.pi,4000)
-MultiPlot(t)
-# x,y = OrbGeo(t,a=1, e=0.9,i=np.pi/4)
+MultiPlot()
+# x,y,t = OrbGeo(a=1.5, e=0,i=np.pi/4)
 # vel = InvVelocity(t,x,y)
 # print(min(vel))
 # rlist, num = Rchange(t,x,y)

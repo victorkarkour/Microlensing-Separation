@@ -170,7 +170,7 @@ def OrbGeo(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     
     return(xt, yt, t)
 
-def InvVelocity(t,x,y):
+def Velocity(t,x,y):
     """
     Calculates the inverse velocity of a planet's orbit.
     
@@ -196,7 +196,6 @@ def InvVelocity(t,x,y):
     # because of how np.linespace works (evenly spaced)
     changet = np.abs(t[1] - t[0])
     vel = []
-    ratio = []
     for i in range(len(t)):
         t1 = t[i] - changet
         t2 = t[i] + changet
@@ -226,8 +225,31 @@ def InvVelocity(t,x,y):
             # vel.append(np.abs(np.log10(1/np.abs((changedeg/(t2-t1))))))
             vel.append((np.abs(changedeg/(t2-t1))))
     # Find max Velocity for solving for ratio
-    velmax = max(vel)
+    return vel
+
+def DotSize(vel, velmax, velmin):
+    """
+    Calculates the dot size of a planet's orbit using its velocity.
     
+    ------
+    ### Parameters
+    
+    vel : arraylike <br>
+        velocity of a planet's orbit
+        
+    velmax : float <br>
+        maximum velocity of ENTIRE PLOT
+        
+    velmin : float <br>
+        minimum velocity of ENTIRE PLOT
+        
+    ------
+    ### Returns
+    
+    ratio : list of floats <br>
+        dot size proportional to velocity
+    """
+    ratio = []
     
     for i in range(len(vel)):
         # Similar to if statement in changedeg,
@@ -235,9 +257,14 @@ def InvVelocity(t,x,y):
         if vel[i] == 0:
             ratio.append(0.1)
         else:
-            # ratio equation
-            ratio.append((np.abs(velmax)/np.abs(vel[i]))*2+0.1)
-        
+            # ratio equation (deprecated)
+            # ratio.append((np.abs(velmin)/np.abs(vel[i]))*2+0.1)
+            
+            # ratio equation (NEW)
+            ratio.append(np.abs(70.0 - ((np.abs(vel[i]) - np.abs(velmin))/np.abs(velmax) - np.abs(velmin))*69.9))
+    
+    # One possible way to fix dot size is to isolate the last column with if statements
+    # and solve for only 1/v    
     
     return ratio
 
@@ -321,11 +348,13 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     """
     # Data points being created for each plots
     # 3 for each section
+    # Initialize Lists
+    listt = []
+    list1 = []
+    vlist = []
     
     # Top Left
     k=0.5
-    listt = []
-    list1 = []
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a=k,e=0, w=np.pi/2)
         list1.append((x1,y1))
@@ -407,9 +436,24 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
         list2,list5,list8,
         list3,list6,list9
     ]
+    # Initially Calculates the Velocity to place these into a list
+    for i in range(len(list)):
+        iter = list[i]
+        j = 0
+        for j in range(len(iter)):
+            initialx, initialy = iter[j]
+            t = listt[j]
+            # Calculates velocity
+            vel = Velocity(t,initialx,initialy)
+            # Takes only the local min and max
+            vlist.append(min(vel))
+            vlist.append(max(vel))
+    # Afterwards, takes the listed values and finds the global max and global min        
+    velmax = max(vlist)
+    velmin = min(vlist)
     
     fig, axs = plt.subplots(n,n, figsize = (7,7), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$")
+    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\pi / 2$")
     # Iterates through each subplot in the 3x3 figure
     for j, ax  in enumerate(axs.flatten()):
         # Takes the first data clump in the list
@@ -423,7 +467,8 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
             initialx, initialy = iterlist[g]
             t = listt[g]
             # Calculates the velocity of each data point in the data set
-            invvel = InvVelocity(t,initialx,initialy)
+            vel = Velocity(t, initialx, initialy)
+            dot = DotSize(vel,velmax,velmin)
             
             # Determines the colors of each data set according
             # to its positioning
@@ -437,7 +482,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
                 color = "b"
                 label = "a = 1.5"
             # Plots the data set, including the dot size according to velocity        
-            dataproj = ax.scatter(initialx, initialy,s = invvel, color = color, label = label)
+            dataproj = ax.scatter(initialx, initialy,s = dot, color = color, label = label)
             
             # Creates the grid for each plot
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
@@ -473,11 +518,13 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     plt.text(-8,10.5,"i=0")
     plt.text(-4,10.5,"i=45")
     plt.text(-0.5,10.5,"i=90")
+    # plt.text()
     plt.show()
     
-    return n
+    return vlist
 
-MultiPlot()
+list = MultiPlot()
+# print(list)
 # x,y,t = OrbGeo(a=1.5, e=0,i=np.pi/4)
 # vel = InvVelocity(t,x,y)
 # print(min(vel))
@@ -492,4 +539,13 @@ MultiPlot()
 # ax.set_xlim(-2,2)
 # ax.set_ylim(-2,2)
 # ax.set_title("Orbital Projection of Exoplanet")
+# plt.show()
+# line = np.linspace(-0.5,0.5,5)
+# y = [0, 0, 0, 0 ,0]
+# dots = [0.1, 1, 2 ,4 ,5]
+# fig, ax = plt.subplots()
+# ax.scatter(line,y, s = dots, label = "0.1, 1, 2, 4, 5")
+# ax.set_xlim(-.75,.75)
+# ax.set_ylim(-.75,.75)
+# fig.legend()
 # plt.show()

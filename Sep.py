@@ -134,6 +134,8 @@ def OrbGeo(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     y : list <br>
         position of planet's orbit on the y-axis according to time
     
+    t : list <br>
+        time associated with planet's position
     """
     xt = []
     yt = []
@@ -170,14 +172,46 @@ def OrbGeo(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     
     return(xt, yt, t)
 
-def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
+def OrbGeoAlt(t0=np.pi/2, a=1, w = 0, W = 0, i = 0, e = 0):
+    """
+    Creates and calculates the X and Y axis of a planet's orbit 
+    using a different method for calculation.
     
+    --------
+    ### Parameters
+    
+    t0 : float <br>
+        time of periapsis (closest to star)
+        
+    a : float <br>
+        semimajor axis 
+    
+    w : float (in radians) <br>
+        argument of periapsis
+        
+    W : float (in radians) <br>
+        longitude of ascending node
+    
+    i : float (in radians) <br>
+        inclination angle
+        
+    e : float <br>
+        eccentricity
+        
+    -------
+    ### Returns 
+    
+    x : list <br>
+        position of planet's orbit on the x-axis according to time
+    
+    y : list <br>
+        position of planet's orbit on the y-axis according to time
+    
+    t : list <br>
+        time associated with planet's position
+    """
     xt = []
     yt = []
-    # Assume time at periastron (closest point to star),
-    # t0, as our starting time so t0 = 0
-    # Check with Scott to see if we can do this
-    t0 = 0
     
     # Initial Equations
     A = a*(np.cos(W)*np.cos(w) - np.sin(W)*np.sin(w)*np.cos(i))
@@ -185,9 +219,12 @@ def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     F = a*(-np.cos(W)*np.sin(w) - np.sin(W)*np.cos(w)*np.cos(i))
     G = a*(-np.sin(W)*np.sin(w) + np.cos(W)*np.cos(w)*np.cos(i))
     
+    # First create how many points in time you want
     j = np.linspace(1,4000,4000)
+    # Place these points into the time function
     phi = [(val/4000)*(2*np.pi)+t0 for val in j]
     
+    # Place the time function into the Eccentric Anomaly
     for k in range(len(phi)):
         
         # Solve Kepler Equation
@@ -204,7 +241,7 @@ def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     
     return (xt, yt, phi)
 
-def Velocity(t,x,y, param):
+def Velocity(t, param):
     """
     Calculates the inverse velocity of a planet's orbit.
     
@@ -228,19 +265,25 @@ def Velocity(t,x,y, param):
     """
     # Change of t will be the same for all values
     # because of how np.linespace works (evenly spaced)
-    param = param
+    # MIGHT HAVE TO CHANGE HOW LARGE THE CHANGE OF TIME
+    # TO ALLOW FOR VELOCITY TO TAKE PLACE
     changet = np.abs(t[1] - t[0])
+    
+    param = param
     vel = []
+    # In case inclination angle is used, then it makes sure to include it
     if len(param) > 3:
         i = param[-1]
     else:
         i = 0
+    # Orbital Calculations
     x1, y1, t1 = OrbGeo(-changet, a = param[0], e = param[1], w = param[2], i = i)
     x1array = np.array(x1)
     y1array = np.array(y1)
     x2, y2, t2 = OrbGeo(changet, a = param[0], e = param[1], w = param[2], i = i)
     x2array = np.array(x2)
     y2array = np.array(y2)
+    
     # for i in range(len(t)):
     #     t1 = t[i] - changet
     #     t2 = t[i] + changet
@@ -258,7 +301,8 @@ def Velocity(t,x,y, param):
     #         x2 = x[i+1]
     #         y2 = y[i+1]
         
-        # Change of degrees function
+    # Change of degrees function
+    # because of array arithmetic, we don't need to use for loops
     changedeg = np.sqrt(np.add(np.power(np.subtract(x2array,x1array),2),np.power(np.subtract(y2array,y1array),2)))
         
         # In case we have a 0 change of deg,
@@ -268,6 +312,7 @@ def Velocity(t,x,y, param):
         # else:
             # Velocity equation
             # vel.append(np.abs(np.log10(1/np.abs((changedeg/(t2-t1))))))
+    # Velocity function
     vel = (np.abs(np.divide(changedeg,(2*changet))))
     # Find max Velocity for solving for ratio
     return vel
@@ -279,7 +324,7 @@ def DotSize(vel, velmax, velmin):
     ------
     ### Parameters
     
-    vel : arraylike <br>
+    vel : array of floats <br>
         velocity of a planet's orbit
         
     velmax : float <br>
@@ -291,70 +336,67 @@ def DotSize(vel, velmax, velmin):
     ------
     ### Returns
     
-    ratio : list of floats <br>
+    ratio : array of floats <br>
         dot size proportional to velocity
     """
-    ratio = []
+    ratio = np.array()
     
-    for i in range(len(vel)):
-        # Similar to if statement in changedeg,
-        # except for the ratio
-        if vel[i] == 0:
-            ratio.append(0.1)
-        else:
-            # ratio equation (deprecated)
-            # ratio.append((np.abs(velmin)/np.abs(vel[i]))*2+0.1)
+    # for i in range(len(vel)):
+    #     # Similar to if statement in changedeg,
+    #     # except for the ratio
+    #     if vel[i] == 0:
+    #         ratio.append(0.1)
+    #     else:
+    #         # ratio equation (deprecated)
+    #         # ratio.append((np.abs(velmin)/np.abs(vel[i]))*2+0.1)
             
-            # ratio equation (NEW)
-            ratio.append(np.abs(40.0 - ((np.abs(vel[i]) - np.abs(velmin))/(np.abs(velmax) - np.abs(velmin)))*39.1))
+    #         # ratio equation (NEW)
+    ratio.append(np.subtract(40.0, np.multiply(((np.subtract(np.abs(vel),np.abs(velmin)))/(np.subtract(np.abs(velmax),np.abs(velmin)))),39.1)))
     
     # One possible way to fix dot size is to isolate the last column with if statements
     # and solve for only 1/v    
     
     return ratio
 
-def Rchange(t,x,y):
+def Rchange(x,y,a):
     """
     Stores all the points in the data where the radius of the orbit
     is very close to the Einstein ring radius.
     
     --------
     ### Parameters
-    
-    t : arraylike <br>
-        time function of a planet's orbit
         
     x : arraylike <br>
         x position of a planet's orbit according to time
         
     y : arraylike <br>
         y position of a planet's orbit according to time
-        
+    
+    a : float <br>
+        semimajor axis of planet's orbit    
     ------
     ### Returns
     
     rlist : list of floats <br>
-        times at which the radius was close to the ring radius
-    
-    num : list of integers <br>
-        position of times in time function
+        values at which the radius was close to the ring radius
+
     """
     
-    rlist = [] # Time at which it was less than 0.001
-    num = [] # Position in list given length of x,y,& t
+    rlist = [] # Point at which it was less than 0.001
     r0 = 1 # Einstein Ring Radius
     # All values equated from t have the same length
-    for i in range(len(t)):
+    for i in range(len(x)):
         x1 = x[i]
         y1 = y[i]
         # Radius equation
         r = np.sqrt(x1**2+y1**2)
         
+        # If there is a point at which the if statement
+        # is true, it takes into account the semimajor axis
+        # of orbit
         if np.abs(r-r0) <= 0.001:
-            # Stores the point in time in which t was found
-            rlist.append(t[i])
-            num.append(i)
-    return rlist , num
+            rlist.append(a)
+    return rlist
 
 def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     """
@@ -416,6 +458,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a=k,e=0.5, w=w)
         list2.append((x1,y1))
+        # listt.append(t1)
         paramlist2.append([k, 0.5, w])
         k+=0.5
     # Bottom Left    
@@ -425,6 +468,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a=k,e=0.9, w=w)
         list3.append((x1,y1))
+        # listt.append(t1)
         paramlist3.append([k, 0.9, w])
         k+=0.5
     
@@ -439,6 +483,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a=k, e = 0, i = np.pi/4, w = w)
         list4.append((x1,y1))
+        # listt.append(t1)
         paramlist4.append([k, 0, w, np.pi/4])
         k+=0.5
     # Center
@@ -448,6 +493,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a=k, e = 0.5, i = np.pi/4, w = w)
         list5.append((x1,y1))
+        # listt.append(t1)
         paramlist5.append([k, 0.5, w, np.pi/4])
         k+=0.5
     # Bottom Middle
@@ -457,6 +503,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a = k, e = 0.9, i = np.pi/4, w = w)
         list6.append((x1,y1))
+        # listt.append(t1)
         paramlist6.append([k, 0.9, w, np.pi/4])
         k+=0.5
     
@@ -471,6 +518,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a = k, e = 0, i = np.pi/2, w = w)
         list7.append((x1,y1))
+        # listt.append(t1)
         paramlist7.append([k, 0, w, np.pi/2])
         k+=0.5
     # Middle Right
@@ -480,6 +528,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a = k, e = 0.5, i = np.pi/2, w = w)
         list8.append((x1,y1))
+        # listt.append(t1)
         paramlist8.append([k, 0.5, w, np.pi/2])
         k+=0.5
     # Bottom Right
@@ -489,6 +538,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     while k <= 1.5:
         x1, y1, t1 = OrbGeo(a = k, e = 0.9, i = np.pi/2, w = w)
         list9.append((x1,y1))
+        # listt.append(t1)
         paramlist9.append([k, 0.9, w, np.pi/2])
         k+=0.5
     
@@ -518,7 +568,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
             t = listt[j]
             parameter = param[j]
             # Calculates velocity
-            vel = Velocity(t,initialx,initialy, parameter)
+            vel = Velocity(t, parameter)
             vel = vel.tolist()
             vellist.append(vel)
             # Takes only the local min and max
@@ -547,7 +597,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
             t = listt[g]
             parameter = param[g]
             # Calculates the velocity of each data point in the data set
-            vel = Velocity(t, initialx, initialy, parameter)
+            vel = Velocity(t,parameter)
             dot = DotSize(vel,velmax,velmin)
             
             # Determines the colors of each data set according

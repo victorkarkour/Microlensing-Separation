@@ -354,7 +354,7 @@ def DotSize(vel, velmax, velmin):
     num = np.subtract(np.abs(vel) , np.abs(velmin))
     denom = np.subtract(np.abs(velmax) , np.abs(velmin))
     
-    ratio = ( 40.0 - (np.divide(num,denom)) * 39.9)
+    ratio = ( 40.0 - np.divide(num,denom) * 39.1)
     
     
     return ratio
@@ -579,7 +579,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
         veltot.append(vellist)
     # Afterwards, takes the listed values and finds the global max and global min
     velmax = np.max(vlistmax)
-    velmin = np.min(vlistmin)
+    velmin = 0.1
     
     fig, axs = plt.subplots(n,n, figsize = (7,7), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\pi / 2$")
@@ -654,21 +654,20 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     
     return vlistmin, vlistmax, veltot
 
-# vlistmin, vlistmax, veltot = MultiPlot(w = np.pi/2)
+vlistmin, vlistmax, veltot = MultiPlot(w = np.pi/2)
 # print(vlistmin)
-x,y,t = OrbGeoAlt(a=0.5, e=0.0,i=np.pi/2,w=np.pi/2)
-param = [0.5, 0.0, np.pi/2, np.pi/2]
-vel = Velocity(t, param)
-vmax = np.max(vel)
-vmin = np.min(vel)
-dot = DotSize(vel, vmax, vmin)
-fig, axs = plt.subplots(figsize = (7,7))
-axs.scatter(x,y, s = dot)
-axs.set_xlim(-2,2)
-axs.set_ylim(-2,2)
-plt.show()
-# rlist, num = Rchange(t,x,y)
-# print(num)
+# x,y,t = OrbGeoAlt(a=1.5, e=0.0,i=np.pi/2,w=np.pi/2)
+# param = [1.5, 0.0, np.pi/2, np.pi/2]
+# vel = Velocity(t, param)
+# vmax = np.max(vel)
+# vmin = np.min(vel)
+# dot = DotSize(vel, vmax, vmin)
+# fig, axs = plt.subplots(figsize = (7,7))
+# axs.scatter(x,y, s = dot)
+# axs.set_xlim(-2,2)
+# axs.set_ylim(-2,2)
+# plt.show()
+# rlist = Rchange(x,y,1.5)
 # print(rlist)
 # print(InvVelocity(t,x,y)[-1])
 # fig, axs = plt.subplots(3,3, figsize = (7,7), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))

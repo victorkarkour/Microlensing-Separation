@@ -153,7 +153,7 @@ def OrbGeo(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     # Equation for P (G*M_sun = 1 in Solar Units)
     P = np.sqrt((4*np.pi)/(1)*a**3)
     
-    t = np.linspace(0, P, 80)
+    t = np.linspace(0, P, 4000)
     
     for k in t:
         # Function for E
@@ -220,12 +220,12 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     G = a*(-np.sin(W)*np.sin(w) + np.cos(W)*np.cos(w)*np.cos(i))
     
     # First create how many points in time you want
-    j = np.linspace(1,80,80)
+    j = np.linspace(1,4000,4000)
     # Place these points into the time function
     # phi = (i/4000)*2*pi
     # phi+ = phi + changephi
     # phi- = phi - changephi
-    phi = [(val/80)*(2.0*np.pi)+t0 for val in j]
+    phi = [(val/4000)*(2.0*np.pi)+t0 for val in j]
     
     # Place the time function into the Eccentric Anomaly
     for k in phi:
@@ -560,7 +560,7 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
     
 
     
-    # Initially Calculates the Velocity to place these into a list
+    # # Initially Calculates the Velocity to place these into a list
     # for i in range(len(list)):
     #     iter = list[i]
     #     j = 0
@@ -603,7 +603,7 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
             vel = Velocity(t,parameter)
             # print("Last Velocity Output: ", vel[-1])
             velmax = np.max(vel)
-            # IMPORTANT!!!!!
+            # # IMPORTANT!!!!!
             velmin = 0.1
             # velmin = np.min(vel)
             

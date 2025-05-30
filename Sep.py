@@ -153,7 +153,7 @@ def OrbGeo(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     # Equation for P (G*M_sun = 1 in Solar Units)
     P = np.sqrt((4*np.pi)/(1)*a**3)
     
-    t = np.linspace(0, P, 4000)
+    t = np.linspace(0, P, 80)
     
     for k in t:
         # Function for E
@@ -172,7 +172,7 @@ def OrbGeo(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     
     return(xt, yt, t)
 
-def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
+def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     """
     Creates and calculates the X and Y axis of a planet's orbit 
     using a different method for calculation.
@@ -220,12 +220,12 @@ def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     G = a*(-np.sin(W)*np.sin(w) + np.cos(W)*np.cos(w)*np.cos(i))
     
     # First create how many points in time you want
-    j = np.linspace(1,4000,4000)
+    j = np.linspace(1,80,80)
     # Place these points into the time function
     # phi = (i/4000)*2*pi
     # phi+ = phi + changephi
     # phi- = phi - changephi
-    phi = [(val/4000)*(2*np.pi)+t0 for val in j]
+    phi = [(val/80)*(2.0*np.pi)+t0 for val in j]
     
     # Place the time function into the Eccentric Anomaly
     for k in phi:
@@ -309,7 +309,7 @@ def Velocity(t, param, size = 10):
     changedeg = np.sqrt(np.add(np.power(np.subtract(x2array,x1array),2),np.power(np.subtract(y2array,y1array),2)))
         
     # Velocity function
-    vel = (np.divide(changedeg,(2*changet)))
+    vel = (np.divide(changedeg,(2.0*changet)))
     # print("Last Velocity output: ", vel[-1])
     # print("Minimum Velocity: ", np.min(vel))
     return vel
@@ -353,10 +353,9 @@ def DotSize(vel, velmax, velmin):
     
     num = np.subtract(np.abs(vel) , np.abs(velmin))
     
-    denom = np.subtract(np.abs(velmax) , np.abs(velmin))
+    denom = np.abs(velmax) - np.abs(velmin) 
     
-    
-    ratio =  (40.0 - (np.divide(num,denom)) * 39.1)
+    ratio =  (40.0 - (np.divide(num,denom)) * 39.0)
     
     return ratio
 
@@ -400,7 +399,7 @@ def Rchange(x,y,a):
             rlist.append(a)
     return rlist
 
-def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
+def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
     """
     Creates a 3 by 3 plot of 3 planetary orbits each with varying semimajor axes
     according to differing parameters.
@@ -451,7 +450,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
         x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
         list1.append((x1,y1))
         listt.append(t1)
-        paramlist1.append([k, 0, w])
+        paramlist1.append([k, 0.0, w])
         k+=0.5
     # Middle Left
     k=0.5
@@ -483,30 +482,30 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     list4=[]
     paramlist4 = []
     while k <= 1.5:
-        x1, y1, t1 = OrbGeoAlt(a=k, e = 0, i = np.pi/4, w = w)
+        x1, y1, t1 = OrbGeoAlt(a=k, e = 0, i = np.pi/4.0, w = w)
         list4.append((x1,y1))
         # listt.append(t1)
-        paramlist4.append([k, 0, w, np.pi/4])
+        paramlist4.append([k, 0.0, w, np.pi/4.0])
         k+=0.5
     # Center
     k=0.5
     list5=[]
     paramlist5 = []
     while k <= 1.5:
-        x1, y1, t1 = OrbGeoAlt(a=k, e = 0.5, i = np.pi/4, w = w)
+        x1, y1, t1 = OrbGeoAlt(a=k, e = 0.5, i = np.pi/4.0, w = w)
         list5.append((x1,y1))
         # listt.append(t1)
-        paramlist5.append([k, 0.5, w, np.pi/4])
+        paramlist5.append([k, 0.5, w, np.pi/4.0])
         k+=0.5
     # Bottom Middle
     k=0.5
     list6=[]
     paramlist6 = []
     while k <= 1.5:
-        x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/4, w = w)
+        x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/4.0, w = w)
         list6.append((x1,y1))
         # listt.append(t1)
-        paramlist6.append([k, 0.9, w, np.pi/4])
+        paramlist6.append([k, 0.9, w, np.pi/4.0])
         k+=0.5
     
     # x2, y11 = OrbGeo(t,e = 0, i = np.pi/4, w = np.pi/2)
@@ -518,30 +517,30 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     list7=[]
     paramlist7 = []
     while k <= 1.5:
-        x1, y1, t1 = OrbGeoAlt(a = k, e = 0, i = np.pi/2, w = w)
+        x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/2.0, w = w)
         list7.append((x1,y1))
         # listt.append(t1)
-        paramlist7.append([k, 0, w, np.pi/2])
+        paramlist7.append([k, 0.0, w, np.pi/2.0])
         k+=0.5
     # Middle Right
     k=0.5
     list8=[]
     paramlist8 = []
     while k <= 1.5:
-        x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/2, w = w)
+        x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/2.0, w = w)
         list8.append((x1,y1))
         # listt.append(t1)
-        paramlist8.append([k, 0.5, w, np.pi/2])
+        paramlist8.append([k, 0.5, w, np.pi/2.0])
         k+=0.5
     # Bottom Right
     k=0.5
     list9=[]
     paramlist9 = []
     while k <= 1.5:
-        x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/2, w = w)
+        x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/2.0, w = w)
         list9.append((x1,y1))
         # listt.append(t1)
-        paramlist9.append([k, 0.9, w, np.pi/2])
+        paramlist9.append([k, 0.9, w, np.pi/2.0])
         k+=0.5
     
     # x3, y111 = OrbGeo(t, e = 0, i = np.pi/2)
@@ -554,10 +553,12 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
         list3,list6,list9
     ]
     totparam = [
-        paramlist1, paramlist2, paramlist3,
-        paramlist4, paramlist5, paramlist6,
-        paramlist7, paramlist8, paramlist9           
+        paramlist1, paramlist4, paramlist7,
+        paramlist2, paramlist5, paramlist8,
+        paramlist3, paramlist6, paramlist9           
     ]
+    
+
     
     # Initially Calculates the Velocity to place these into a list
     # for i in range(len(list)):
@@ -621,7 +622,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
                 color = "b"
                 label = "a = 1.5"
             # Plots the data set, including the dot size according to velocity        
-            dataproj = ax.scatter(initialx, initialy, s=dot , color = color, label = label)
+            dataproj = ax.scatter(initialx, initialy, s=dot , color=color, label=label)
             
             # Maybe try markersize in ax.plot()
             
@@ -664,7 +665,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     
     return vlistmin, vlistmax, veltot
 
-vlistmin, vlistmax, veltot = MultiPlot(w = np.pi/2)
+vlistmin, vlistmax, veltot = MultiPlot(w = np.pi/2.0)
 # x,y,t = OrbGeoAlt(a=0.5, e=0.5,w=np.pi/2, i = 0)
 # param = [0.5, 0.5, np.pi/2, 0]
 # vel = Velocity(t, param)

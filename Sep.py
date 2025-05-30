@@ -240,8 +240,9 @@ def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
         # Actual x any y functions of t
         xt.append(A*Xt + F*Yt)
         yt.append(B*Xt + G*Yt)
-    
-    
+    # print("Last x output: ", xt[-1])
+    # print("Last y output: ", yt[-1])
+    # print("Last t output: ", phi[-1])
     return (xt, yt, phi)
 
 def Velocity(t, param, size = 10):
@@ -309,7 +310,8 @@ def Velocity(t, param, size = 10):
         
     # Velocity function
     vel = (np.divide(changedeg,(2*changet)))
-    
+    # print("Last Velocity output: ", vel[-1])
+    # print("Minimum Velocity: ", np.min(vel))
     return vel
 
 def DotSize(vel, velmax, velmin):
@@ -350,12 +352,11 @@ def DotSize(vel, velmax, velmin):
     # denom = np.subtract(np.log10(np.abs(velmax)) , np.log10(np.abs(velmin)))
     
     num = np.subtract(np.abs(vel) , np.abs(velmin))
-    # print(np.where(num==0)[0])
+    
     denom = np.subtract(np.abs(velmax) , np.abs(velmin))
     
     
     ratio =  (40.0 - (np.divide(num,denom)) * 39.1)
-    
     
     return ratio
 
@@ -581,7 +582,7 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     # velmax = np.max(vlistmax)
     # velmin = 0.1
     
-    fig, axs = plt.subplots(n,n, figsize = (7,7), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
+    fig, axs = plt.subplots(n,n, figsize = (10,10), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\pi / 2$")
     # Iterates through each subplot in the 3x3 figure
     for j, ax  in enumerate(axs.flatten()):
@@ -599,10 +600,14 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
             parameter = param[g]
             # Calculates the velocity of each data point in the data set
             vel = Velocity(t,parameter)
+            # print("Last Velocity Output: ", vel[-1])
             velmax = np.max(vel)
             # IMPORTANT!!!!!
             velmin = 0.1
+            # velmin = np.min(vel)
+            
             dot = DotSize(vel,velmax,velmin)
+            # print("Last Dot Size Output: ", dot[-1])
             
             # Determines the colors of each data set according
             # to its positioning
@@ -617,6 +622,8 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
                 label = "a = 1.5"
             # Plots the data set, including the dot size according to velocity        
             dataproj = ax.scatter(initialx, initialy, s=dot , color = color, label = label)
+            
+            # Maybe try markersize in ax.plot()
             
             # Creates the grid for each plot
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
@@ -658,15 +665,19 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     return vlistmin, vlistmax, veltot
 
 vlistmin, vlistmax, veltot = MultiPlot(w = np.pi/2)
-# print(vlistmin)
-# x,y,t = OrbGeoAlt(a=1.5, e=0.0,i=np.pi/2,w=np.pi/2)
-# param = [1.5, 0.0, np.pi/2, np.pi/2]
+# x,y,t = OrbGeoAlt(a=0.5, e=0.5,w=np.pi/2, i = 0)
+# param = [0.5, 0.5, np.pi/2, 0]
 # vel = Velocity(t, param)
+# print("Last Velocity Output: ", vel[-1])
 # vmax = np.max(vel)
-# vmin = np.min(vel)
+# vmin = 0.1
 # dot = DotSize(vel, vmax, vmin)
-# fig, axs = plt.subplots(figsize = (7,7))
+# print("Last Dot Size Output",dot[-1])
+# fig, axs = plt.subplots(figsize = (8,8))
 # axs.scatter(x,y, s = dot)
+# Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
+# axs.add_patch(Circ2)
+# axs.grid(True,color = "grey", linestyle="--", linewidth="0.25")
 # axs.set_xlim(-2,2)
 # axs.set_ylim(-2,2)
 # plt.show()

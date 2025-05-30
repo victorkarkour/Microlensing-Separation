@@ -222,6 +222,9 @@ def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
     # First create how many points in time you want
     j = np.linspace(1,4000,4000)
     # Place these points into the time function
+    # phi = (i/4000)*2*pi
+    # phi+ = phi + changephi
+    # phi- = phi - changephi
     phi = [(val/4000)*(2*np.pi)+t0 for val in j]
     
     # Place the time function into the Eccentric Anomaly
@@ -243,7 +246,7 @@ def OrbGeoAlt(t0=0, a=1, w = 0, W = 0, i = 0, e = 0):
 
 def Velocity(t, param, size = 10):
     """
-    Calculates the inverse velocity of a planet's orbit.
+    Calculates the velocity of a planet's orbit.
     
     ------
     ### Parameters
@@ -267,8 +270,7 @@ def Velocity(t, param, size = 10):
     # because of how np.linespace works (evenly spaced)
     # MIGHT HAVE TO CHANGE HOW LARGE THE CHANGE OF TIME
     # TO ALLOW FOR VELOCITY TO TAKE PLACE
-    changet = np.abs(t[size] - t[0])
-    
+    changet = (np.pi*2)/10000
     param = param
     vel = []
     # In case inclination angle is used, then it makes sure to include it
@@ -305,16 +307,9 @@ def Velocity(t, param, size = 10):
     # because of array arithmetic, we don't need to use for loops
     changedeg = np.sqrt(np.add(np.power(np.subtract(x2array,x1array),2),np.power(np.subtract(y2array,y1array),2)))
         
-        # In case we have a 0 change of deg,
-        # we set this to 0
-        # if changedeg == 0:
-        #     vel.append(0)
-        # else:
-            # Velocity equation
-            # vel.append(np.abs(np.log10(1/np.abs((changedeg/(t2-t1))))))
     # Velocity function
     vel = (np.divide(changedeg,(2*changet)))
-    # Find max Velocity for solving for ratio
+    
     return vel
 
 def DotSize(vel, velmax, velmin):
@@ -351,10 +346,15 @@ def DotSize(vel, velmax, velmin):
     #         # ratio.append((np.abs(velmin)/np.abs(vel[i]))*2+0.1)
             
     #         # ratio equation (NEW)
+    # num = np.subtract(np.log10(np.abs(vel)) , np.log10(np.abs(velmin)))
+    # denom = np.subtract(np.log10(np.abs(velmax)) , np.log10(np.abs(velmin)))
+    
     num = np.subtract(np.abs(vel) , np.abs(velmin))
+    # print(np.where(num==0)[0])
     denom = np.subtract(np.abs(velmax) , np.abs(velmin))
     
-    ratio = ( 40.0 - np.divide(num,denom) * 39.1)
+    
+    ratio =  (40.0 - (np.divide(num,denom)) * 39.1)
     
     
     return ratio
@@ -559,27 +559,27 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
     ]
     
     # Initially Calculates the Velocity to place these into a list
-    for i in range(len(list)):
-        iter = list[i]
-        j = 0
-        vellist = []
-        param = totparam[i]
-        for j in range(len(iter)):
-            initialx, initialy = iter[j]
-            t = listt[j]
-            parameter = param[j]
-            # Calculates velocity
-            vel = Velocity(t, parameter)
-            vel = vel.tolist()
-            vellist.append(vel)
-            # Takes only the local min and max
-            vlistmin.append(min(vel))
-            # print(min(vel))
-            vlistmax.append(max(vel))
-        veltot.append(vellist)
-    # Afterwards, takes the listed values and finds the global max and global min
-    velmax = np.max(vlistmax)
-    velmin = 0.1
+    # for i in range(len(list)):
+    #     iter = list[i]
+    #     j = 0
+    #     vellist = []
+    #     param = totparam[i]
+    #     for j in range(len(iter)):
+    #         initialx, initialy = iter[j]
+    #         t = listt[j]
+    #         parameter = param[j]
+    #         # Calculates velocity
+    #         vel = Velocity(t, parameter)
+    #         vel = vel.tolist()
+    #         vellist.append(vel)
+    #         # Takes only the local min and max
+    #         vlistmin.append(min(vel))
+    #         # print(min(vel))
+    #         vlistmax.append(max(vel))
+    #     veltot.append(vellist)
+    # # Afterwards, takes the listed values and finds the global max and global min
+    # velmax = np.max(vlistmax)
+    # velmin = 0.1
     
     fig, axs = plt.subplots(n,n, figsize = (7,7), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\pi / 2$")
@@ -599,6 +599,9 @@ def MultiPlot(t0 = 0, a=1, w = 0, W = 0, i = 0, e = 0, n = 3):
             parameter = param[g]
             # Calculates the velocity of each data point in the data set
             vel = Velocity(t,parameter)
+            velmax = np.max(vel)
+            # IMPORTANT!!!!!
+            velmin = 0.1
             dot = DotSize(vel,velmax,velmin)
             
             # Determines the colors of each data set according

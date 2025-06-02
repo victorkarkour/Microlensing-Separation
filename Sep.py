@@ -384,6 +384,8 @@ def Rchange(x,y,a):
     """
     
     rlist = [] # Point at which it was less than 0.001
+    xlist = []
+    ylist = []
     r0 = 1 # Einstein Ring Radius
     # All values equated from t have the same length
     for i in range(len(x)):
@@ -397,7 +399,9 @@ def Rchange(x,y,a):
         # of orbit
         if np.abs(r-r0) <= 0.001:
             rlist.append(a)
-    return rlist
+            xlist.append(x1)
+            ylist.append(y1)
+    return rlist, xlist, ylist
 
 def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
     """
@@ -441,107 +445,108 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
     vlistmin = []
     vlistmax = []
     veltot = []
+    rlist = []
     
     # Top Left
-    k=0.5
+    k=0.75
     list1 = []
     paramlist1 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
         list1.append((x1,y1))
         listt.append(t1)
         paramlist1.append([k, 0.0, w])
-        k+=0.5
+        k+=0.25
     # Middle Left
-    k=0.5
+    k=0.75
     list2=[]
     paramlist2 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w)
         list2.append((x1,y1))
         # listt.append(t1)
         paramlist2.append([k, 0.5, w])
-        k+=0.5
+        k+=0.25
     # Bottom Left    
-    k=0.5
+    k=0.75
     list3=[]
     paramlist3 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w)
         list3.append((x1,y1))
         # listt.append(t1)
         paramlist3.append([k, 0.9, w])
-        k+=0.5
+        k+=0.25
     
     # x1, y1 = OrbGeo(t,e = 0,)
     # x11, y2 = OrbGeo(t,e = 0.5)
     # x111, y3 = OrbGeo(t,e = 0.9)
     
     # Top Middle
-    k=0.5
+    k=0.75
     list4=[]
     paramlist4 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a=k, e = 0, i = np.pi/4.0, w = w)
         list4.append((x1,y1))
         # listt.append(t1)
         paramlist4.append([k, 0.0, w, np.pi/4.0])
-        k+=0.5
+        k+=0.25
     # Center
-    k=0.5
+    k=0.75
     list5=[]
     paramlist5 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a=k, e = 0.5, i = np.pi/4.0, w = w)
         list5.append((x1,y1))
         # listt.append(t1)
         paramlist5.append([k, 0.5, w, np.pi/4.0])
-        k+=0.5
+        k+=0.25
     # Bottom Middle
-    k=0.5
+    k=0.75
     list6=[]
     paramlist6 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/4.0, w = w)
         list6.append((x1,y1))
         # listt.append(t1)
         paramlist6.append([k, 0.9, w, np.pi/4.0])
-        k+=0.5
+        k+=0.25
     
     # x2, y11 = OrbGeo(t,e = 0, i = np.pi/4, w = np.pi/2)
     # x22, y22 = OrbGeo(t,e = 0.5, i = np.pi/4, w = np.pi)
     # x222, y33 = OrbGeo(t,e = 0.9, i = np.pi/4, w = 3*np.pi/2)
     
     # Top Right
-    k=0.5
+    k=0.75
     list7=[]
     paramlist7 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/2.0, w = w)
         list7.append((x1,y1))
         # listt.append(t1)
         paramlist7.append([k, 0.0, w, np.pi/2.0])
-        k+=0.5
+        k+=0.25
     # Middle Right
-    k=0.5
+    k=0.75
     list8=[]
     paramlist8 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/2.0, w = w)
         list8.append((x1,y1))
         # listt.append(t1)
         paramlist8.append([k, 0.5, w, np.pi/2.0])
-        k+=0.5
+        k+=0.25
     # Bottom Right
-    k=0.5
+    k=0.75
     list9=[]
     paramlist9 = []
-    while k <= 1.5:
+    while k <= 1.25:
         x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/2.0, w = w)
         list9.append((x1,y1))
         # listt.append(t1)
         paramlist9.append([k, 0.9, w, np.pi/2.0])
-        k+=0.5
+        k+=0.25
     
     # x3, y111 = OrbGeo(t, e = 0, i = np.pi/2)
     # x33, y222 = OrbGeo(t, e=0.5, i = np.pi/2)
@@ -583,8 +588,8 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
     # velmax = np.max(vlistmax)
     # velmin = 0.1
     
-    fig, axs = plt.subplots(n,n, figsize = (10,10), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\pi / 2$")
+    fig, axs = plt.subplots(n,n, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
+    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{3\pi}{4}$")
     # Iterates through each subplot in the 3x3 figure
     for j, ax  in enumerate(axs.flatten()):
         # Takes the first data clump in the list
@@ -601,6 +606,8 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
             parameter = param[g]
             # Calculates the velocity of each data point in the data set
             vel = Velocity(t,parameter)
+            rtemp, xchange, ychange = Rchange(initialx,initialy,parameter[0])
+            rlist.append(rtemp)
             # print("Last Velocity Output: ", vel[-1])
             velmax = np.max(vel)
             # # IMPORTANT!!!!!
@@ -613,17 +620,17 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
             # Determines the colors of each data set according
             # to its positioning
             if g == 0:
-                color = "g"
-                label = "a = 0.5"
+                color = "forestgreen"
+                label = "a = 0.75"
             elif g == 1:
-                color = "r"
+                color = "tomato"
                 label = "a = 1.0"
             else:
-                color = "b"
-                label = "a = 1.5"
+                color = "mediumblue"
+                label = "a = 1.25"
             # Plots the data set, including the dot size according to velocity        
             dataproj = ax.scatter(initialx, initialy, s=dot , color=color, label=label)
-            
+            data = ax.scatter(xchange, ychange, s = 8, color = "yellow")
             # Maybe try markersize in ax.plot()
             
             # Creates the grid for each plot
@@ -661,11 +668,13 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3):
     plt.text(-4,10.5,"i=45")
     plt.text(-0.5,10.5,"i=90")
     # plt.text()
+    plt.savefig(f"Figures\Multi_a075_omega_3pi_4.png")
     plt.show()
     
-    return vlistmin, vlistmax, veltot
+    return rlist
 
-vlistmin, vlistmax, veltot = MultiPlot(w = np.pi/2.0)
+rlist = MultiPlot(w = 3*np.pi/4.)
+# print(rlist)
 # x,y,t = OrbGeoAlt(a=0.5, e=0.5,w=np.pi/2, i = 0)
 # param = [0.5, 0.5, np.pi/2, 0]
 # vel = Velocity(t, param)

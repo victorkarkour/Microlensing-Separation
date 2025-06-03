@@ -403,8 +403,10 @@ def Rchange(x,y,a):
             ylist.append(y1)
     return rlist, xlist, ylist
 
-def Data(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = True):
-
+def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = True):
+    """
+    
+    """
     listt = []
     
     if startinga == True:
@@ -605,7 +607,32 @@ def Data(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = True):
     ]
     return totlist, totparam, listt
 
-def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3, startinga = True):
+def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
+    """
+    """
+    listt = []
+    k=0.5
+    list1 = []
+    paramlist1 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list1.append((rlist))
+        k+=0.01
+    k=0.5
+    list2 = []
+    paramlist2 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list2.append((rlist))
+        k+=0.01
+
+    totlist = [list1, list2]
+    
+    return totlist
+
+def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3, startinga = True):
     """
     Creates a 3 by 3 plot of 3 planetary orbits each with varying semimajor axes
     according to differing parameters.
@@ -649,7 +676,7 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3, starti
     veltot = []
     rlist = []
     
-    list, totparam, listt = Data(t0, a, w, W, i, e,startinga)
+    list, totparam, listt = DataProj(t0, a, w, W, i, e,startinga)
     
     # # Initially Calculates the Velocity to place these into a list
     # for i in range(len(list)):
@@ -766,12 +793,40 @@ def MultiPlot(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, n = 3, starti
     plt.text(-4,10.5,"i=45")
     plt.text(-0.5,10.5,"i=90")
     # plt.text()
-    plt.savefig(f"Figures\Multi_a05_omega_3pi_4.png")
+    # Makes a warning, which is why I comment it out
+    plt.savefig("/College Projects/Microlensing Separation/Figures/Multi_a05_omega_3pi_4.png")
     plt.show()
     
     return rlist
 
-rlist = MultiPlot(w = 3*np.pi/4., startinga=False)
+def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
+    """
+    """
+    totlist = DataHist(t0, a, w, W, i, e)
+    
+    
+    fig, axs = plt.subplots(1,2, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
+    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$")
+    # Iterates through each subplot in the 3x3 figure
+    for j, ax  in enumerate(axs.flatten()):
+        iterlist = totlist[j]
+        
+        datahist, bins, patches = ax.hist(iterlist, bins = 10, align = "left", linewidth = 6, stacked=True, histtype = "barstacked")
+        
+        for patch in patches:
+            for rect in patch:
+                rect.set_facecolor("black")
+        ax.set_xlim(0.5,5)
+        ax.set_ylim(0,4000)
+        
+    plt.savefig('/College Projects/Microlensing Separation/Figures/DoubleHist_omega_pi_4.png')
+    plt.show()
+    return iterlist
+
+
+
+# rlist = MultiPlotProj(w = 3*np.pi/4., startinga=False)
+rtemp = MultiPlotHist(w = np.pi/4)
 # print(rlist)
 # x,y,t = OrbGeoAlt(a=0.5, e=0.5,w=np.pi/2, i = 0)
 # param = [0.5, 0.5, np.pi/2, 0]

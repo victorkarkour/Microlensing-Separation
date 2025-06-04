@@ -1,6 +1,6 @@
 import astropy.constants as ac
 import numpy as np
-import scipy.differentiate as diff
+import scipy.signal as signal
 import scipy.optimize as sc
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -401,6 +401,8 @@ def Rchange(x,y,a):
             rlist.append(a)
             xlist.append(x1)
             ylist.append(y1)
+        else: 
+            rlist.append(0)
     return rlist, xlist, ylist
 
 def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = True):
@@ -618,7 +620,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
         x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list1.append((rlist))
-        k+=0.01
+        k+=0.1
     k=0.5
     list2 = []
     paramlist2 = []
@@ -626,9 +628,72 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list2.append((rlist))
-        k+=0.01
-
-    totlist = [list1, list2]
+        k+=0.1
+    k = 0.5
+    list3 = []
+    paramlist3 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list3.append((rlist))
+        k+=0.1
+    
+    k=0.5    
+    list4 = []
+    paramlist4 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.0, w=w, i = np.pi/4.0)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list4.append((rlist))
+        k+=0.1
+    k=0.5
+    list5 = []
+    paramlist5 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w, i = np.pi/4.0)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list5.append((rlist))
+        k+=0.1
+    k=0.5
+    list6 = []
+    paramlist6 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w, i = np.pi/4.0)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list6.append((rlist))
+        k+=0.1
+    
+    k=0.5
+    list7 = []
+    paramlist7 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.0, w=w, i = np.pi/2.0)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list7.append((rlist))
+        k+=0.1
+    k=0.5
+    list8 = []
+    paramlist8 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w, i = np.pi/2.0)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list8.append((rlist))
+        k+=0.1
+    k=0.5
+    list9 = []
+    paramlist9 = []
+    while k <= 5.0:
+        x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w, i = np.pi/2.0)
+        rlist, xlist, ylist = Rchange(x1,y1,k)
+        list9.append((rlist))
+        k+=0.1
+    
+    
+    totlist = [
+        list1,list4,list7,
+        list2,list5,list8,
+        list3,list6,list9
+    ]
     
     return totlist
 
@@ -805,24 +870,32 @@ def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     totlist = DataHist(t0, a, w, W, i, e)
     
     
-    fig, axs = plt.subplots(1,2, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
+    fig, axs = plt.subplots(3,3, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$")
     # Iterates through each subplot in the 3x3 figure
+    
     for j, ax  in enumerate(axs.flatten()):
         iterlist = totlist[j]
+        iterarray = np.array(iterlist)
+        tot_counts = np.ndarray.sum(iterarray)
+        normlist = iterlist / tot_counts    
         
-        datahist, bins, patches = ax.hist(iterlist, bins = 10, align = "left", linewidth = 6, stacked=True, histtype = "barstacked")
+        datahist, bins, patches = ax.hist(iterlist, align = "right",range = (0,5.5), linewidth = 6, stacked=True, histtype = "barstacked", weights = normlist.tolist())
         
         for patch in patches:
             for rect in patch:
                 rect.set_facecolor("black")
         ax.set_xlim(0.5,5)
-        ax.set_ylim(0,4000)
-        
-    plt.savefig('/College Projects/Microlensing Separation/Figures/DoubleHist_omega_pi_4.png')
+    
+    # plt.text(-11.5,7.90,"e=0")
+    # plt.text(-11.5,3.90,"e=0.5")
+    # plt.text(-11.5,-0.1,"e=0.9")
+    # plt.text(-8,10.5,"i=0")
+    # plt.text(-4,10.5,"i=45")
+    # plt.text(-0.5,10.5,"i=90")
+    plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4.png')
     plt.show()
     return iterlist
-
 
 
 # rlist = MultiPlotProj(w = 3*np.pi/4., startinga=False)

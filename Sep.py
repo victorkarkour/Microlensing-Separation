@@ -880,19 +880,19 @@ def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
         tot_counts = np.ndarray.sum(iterarray)
         normlist = iterlist / tot_counts    
         
-        datahist, bins, patches = ax.hist(iterlist, align = "right",range = (0,5.5), linewidth = 6, stacked=True, histtype = "barstacked", weights = normlist.tolist())
+        datahist, bins, patches = ax.hist(iterlist, bins = 20,range = (0,5.5), linewidth = 6, stacked=True, histtype = "barstacked", weights = normlist.tolist())
         
         for patch in patches:
             for rect in patch:
                 rect.set_facecolor("black")
         ax.set_xlim(0.5,5)
     
-    # plt.text(-11.5,7.90,"e=0")
-    # plt.text(-11.5,3.90,"e=0.5")
-    # plt.text(-11.5,-0.1,"e=0.9")
-    # plt.text(-8,10.5,"i=0")
-    # plt.text(-4,10.5,"i=45")
-    # plt.text(-0.5,10.5,"i=90")
+    plt.text(-10,2.59,"e=0")
+    plt.text(-10,1.53,"e=0.5")
+    plt.text(-10,0.47,"e=0.9")
+    plt.text(-6.3,3.2,"i=0")
+    plt.text(-2.05,3.2,"i=45")
+    plt.text(2.45,3.2,"i=90")
     plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4.png')
     plt.show()
     return iterlist

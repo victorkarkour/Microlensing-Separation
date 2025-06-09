@@ -4,6 +4,7 @@ import scipy.signal as signal
 import scipy.optimize as sc
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import time
 
 def NewtRaf(M, e):
     """
@@ -382,27 +383,38 @@ def Rchange(x,y,a):
         values at which the radius was close to the ring radius
 
     """
-    
     rlist = [] # Point at which it was less than 0.001
     xlist = []
     ylist = []
     r0 = 1 # Einstein Ring Radius
-    # All values equated from t have the same length
-    for i in range(len(x)):
-        x1 = x[i]
-        y1 = y[i]
-        # Radius equation
-        r = np.sqrt(x1**2+y1**2)
+    
+    # DEPRECATED
+    # # All values equated from t have the same length
+    # for i in range(len(x)):
+    #     x1 = x[i]
+    #     y1 = y[i]
+    #     # Radius equation
+    #     r = np.sqrt(x1**2+y1**2)
         
-        # If there is a point at which the if statement
-        # is true, it takes into account the semimajor axis
-        # of orbit
-        if np.abs(r-r0) <= 0.001:
-            rlist.append(a)
-            xlist.append(x1)
-            ylist.append(y1)
-        else: 
-            rlist.append(0)
+    #     # If there is a point at which the if statement
+    #     # is true, it takes into account the semimajor axis
+    #     # of orbit
+    #     if np.abs(r-r0) <= 0.01:
+    #         rlist.append(a)
+    #         xlist.append(x1)
+    #         ylist.append(y1)
+    #     else: 
+    #         rlist.append(0)
+   
+    x1 = np.array(x)
+    y1 = np.array(y)
+    
+    r = np.sqrt(x1**2+y1**2)
+    
+    rlist = np.where(np.abs(r-r0)<=0.01, a, 0)
+    xlist = np.where(np.abs(r-r0)<=0.01, x, None)
+    ylist = np.where(np.abs(r-r0)<=0.01, y, None)
+    
     return rlist, xlist, ylist
 
 def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = True):
@@ -669,6 +681,7 @@ def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = Tr
 def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     """
     """
+    start = time.perf_counter()
     listt = []
     k=0.5
     list1 = []
@@ -694,6 +707,8 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list3.append((rlist))
         k+=step
+    print("Column 1 Complete.")
+    
     
     k=0.5    
     list4 = []
@@ -719,6 +734,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list6.append((rlist))
         k+=step
+    print("Column 2 Complete.")
     
     k=0.5
     list7 = []
@@ -744,6 +760,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list9.append((rlist))
         k+=step
+    print("Column 3 Complete.")
     
     k=0.5
     list10 = []
@@ -769,6 +786,11 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list12.append((rlist))
         k+=step
+    end = time.perf_counter()
+    print("Column 4 Complete.")
+    
+    totaltime = end - start
+    print(f"Time to Compute was {totaltime:.4f} seconds.")
     
     totlist = [
         list1,list4,list7, list10,
@@ -983,7 +1005,7 @@ def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.
 
 
 # rlist = MultiPlotProj(w = np.pi/4., startinga=True)
-rtemp = MultiPlotHist(w = np.pi/4, step = 0.001)
+rtemp = MultiPlotHist(w = np.pi/4, step = 0.1)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

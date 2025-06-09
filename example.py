@@ -37,42 +37,45 @@
 # # You can verify the solution by plugging it back into Kepler's equation
 # # The result should be very close to zero
 # print("Verification (Kepler(Solution, M, e)):", Kepler(Solution, M, e))
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+# import matplotlib.pyplot as plt
+# import matplotlib.patches as patches
 import numpy as np
 
-# Example data (replace with your actual 'list')
-n = 2
-list = [
-    (np.linspace(-1, 1, 50), np.linspace(-0.5, 0.5, 50)),
-    (np.linspace(-0.8, 0.8, 50), np.linspace(-1.2, 1.2, 50)),
-    (np.linspace(-1.5, 1.5, 50), np.linspace(-0.3, 0.3, 50)),
-    (np.linspace(-0.2, 0.2, 50), np.linspace(-1.8, 1.8, 50)),
-]
+# # Example data (replace with your actual 'list')
+# n = 2
+# list = [
+#     (np.linspace(-1, 1, 50), np.linspace(-0.5, 0.5, 50)),
+#     (np.linspace(-0.8, 0.8, 50), np.linspace(-1.2, 1.2, 50)),
+#     (np.linspace(-1.5, 1.5, 50), np.linspace(-0.3, 0.3, 50)),
+#     (np.linspace(-0.2, 0.2, 50), np.linspace(-1.8, 1.8, 50)),
+# ]
 
-fig, axs = plt.subplots(n, n, figsize=(7, 7), sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
-fig.suptitle("Orbital Projection with Alterations in e, i, and $\omega$")
+# fig, axs = plt.subplots(n, n, figsize=(7, 7), sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
+# fig.suptitle("Orbital Projection with Alterations in e, i, and $\omega$")
 
-# Initialize a variable to store the line object
-line_handle = None
+# # Initialize a variable to store the line object
+# line_handle = None
 
-for j, ax in enumerate(axs.flatten()):
-    initialx, initialy = list[j]
-    line, = ax.plot(initialx, initialy, color="g")  # Capture the line object
-    if j == 0:
-        line_handle = line  # Store the line object from the first subplot
+# for j, ax in enumerate(axs.flatten()):
+#     initialx, initialy = list[j]
+#     line, = ax.plot(initialx, initialy, color="g")  # Capture the line object
+#     if j == 0:
+#         line_handle = line  # Store the line object from the first subplot
 
-    Circ1 = patches.Circle((0, 0), 0.5, ec="b", fill=False, linestyle=":", linewidth=1)
-    Circ2 = patches.Circle((0, 0), 1, ec="purple", fill=False, linestyle=":", linewidth=1)
-    Circ3 = patches.Circle((0, 0), 1.5, ec="r", fill=False, linestyle=":", linewidth=1)
+#     Circ1 = patches.Circle((0, 0), 0.5, ec="b", fill=False, linestyle=":", linewidth=1)
+#     Circ2 = patches.Circle((0, 0), 1, ec="purple", fill=False, linestyle=":", linewidth=1)
+#     Circ3 = patches.Circle((0, 0), 1.5, ec="r", fill=False, linestyle=":", linewidth=1)
 
-    ax.add_patch(Circ1)
-    ax.add_patch(Circ2)
-    ax.add_patch(Circ3)
+#     ax.add_patch(Circ1)
+#     ax.add_patch(Circ2)
+#     ax.add_patch(Circ3)
 
-    ax.set_xlim(-2, 2)
-    ax.set_ylim(-2, 2)
+#     ax.set_xlim(-2, 2)
+#     ax.set_ylim(-2, 2)
 
-# Create the legend using the patch objects and the captured line object
-fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
-plt.show()
+# # Create the legend using the patch objects and the captured line object
+# fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
+# plt.show()
+g = [0.5, 1, 1.5, 2, 2.5, 3, 3.5]
+label = [f"a = {string}" for string in g]
+print(label)

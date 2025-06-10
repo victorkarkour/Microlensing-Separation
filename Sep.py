@@ -813,7 +813,7 @@ def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.
     ]
     return totlist, totparam, listt
 
-def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
+def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001, end = 10):
     """
     """
     start = time.perf_counter()
@@ -821,7 +821,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list1 = []
     paramlist1 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list1.append((rlist))
@@ -829,7 +829,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list2 = []
     paramlist2 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list2.append((rlist))
@@ -837,7 +837,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k = 0.5
     list3 = []
     paramlist3 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list3.append((rlist))
@@ -848,7 +848,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5    
     list4 = []
     paramlist4 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.0, w=w, i = np.pi/6.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list4.append((rlist))
@@ -856,7 +856,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list5 = []
     paramlist5 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w, i = np.pi/6.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list5.append((rlist))
@@ -864,7 +864,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list6 = []
     paramlist6 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w, i = np.pi/6.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list6.append((rlist))
@@ -874,7 +874,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list7 = []
     paramlist7 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.0, w=w, i = np.pi/3.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list7.append((rlist))
@@ -882,7 +882,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list8 = []
     paramlist8 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w, i = np.pi/3.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list8.append((rlist))
@@ -890,7 +890,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list9 = []
     paramlist9 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w, i = np.pi/3.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list9.append((rlist))
@@ -900,7 +900,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list10 = []
     paramlist10 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.0, w=w, i = np.pi/2.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list10.append((rlist))
@@ -908,7 +908,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list11 = []
     paramlist11 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w, i = np.pi/2.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list11.append((rlist))
@@ -916,7 +916,7 @@ def DataHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
     k=0.5
     list12 = []
     paramlist12 = []
-    while k <= 10.0:
+    while k <= end:
         x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w, i = np.pi/2.0)
         rlist, xlist, ylist = Rchange(x1,y1,k)
         list12.append((rlist))
@@ -1105,11 +1105,11 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
     
     return rlist
 
-def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001):
+def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.001, end = 10):
     """
     """
     
-    totlist = DataHist(t0, a, w, W, i, e, step = step)
+    totlist = DataHist(t0, a, w, W, i, e, step = step, end = end)
     
     
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
@@ -1122,28 +1122,29 @@ def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.
         tot_counts = np.ndarray.sum(iterarray)
         normlist = iterlist / tot_counts    
         
-        datahist, bins, patches = ax.hist(iterlist, bins = 21, range = (0.5,10.5), align = "right", linewidth = 6, stacked=True, histtype = "barstacked", weights = normlist.tolist())
+        datahist, bins, patches = ax.hist(iterlist, bins = 61, range = (0.5,end+0.5), align = "right", linewidth = 6
+                                          , stacked=True, histtype = "barstacked", weights = normlist.tolist())
         
         for patch in patches:
             for rect in patch:
                 rect.set_facecolor("black")
-        ax.set_xlim(0.5,10.5)
+        ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,0.3)
     
-    plt.text(-33,2.59,"e=0")
-    plt.text(-33,1.53,"e=0.5")
-    plt.text(-33,0.47,"e=0.9")
-    plt.text(-25.3,3.2,"i=0")
-    plt.text(-15,3.2,"i=30")
-    plt.text(-5,3.2,"i=60")
-    plt.text(5,3.2,"i=90")
+    plt.text(-70,0.76,"e=0")
+    plt.text(-70,0.46,"e=0.5")
+    plt.text(-70,0.16,"e=0.9")
+    plt.text(-52,0.91,"i=0")
+    plt.text(-32,0.91,"i=30")
+    plt.text(-12,0.91,"i=60")
+    plt.text(10, 0.91,"i=90")
     plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4.png')
     plt.show()
     return iterlist
 
 
 # rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
-rtemp = MultiPlotHist(w = np.pi/4, step = 0.01)
+rtemp = MultiPlotHist(w = np.pi/4, step = 0.1, end = 20)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

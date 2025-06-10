@@ -76,6 +76,7 @@ import numpy as np
 # # Create the legend using the patch objects and the captured line object
 # fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
 # plt.show()
+j = np.arange(0.5,20.5,0.5)
 g = [0.5, 1, 1.5, 2, 2.5, 3, 3.5]
-label = [f"a = {string}" for string in g]
+label = [f"a = {string}" for string in j]
 print(label)

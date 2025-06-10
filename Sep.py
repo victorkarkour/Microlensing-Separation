@@ -970,18 +970,20 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
      3 by 3 Plot of Planetary Orbits
     
     """
-    # Data points being created for each plots
-    # 3 for each section
+    
     # Initialize Lists
     listt = []
-    vlistmin = []
-    vlistmax = []
-    veltot = []
+    
     rlist = []
     
+    # Data points being created for each plots
+    # 3 for each section
     list, totparam, listt = DataProj(t0, a, w, W, i, e, startinga)
     
     # # Initially Calculates the Velocity to place these into a list
+    # vlistmin = []
+    # vlistmax = []
+    # veltot = []
     # for i in range(len(list)):
     #     iter = list[i]
     #     j = 0
@@ -1058,36 +1060,24 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
                     label = "a = 1.5"
                     color = colorlist[g]
             else:
-                rangelist = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5,
-                             6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0]
+                rangelist = np.arange(0.5,startinga+0.5,0.5)
                 alpha = rangelist[g]
                 label = f"a = {alpha}"
-                if g < 10:
-                    color = colorlist[g]
-                else:
-                    color = colorlist[g-10]    
+                color = colorlist[g % 10]   
             
             # Plots the data set, including the dot size according to velocity        
             dataproj = ax.scatter(initialx, initialy, s=dot, color= color, label=label)
+            # Also includes points at which |r-r0| <= 0.01
             data = ax.scatter(xchange, ychange, s = 8, color = "yellow")
-            # Maybe try markersize in ax.plot()
             
             # Creates the grid for each plot
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
         
-        # Circ1 = patches.Circle((0,0), 0.5, ec= "b", fill=False, linestyle = ":", linewidth = 1)
-        
         # Plots an Einstein Ring Radius of 1 around each plot
         Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
         
-        
-        # Circ3 = patches.Circle((0,0), 1.5, ec="r", fill=False, linestyle = ":", linewidth = 1)
-        
-        # ax.add_patch(Circ1)
-        
         # Adds the Circle to the plot
         ax.add_patch(Circ2)
-        # ax.add_patch(Circ3)
         
         # Just grabs the labels for each plot just before it iterates through again
         if j == 0:
@@ -1096,7 +1086,7 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
         # Limits
         ax.set_xlim(-2,2)
         ax.set_ylim(-2,2)
-    # fig.legend([Circ1,Circ2,Circ3,linelabel],["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], fontsize = "small")
+    
     # Shows the legend of each data point
     fig.legend(handles,labels,fontsize="small")
     # Shows where the data values change according to the plot 
@@ -1108,8 +1098,9 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
     plt.text(-4.25,10.25,"i=60")
     plt.text(0,10.25,"i=90")
     # plt.text()
-    # Makes a warning, which is why I comment it out
-    plt.savefig("/College Projects/Microlensing Separation/Figures/Multi_a05_10_omega_pi_4.png")
+    
+    # Saves to Figure Folder
+    plt.savefig("/College Projects/Microlensing Separation/Figures/Multi_a05_20_omega_pi_4.png")
     plt.show()
     
     return rlist
@@ -1151,8 +1142,8 @@ def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.
     return iterlist
 
 
-# rlist = MultiPlotProj(w = np.pi/4., startinga= 10)
-rtemp = MultiPlotHist(w = np.pi/4, step = 0.001)
+# rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
+rtemp = MultiPlotHist(w = np.pi/4, step = 0.01)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

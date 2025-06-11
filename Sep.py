@@ -1122,7 +1122,7 @@ def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.
         tot_counts = np.ndarray.sum(iterarray)
         normlist = iterlist / tot_counts    
         
-        datahist, bins, patches = ax.hist(iterlist, bins = 61, range = (0.5,end+0.5), align = "right", linewidth = 6
+        datahist, bins, patches = ax.hist(iterlist, bins = 200, range = (0.5,end+0.5), align = "right", linewidth = 6
                                           , stacked=True, histtype = "barstacked", weights = normlist.tolist())
         
         for patch in patches:
@@ -1144,7 +1144,7 @@ def MultiPlotHist(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, step = 0.
 
 
 # rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
-rtemp = MultiPlotHist(w = np.pi/4, step = 0.1, end = 20)
+rtemp = MultiPlotHist(w = np.pi/4, step = 0.01, end = 20)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

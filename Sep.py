@@ -788,10 +788,9 @@ def DataHist(w = 0, step = 0.001, end = 10):
     with Pool() as pool:
         totlist = pool.map(Rchange, param)
     
-    # totlist = [Rchange(param[0]), Rchange(param[1])]
     
-    
-    totaltime = end - start
+    end_time = time.perf_counter()
+    totaltime = end_time - start
     print(f"Time to Compute was {totaltime:.4f} seconds.")
     
     # totlist = [
@@ -986,16 +985,17 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
     
     for j, ax  in enumerate(axs.flatten()):
         iterlist, x, y = totlist[j]
-        iterarray = np.array(iterlist)
-        tot_counts = np.ndarray.sum(iterarray)
-        normlist = iterlist / tot_counts    
+        # Convert list of arrays to a single array, filtering out zeros
+        flat_data = np.concatenate([arr[arr != 0] for arr in iterlist])
+        # Calculate weights for normalization
+        weights = np.ones_like(flat_data) / len(flat_data)
         
-        datahist, bins, patches = ax.hist(iterlist, bins = 200, range = (0.5,end+0.5), align = "right", linewidth = 6
-                                          , stacked=True, histtype = "barstacked", weights = normlist.tolist())
+        datahist, bins, patches = ax.hist(flat_data, bins=200, range=(0.5,end+0.5), 
+                                         align="right", stacked=True, histtype="barstacked", 
+                                         weights=weights)
         
         for patch in patches:
-            for rect in patch:
-                rect.set_facecolor("black")
+            patch.set_facecolor("black")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,0.3)
     
@@ -1006,7 +1006,7 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
     plt.text(-32,0.91,"i=30")
     plt.text(-12,0.91,"i=60")
     plt.text(10, 0.91,"i=90")
-    plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4.png')
+    plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001.png')
     plt.show()
     return iterlist
 

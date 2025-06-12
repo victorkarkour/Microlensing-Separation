@@ -986,17 +986,16 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
     
     for j, ax  in enumerate(axs.flatten()):
         iterlist, x, y = totlist[j]
-        # Convert list of arrays to a single array, filtering out zeros
-        flat_data = np.concatenate([arr[arr != 0] for arr in iterlist])
-        # Calculate weights for normalization
-        weights = np.ones_like(flat_data) / len(flat_data)
+        iterarray = np.array(iterlist)
+        tot_counts = np.ndarray.sum(iterarray)
+        normlist = iterlist / tot_counts    
         
-        datahist, bins, patches = ax.hist(flat_data, bins=200, range=(0.5,end+0.5), 
-                                         align="right", stacked=True, histtype="barstacked", 
-                                         weights=weights)
+        datahist, bins, patches = ax.hist(iterlist, bins = 200, range = (0.5,end+0.5), align = "right", linewidth = 6
+                                          , stacked=True, histtype = "barstacked", weights = normlist.tolist())
         
         for patch in patches:
-            patch.set_facecolor("black")
+            for rect in patch:
+                rect.set_facecolor("black")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,0.3)
     

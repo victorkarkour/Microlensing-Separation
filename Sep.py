@@ -7,46 +7,48 @@ import matplotlib.patches as patches
 import time
 from multiprocessing import Pool
 
-def NewtRaf(M, e):
+def NewtRaf(M, e, maxiter=50, tol=1e-8):
     """
-    Uses scipy functions to produce a 
-    root of a real function using the
-    Newton-Raphson method.
+    Custom vectorized Newton-Raphson implementation for Kepler's equation.
+    More memory efficient than scipy's newton.
     
-    -------------------------------
-    ### Parameters
-    
-    M : float <br>
-        A combination of Period and semimajor axis.
-    
-    e : float <br>
-        Constant of eccentricity.
-    
-    -------------------------------
-    ### Returns
-    
-    Solution : float <br>
-        Solution to Kepler Equation
-    """
-    initial = M+e*np.sin(M) # Bascially starting with M as our initial guess
-    Solution = np.zeros_like(M)
-    
-    Ei = initial # Initial Guess
+    Parameters
+    ----------
+    M : array-like
+        Mean anomaly
+    e : float
+        Eccentricity
+    maxiter : int, optional
+        Maximum number of iterations
+    tol : float, optional
+        Convergence tolerance
         
-    # Uses Kepler's Equation and Derivative to solve
-    Solution = sc.newton(Kepler, Ei, fprime = DKepler, args = (M,e))
+    Returns
+    -------
+    array-like
+        Eccentric anomaly
+    """
+    # Initial guess
+    E = M + e * np.sin(M)
     
-    # Previous attempt at solving for E
-    # Elist = []
-    # for i in range(n-1):
-    #     if i == 0:
-    #         Eprime = diff.derivative(fE,Elist[i])
-    #         Elist.append(initial-(fE/Eprime))
-    #     Eprime = diff.derivative(fE,Elist[i])
-    #     Elist.append(Elist[i]-(fE/Eprime))
-    # return(Elist[-1])
-    
-    return(Solution)
+    # Old Newton-Raphson
+    # initial = M + e * np.sin(M)
+    # return sc.newton(Kepler, initial, fprime=DKepler, args=(M,e))
+    # Vectorized Newton-Raphson iteration
+    for _ in range(maxiter):
+        # Calculate function value and derivative
+        f = Kepler(E,M,e)
+        df = DKepler(E,M,e)
+        
+        # Update step
+        dE = f / df
+        E = E - dE
+        
+        # Check convergence
+        if np.all(np.abs(dE) < tol):
+            break
+            
+    return E
 
 def Kepler(En,Mn,ec):
     """
@@ -211,11 +213,6 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     t : list <br>
         time associated with planet's position
     """
-    xt = []
-    yt = []
-    xt = np.array(xt)
-    yt = np.array(yt)
-    
     # Initial Equations
     A = a*(np.cos(W)*np.cos(w) - np.sin(W)*np.sin(w)*np.cos(i))
     B = a*(np.sin(W)*np.cos(w) + np.cos(W)*np.sin(w)*np.cos(i))
@@ -223,14 +220,20 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     G = a*(-np.sin(W)*np.sin(w) + np.cos(W)*np.cos(w)*np.cos(i))
     
     # Create time function (start to whatever start was plus 2*pi)
-    # phi = (i/4000)*2*pi
-    # phi+ = phi + changephi
-    # phi- = phi - changephi
-    phi = np.linspace(t0,(1)*(2.0*np.pi)+t0,10000)
-    
+    nphase = int(140* a ** 1.5)
+    phi = np.linspace(t0,(1)*(2.0*np.pi)+t0, nphase)
     # Place the time function into the Eccentric Anomaly
-        # Solve Kepler Equation
-    Et = NewtRaf(phi, e)
+    # Solve Kepler Equation in chunks to manage memory
+    # Et = NewtRaf(phi, e)
+    
+    # chunk_size = 10000
+    # Et = np.zeros_like(phi)
+    
+    # for i in range(0, len(phi), chunk_size):
+    #     end_idx = min(i + chunk_size, len(phi))
+    #     Et[i:end_idx] = NewtRaf(phi[i:end_idx], e)
+    
+    Et = NewtRaf(phi,e)
     
     # Function of X and Y according to E
     Xt = np.cos(Et) - e
@@ -239,9 +242,8 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     # Actual x any y functions of t
     xt = A * Xt + F * Yt
     yt = B * Xt + G * Yt
-    # print("Last x output: ", xt[-1])
-    # print("Last y output: ", yt[-1])
-    # print("Last t output: ", phi[-1])
+    
+    gc.collect()
     return (xt, yt, phi)
 
 def Velocity(param):
@@ -976,6 +978,8 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
     """
     """
     
+    
+    
     totlist = DataHist(w = w, step = step, end = end)
     
     
@@ -988,6 +992,7 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
         # Convert list of arrays to a single array, filtering out zeros
         flat_data = np.concatenate([arr[arr != 0] for arr in iterlist])
         # Calculate weights for normalization
+        # Check if this is wrong or not, cause of the np.ones_like()
         weights = np.ones_like(flat_data) / len(flat_data)
         
         datahist, bins, patches = ax.hist(flat_data, bins=200, range=(0.5,end+0.5), 
@@ -997,15 +1002,15 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
         for patch in patches:
             patch.set_facecolor("black")
         ax.set_xlim(0.5,20.5)
-        ax.set_ylim(0,0.3)
+        ax.set_ylim(0,0.1)
     
-    plt.text(-70,0.76,"e=0")
-    plt.text(-70,0.46,"e=0.5")
-    plt.text(-70,0.16,"e=0.9")
-    plt.text(-52,0.91,"i=0")
-    plt.text(-32,0.91,"i=30")
-    plt.text(-12,0.91,"i=60")
-    plt.text(10, 0.91,"i=90")
+    plt.text(-70,0.25,"e=0")
+    plt.text(-70,0.15,"e=0.5")
+    plt.text(-70,0.05,"e=0.9")
+    plt.text(-52,0.31,"i=0")
+    plt.text(-32,0.31,"i=30")
+    plt.text(-12,0.31,"i=60")
+    plt.text(10, 0.31,"i=90")
     plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001.png')
     plt.show()
     return iterlist
@@ -1013,7 +1018,7 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
 
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
-    rtemp = MultiPlotHist(w = np.pi/4, step = 0.01, end = 20)
+    rtemp = MultiPlotHist(w = np.pi/4, step = 0.001, end = 20)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

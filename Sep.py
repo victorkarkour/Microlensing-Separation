@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import time
 from multiprocessing import Pool
+import gc
 
 def NewtRaf(M, e, maxiter=50, tol=1e-8):
     """
@@ -28,27 +29,30 @@ def NewtRaf(M, e, maxiter=50, tol=1e-8):
     array-like
         Eccentric anomaly
     """
-    # Initial guess
-    E = M + e * np.sin(M)
-    
     # Old Newton-Raphson
-    # initial = M + e * np.sin(M)
-    # return sc.newton(Kepler, initial, fprime=DKepler, args=(M,e))
+    initial = M + e * np.sin(M)
+    Solution = np.zeros_like(M)
+    
+    Solution = sc.newton(Kepler, initial, fprime=DKepler, args=(M,e))
+    return Solution
+    
+    # Initial guess
+    # E = M + e * np.sin(M)
     # Vectorized Newton-Raphson iteration
-    for _ in range(maxiter):
-        # Calculate function value and derivative
-        f = Kepler(E,M,e)
-        df = DKepler(E,M,e)
+    # for _ in range(maxiter):
+    #     # Calculate function value and derivative
+    #     f = Kepler(E,M,e)
+    #     df = DKepler(E,M,e)
         
-        # Update step
-        dE = f / df
-        E = E - dE
+    #     # Update step
+    #     dE = f / df
+    #     E = E - dE
         
-        # Check convergence
-        if np.all(np.abs(dE) < tol):
-            break
+    #     # Check convergence
+    #     if np.all(np.abs(dE) <= tol):
+    #         break
             
-    return E
+    # return E
 
 def Kepler(En,Mn,ec):
     """
@@ -220,8 +224,10 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     G = a*(-np.sin(W)*np.sin(w) + np.cos(W)*np.cos(w)*np.cos(i))
     
     # Create time function (start to whatever start was plus 2*pi)
-    nphase = int(140* a ** 1.5)
-    phi = np.linspace(t0,(1)*(2.0*np.pi)+t0, nphase)
+    # nphase = int(800* a ** 1.5)
+    
+    phi = np.linspace(t0,(1)*(2.0*np.pi)+t0, 10000)
+    
     # Place the time function into the Eccentric Anomaly
     # Solve Kepler Equation in chunks to manage memory
     # Et = NewtRaf(phi, e)
@@ -243,7 +249,9 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     xt = A * Xt + F * Yt
     yt = B * Xt + G * Yt
     
-    gc.collect()
+    # ONLY USE IF SYSTEM DOESN'T HAVE ENOUGH MEMORY
+    # 
+    # gc.collect()
     return (xt, yt, phi)
 
 def Velocity(param):
@@ -368,6 +376,12 @@ def Rchange(param, coords = False):
     ylist = []
     r0 = 1 # Einstein Ring Radius
     e, i, w, end, step = param
+    
+    # steps = np.linspace(0, 10000,10000)
+    
+    # loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
+    
+    # stepthrough = 10**loga
     
     stepthrough = np.arange(0.5, end + step, step)
    
@@ -787,7 +801,7 @@ def DataHist(w = 0, step = 0.001, end = 10):
     
     start = time.perf_counter()
     
-    with Pool() as pool:
+    with Pool(processes = 12) as pool:
         totlist = pool.map(Rchange, param)
     
     
@@ -1003,6 +1017,7 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
             patch.set_facecolor("black")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,0.1)
+        ax.set_xscale("log")
     
     plt.text(-70,0.25,"e=0")
     plt.text(-70,0.15,"e=0.5")

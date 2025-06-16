@@ -249,9 +249,6 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     xt = A * Xt + F * Yt
     yt = B * Xt + G * Yt
     
-    # ONLY USE IF SYSTEM DOESN'T HAVE ENOUGH MEMORY
-    # 
-    # gc.collect()
     return (xt, yt, phi)
 
 def Velocity(param):
@@ -375,15 +372,15 @@ def Rchange(param, coords = False):
     xlist = []
     ylist = []
     r0 = 1 # Einstein Ring Radius
-    e, i, w, end, step = param
+    e, i, w, end, step, Linear = param
     
-    # steps = np.linspace(0, 10000,10000)
-    
-    # loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
-    
-    # stepthrough = 10**loga
-    
-    stepthrough = np.arange(0.5, end + step, step)
+    if Linear == True:
+        stepthrough = np.arange(0.5, end + step, step)
+    elif Linear == False:
+        
+        steps = np.linspace(0, 10000,10000)
+        loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
+        stepthrough = 10**loga 
    
     for val in stepthrough:
         x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
@@ -391,13 +388,13 @@ def Rchange(param, coords = False):
         r = np.sqrt(x**2+y**2)
 
         if coords == False:
-            # if np.any(np.abs(r-r0)<=0.01):
-            #     rlist.append(val)
             rlist.append(np.where(np.abs(r-r0)<=0.01, val, 0))
         else: 
             rlist.append(np.where(np.abs(r-r0)<=0.01, val, 0))
             xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
-            ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))            
+            ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+    
+    gc.collect()            
     return rlist, xlist, ylist
 
 def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.25):
@@ -785,17 +782,20 @@ def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.
     ]
     return totlist, totparam, listt
 
-def DataHist(w = 0, step = 0.001, end = 10):
+def DataHist(w = 0, step = 0.001, end = 10, Linear = True):
     """
     """
-    
+    if Linear == True:
+        Linear = True
+    else:
+        Linear = False
     param = [
     # Row 1
-    (0 , 0, w, end, step), (0, np.pi/6, w, end, step), (0, np.pi/3, w, end, step), (0, np.pi/2, w, end, step),
+    (0 , 0, w, end, step, Linear), (0, np.pi/6, w, end, step, Linear), (0, np.pi/3, w, end, step, Linear), (0, np.pi/2, w, end, step, Linear),
     # Row 2
-    (0.5, 0, w, end, step), (0.5, np.pi/6, w, end, step), (0.5, np.pi/3, w, end, step), (0.5, np.pi/2, w, end, step),
+    (0.5, 0, w, end, step, Linear), (0.5, np.pi/6, w, end, step, Linear), (0.5, np.pi/3, w, end, step, Linear), (0.5, np.pi/2, w, end, step, Linear),
     # Row 3
-    (0.9, 0, w, end, step), (0.9, np.pi/6, w, end, step), (0.9, np.pi/3, w, end, step), (0.9, np.pi/2, w, end, step)
+    (0.9, 0, w, end, step, Linear), (0.9, np.pi/6, w, end, step, Linear), (0.9, np.pi/3, w, end, step, Linear), (0.9, np.pi/2, w, end, step, Linear)
         
     ]
     
@@ -988,17 +988,20 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
     
     return rlist
 
-def MultiPlotHist(w = 0, step = 0.001, end = 10):
+def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
     """
     """
     
     
     
-    totlist = DataHist(w = w, step = step, end = end)
+    totlist = DataHist(w = w, step = step, end = end, Linear = Linear)
     
     
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$")
+    if Linear == True:
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$ (Linear)")
+    else:
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$ (Log)")
     # Iterates through each subplot in the 3x3 figure
     
     for j, ax  in enumerate(axs.flatten()):
@@ -1017,7 +1020,8 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
             patch.set_facecolor("black")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,0.1)
-        ax.set_xscale("log")
+        if Linear == False:
+            ax.set_xscale("log")
     
     plt.text(-70,0.25,"e=0")
     plt.text(-70,0.15,"e=0.5")
@@ -1026,14 +1030,17 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10):
     plt.text(-32,0.31,"i=30")
     plt.text(-12,0.31,"i=60")
     plt.text(10, 0.31,"i=90")
-    plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001.png')
+    if Linear == True:
+        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001_Linear.png')
+    else:
+        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001_Log.png')
     plt.show()
     return iterlist
 
 
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
-    rtemp = MultiPlotHist(w = np.pi/4, step = 0.001, end = 20)
+    rtemp = MultiPlotHist(w = np.pi/4, step = 0.001, end = 20, Linear = True)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

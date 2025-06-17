@@ -393,8 +393,8 @@ def Rchange(param, coords = False):
             rlist.append(np.where(np.abs(r-r0)<=0.01, val, 0))
             xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
             ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
-    
-    gc.collect()            
+    # if Linear == False:
+    # gc.collect()            
     return rlist, xlist, ylist
 
 def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.25):
@@ -791,11 +791,11 @@ def DataHist(w = 0, step = 0.001, end = 10, Linear = True):
         Linear = False
     param = [
     # Row 1
-    (0 , 0, w, end, step, Linear), (0, np.pi/6, w, end, step, Linear), (0, np.pi/3, w, end, step, Linear), (0, np.pi/2, w, end, step, Linear),
+    (0. , 0., w, end, step, Linear), (0., np.pi/6, w, end, step, Linear), (0., np.pi/3, w, end, step, Linear), (0., np.pi/2, w, end, step, Linear),
     # Row 2
-    (0.5, 0, w, end, step, Linear), (0.5, np.pi/6, w, end, step, Linear), (0.5, np.pi/3, w, end, step, Linear), (0.5, np.pi/2, w, end, step, Linear),
+    (0.5, 0., w, end, step, Linear), (0.5, np.pi/6, w, end, step, Linear), (0.5, np.pi/3, w, end, step, Linear), (0.5, np.pi/2, w, end, step, Linear),
     # Row 3
-    (0.9, 0, w, end, step, Linear), (0.9, np.pi/6, w, end, step, Linear), (0.9, np.pi/3, w, end, step, Linear), (0.9, np.pi/2, w, end, step, Linear)
+    (0.9, 0., w, end, step, Linear), (0.9, np.pi/6, w, end, step, Linear), (0.9, np.pi/3, w, end, step, Linear), (0.9, np.pi/2, w, end, step, Linear)
         
     ]
     
@@ -815,7 +815,7 @@ def DataHist(w = 0, step = 0.001, end = 10, Linear = True):
     #     list3,list6,list9, list12
     # ]
     
-    return totlist
+    return totlist, param
 
 def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.5):
     """
@@ -993,8 +993,7 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
     """
     
     
-    
-    totlist = DataHist(w = w, step = step, end = end, Linear = Linear)
+    totlist, param = DataHist(w = w, step = step, end = end, Linear = Linear)
     
     
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
@@ -1010,26 +1009,35 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
         flat_data = np.concatenate([arr[arr != 0] for arr in iterlist])
         # Calculate weights for normalization
         # Check if this is wrong or not, cause of the np.ones_like()
-        weights = np.ones_like(flat_data) / len(flat_data)
+        weights = np.ones_like(flat_data) / len(flat_data)    
+
+        # Creates the log spaced bins for our data
+        # Stupid fix to stupid problems :)
+        if j == 0 and Linear == True:
+            logbins = np.linspace(0.5,20,2000+1)
+        else:
+            logbins = np.geomspace(flat_data.min(),flat_data.max(), 200+1)
         
-        datahist, bins, patches = ax.hist(flat_data, bins=200, range=(0.5,end+0.5), 
-                                         align="right", stacked=True, histtype="barstacked", 
-                                         weights=weights)
-        
+        datahist, bins, patches = ax.hist(
+            flat_data, bins=logbins, range=(0.5, end+0.5),
+            align="right", stacked=True, histtype="barstacked",
+            weights=weights
+        )
+
         for patch in patches:
             patch.set_facecolor("black")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,0.1)
-        if Linear == False:
-            ax.set_xscale("log")
+        ax.set_xscale("log")
+        
     
-    plt.text(-70,0.25,"e=0")
-    plt.text(-70,0.15,"e=0.5")
-    plt.text(-70,0.05,"e=0.9")
-    plt.text(-52,0.31,"i=0")
-    plt.text(-32,0.31,"i=30")
-    plt.text(-12,0.31,"i=60")
-    plt.text(10, 0.31,"i=90")
+    plt.text(1.25e-6,0.25,"e=0")
+    plt.text(1.25e-6,0.15,"e=0.5")
+    plt.text(1.25e-6,0.05,"e=0.9")
+    plt.text(3e-5,0.31,"i=0")
+    plt.text(1.5e-3,0.31,"i=30")
+    plt.text(5.5e-2,0.31,"i=60")
+    plt.text(2.75, 0.31,"i=90")
     if Linear == True:
         plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001_Linear.png')
     else:

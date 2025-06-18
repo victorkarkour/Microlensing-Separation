@@ -393,8 +393,8 @@ def Rchange(param, coords = False):
             rlist.append(np.where(np.abs(r-r0)<=0.01, val, 0))
             xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
             ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
-    # if Linear == False:
-    # gc.collect()            
+    if Linear == False:
+        gc.collect()            
     return rlist, xlist, ylist
 
 def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.25):
@@ -801,7 +801,7 @@ def DataHist(w = 0, step = 0.001, end = 10, Linear = True):
     
     start = time.perf_counter()
     
-    with Pool(processes = 12) as pool:
+    with Pool(processes = 8) as pool:
         totlist = pool.map(Rchange, param)
     
     
@@ -1001,43 +1001,52 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
         fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$ (Linear)")
     else:
         fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$ (Log)")
-    # Iterates through each subplot in the 3x3 figure
+    # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
         iterlist, x, y = totlist[j]
         # Convert list of arrays to a single array, filtering out zeros
         flat_data = np.concatenate([arr[arr != 0] for arr in iterlist])
+        
+        # Create variables for bin sizes
+        nbin = 200
+        amin = 0.5
+        amax = 21
+        # Make logbinsizes for all
+        logbinsize = (np.log10(amin)-np.log10(amax))/nbin
+        
         # Calculate weights for normalization
         # Check if this is wrong or not, cause of the np.ones_like()
-        weights = np.ones_like(flat_data) / len(flat_data)    
+        weights = np.abs(np.ones_like(flat_data) / (len(flat_data) * logbinsize))    
 
         # Creates the log spaced bins for our data
         # Stupid fix to stupid problems :)
         if j == 0 and Linear == True:
-            logbins = np.linspace(0.5,20,2000+1)
+            logbins = np.linspace(amin,amax,1000+1)
         else:
-            logbins = np.geomspace(flat_data.min(),flat_data.max(), 200+1)
+            logbins = np.geomspace(amin,amax, nbin)
         
         datahist, bins, patches = ax.hist(
             flat_data, bins=logbins, range=(0.5, end+0.5),
-            align="right", stacked=True, histtype="barstacked",
-            weights=weights
+            stacked=True, histtype="barstacked",
+            weights=weights,
+            # density = True
         )
 
         for patch in patches:
             patch.set_facecolor("black")
         ax.set_xlim(0.5,20.5)
-        ax.set_ylim(0,0.1)
+        ax.set_ylim(0,10)
         ax.set_xscale("log")
         
     
-    plt.text(1.25e-6,0.25,"e=0")
-    plt.text(1.25e-6,0.15,"e=0.5")
-    plt.text(1.25e-6,0.05,"e=0.9")
-    plt.text(3e-5,0.31,"i=0")
-    plt.text(1.5e-3,0.31,"i=30")
-    plt.text(5.5e-2,0.31,"i=60")
-    plt.text(2.75, 0.31,"i=90")
+    plt.text(1.25e-6,25,"e=0")
+    plt.text(1.25e-6,15,"e=0.5")
+    plt.text(1.25e-6,5,"e=0.9")
+    plt.text(4e-5,30.5,"i=0")
+    plt.text(1.5e-3,30.5,"i=30")
+    plt.text(5.5e-2,30.5,"i=60")
+    plt.text(2.75, 30.5,"i=90")
     if Linear == True:
         plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001_Linear.png')
     else:
@@ -1048,7 +1057,7 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
 
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
-    rtemp = MultiPlotHist(w = np.pi/4, step = 0.001, end = 20, Linear = True)
+    rtemp = MultiPlotHist(w = np.pi/4, step = 0.001, end = 20, Linear = False)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

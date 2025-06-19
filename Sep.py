@@ -368,7 +368,8 @@ def Rchange(param, coords = False):
         values at which the radius was close to the ring radius
 
     """
-    rlist = [] # Point at which it was less than 0.001
+    rlistlog = [] # Point at which it was less than 0.001
+    rlistlin = []
     xlist = []
     ylist = []
     r0 = 1 # Einstein Ring Radius
@@ -376,26 +377,46 @@ def Rchange(param, coords = False):
     
     if Linear == True:
         stepthrough = np.arange(0.5, end + step, step)
-    elif Linear == False:
         
+        for val in stepthrough:
+            x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
+    
+            r = np.sqrt(x**2+y**2)
+
+            if coords == False:
+                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+            else: 
+                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
+                ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+    elif Linear == False:
+        # Log Portion
         steps = np.linspace(0, 10000,10000)
         loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
         stepthrough = 10**loga 
    
-    for val in stepthrough:
-        x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
+        for val in stepthrough:
+            x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
     
-        r = np.sqrt(x**2+y**2)
+            r = np.sqrt(x**2+y**2)
+        
+            rlistlog.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+        gc.collect()
+        # Linear Portion
+        stepthrough = np.arange(0.5, end + step, step)
+        for val in stepthrough:
+            x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
+    
+            r = np.sqrt(x**2+y**2)
 
-        if coords == False:
-            rlist.append(np.where(np.abs(r-r0)<=0.01, val, 0))
-        else: 
-            rlist.append(np.where(np.abs(r-r0)<=0.01, val, 0))
-            xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
-            ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
-    if Linear == False:
-        gc.collect()            
-    return rlist, xlist, ylist
+            if coords == False:
+                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+            else: 
+                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
+                ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+               
+    return rlistlin, xlist, ylist, rlistlog
 
 def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.25):
     """
@@ -782,13 +803,10 @@ def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.
     ]
     return totlist, totparam, listt
 
-def DataHist(w = 0, step = 0.001, end = 10, Linear = True):
+def DataHist(w = 0, step = 0.001, end = 10, Linearonly = True):
     """
     """
-    if Linear == True:
-        Linear = True
-    else:
-        Linear = False
+    Linear = Linearonly
     param = [
     # Row 1
     (0. , 0., w, end, step, Linear), (0., np.pi/6, w, end, step, Linear), (0., np.pi/3, w, end, step, Linear), (0., np.pi/2, w, end, step, Linear),
@@ -801,7 +819,7 @@ def DataHist(w = 0, step = 0.001, end = 10, Linear = True):
     
     start = time.perf_counter()
     
-    with Pool(processes = 8) as pool:
+    with Pool(processes = 6) as pool:
         totlist = pool.map(Rchange, param)
     
     
@@ -988,26 +1006,29 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
     
     return rlist
 
-def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
+def MultiPlotHist(w = 0, step = 0.001, end = 10, Linearonly = True):
     """
     """
+    if Linearonly == True:
+        colorlist = ["black"]
+    else:
+        colorlist = ["black", "red"]
     
-    
-    totlist, param = DataHist(w = w, step = step, end = end, Linear = Linear)
+    totlist, param = DataHist(w = w, step = step, end = end, Linearonly = Linearonly)
     
     
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    if Linear == True:
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$ (Linear)")
+    if Linearonly == True:
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $0$ (Linear)")
     else:
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$ (Log)")
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $0$ (Linear & Log)")
     # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
-        iterlist, x, y = totlist[j]
+        iterlistlin, x, y, iterlistlog = totlist[j]
         # Convert list of arrays to a single array, filtering out zeros
-        flat_data = np.concatenate([arr[arr != 0] for arr in iterlist])
-        
+        flat_data_lin = np.concatenate([arr[arr != 0] for arr in iterlistlin])
+        flat_data_log = np.concatenate([arr[arr != 0] for arr in iterlistlog])
         # Create variables for bin sizes
         nbin = 200
         amin = 0.5
@@ -1017,24 +1038,52 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
         
         # Calculate weights for normalization
         # Check if this is wrong or not, cause of the np.ones_like()
-        weights = np.abs(np.ones_like(flat_data) / (len(flat_data) * logbinsize))    
-
+        weights_lin = np.abs(np.ones_like(flat_data_lin) / (len(flat_data_lin) * logbinsize))    
+        weights_log = np.abs(np.ones_like(flat_data_log) / (len(flat_data_log) * logbinsize))  
         # Creates the log spaced bins for our data
         # Stupid fix to stupid problems :)
-        if j == 0 and Linear == True:
-            logbins = np.linspace(amin,amax,1000+1)
+        if j == 0 and Linearonly == True:
+            logbins_lin = np.linspace(amin,amax,1000+1)
         else:
-            logbins = np.geomspace(amin,amax, nbin)
+            if j == 0:
+                logbins_lin = np.linspace(amin,amax,nbin)
+                logbins_log = np.geomspace(amin,amax,nbin)
+            else:    
+                logbins_lin = np.geomspace(amin,amax, nbin)
+                logbins_log = np.geomspace(amin,amax,nbin)
+        if Linearonly == True:
+            
+            datahist_lin, bins, patches_lin = ax.hist(
+                flat_data_lin, bins=logbins_lin, range=(0.5, end+0.5),
+                stacked=True, histtype="barstacked",
+                weights=weights_lin
+            )
+        else:
+            datahist_lin, bins, patches_lin = ax.hist(
+                flat_data_lin, bins=logbins_lin, range=(0.5, end+0.5),
+                stacked=True, histtype="barstacked",
+                weights=weights_lin,
+            )
+            datahist_log, bins, patches_log = ax.hist(
+                flat_data_log, bins=logbins_log, range=(0.5, end+0.5),
+                stacked=True, histtype="barstacked",
+                weights=weights_log
+            )
         
-        datahist, bins, patches = ax.hist(
-            flat_data, bins=logbins, range=(0.5, end+0.5),
-            stacked=True, histtype="barstacked",
-            weights=weights,
-            # density = True
-        )
-
-        for patch in patches:
-            patch.set_facecolor("black")
+        if Linearonly == True:
+            for patch in patches_lin:
+                patch.set_facecolor("black")
+                patch.set_edgecolor("black")
+                patch.set_fill(False)
+        else:
+            for patch in patches_lin:
+                patch.set_facecolor("black")
+                patch.set_edgecolor("black")
+                patch.set_fill(False)
+            for patch in patches_log:
+                patch.set_facecolor("red")
+                patch.set_edgecolor("red")
+                patch.set_fill(False)
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,10)
         ax.set_xscale("log")
@@ -1047,17 +1096,23 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linear = True):
     plt.text(1.5e-3,30.5,"i=30")
     plt.text(5.5e-2,30.5,"i=60")
     plt.text(2.75, 30.5,"i=90")
-    if Linear == True:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001_Linear.png')
+    handles = [patches.Rectangle((0,0),1,1,color = c, ec = "k") for c in colorlist]
+    if Linearonly == True:
+        labels = ["Linear"]
     else:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_4_0001_Log.png')
+        labels = ["Linear", "Log"]
+    fig.legend(handles, labels)
+    if Linearonly == True:
+        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_0_0001_Linear.png')
+    else:
+        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_0__0001_LinLog.png')
     plt.show()
-    return iterlist
+    return iterlistlin
 
 
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
-    rtemp = MultiPlotHist(w = np.pi/4, step = 0.001, end = 20, Linear = False)
+    rtemp = MultiPlotHist(w = 0, step = 0.001, end = 20, Linearonly = False)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

@@ -278,11 +278,11 @@ def Velocity(param):
     # MIGHT HAVE TO CHANGE HOW LARGE THE CHANGE OF TIME
     # TO ALLOW FOR VELOCITY TO TAKE PLACE
     changet = (np.pi*2)/10000
-    e, i, w, end, step = param
+    e, i, w, end, step, start = param
     vel = []
     # In case inclination angle is used, then it makes sure to include it
     
-    stepthrough = np.arange(0.5, end + step, step)
+    stepthrough = np.arange(start, end + step, step)
     
     for val in stepthrough:
     
@@ -373,7 +373,11 @@ def Rchange(param, coords = False):
     xlist = []
     ylist = []
     r0 = 1 # Einstein Ring Radius
-    e, i, w, end, step, Linear = param
+    if coords == True:
+        e, i, w, end, step, start = param
+        Linear = True
+    else:    
+        e, i, w, end, step, Linear = param
     
     if Linear == True:
         stepthrough = np.arange(0.5, end + step, step)
@@ -418,392 +422,67 @@ def Rchange(param, coords = False):
                
     return rlistlin, xlist, ylist, rlistlog
 
-def DataProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.25):
+def DataProj(w = 0, start = 0.5, end = 20, step = 0.5):
     """
     
     """
     listt = []
+    totlist = []
+    totparam = []
     
-    if startinga == 1.25:
-        # Top Left
-        k=0.75
-        list1 = []
-        paramlist1 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
-            list1.append((x1,y1))
-            listt.append(t1)
-            paramlist1.append([0.0, w, 0])
-            k+=0.25
-        # Middle Left
-        k=0.75
-        list2=[]
-        paramlist2 = []
-        while k <= 1.25:
-          x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w)
-          list2.append((x1,y1))
-          # listt.append(t1)
-          paramlist2.append([k, 0.5, w])
-          k+=0.25
-        # Bottom Left    
-        k=0.75
-        list3=[]
-        paramlist3 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w)
-            list3.append((x1,y1))
-            # listt.append(t1)
-            paramlist3.append([k, 0.9, w])
-            k+=0.25
-        print("Column 1 Complete.")
-    
-    
-        # Top Middle
-        k=0.75
-        list4=[]
-        paramlist4 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a=k, e = 0, i = np.pi/6.0, w = w)
-            list4.append((x1,y1))
-            # listt.append(t1)
-            paramlist4.append([k, 0.0, w, np.pi/4.0])
-            k+=0.25
-        # Center
-        k=0.75
-        list5=[]
-        paramlist5 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a=k, e = 0.5, i = np.pi/6.0, w = w)
-            list5.append((x1,y1))
-            # listt.append(t1)
-            paramlist5.append([k, 0.5, w, np.pi/4.0])
-            k+=0.25
-        # Bottom Middle
-        k=0.75
-        list6=[]
-        paramlist6 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/6.0, w = w)
-            list6.append((x1,y1))
-            # listt.append(t1)
-            paramlist6.append([k, 0.9, w, np.pi/4.0])
-            k+=0.25
-        print("Column 2 Complete.")
+    param = [
+    # Row 1
+    (0. , 0., w, end, step, start), (0., np.pi/6, w, end, step, start), (0., np.pi/3, w, end, step, start), (0., np.pi/2, w, end, step, start),
+    # Row 2
+    (0.5, 0., w, end, step, start), (0.5, np.pi/6, w, end, step, start), (0.5, np.pi/3, w, end, step, start), (0.5, np.pi/2, w, end, step, start),
+    # Row 3
+    (0.9, 0., w, end, step, start), (0.9, np.pi/6, w, end, step, start), (0.9, np.pi/3, w, end, step, start), (0.9, np.pi/2, w, end, step, start)
         
-        # Top Right
-        k=0.75
-        list7=[]
-        paramlist7 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/3.0, w = w)
-            list7.append((x1,y1))
-            # listt.append(t1)
-            paramlist7.append([k, 0.0, w, np.pi/2.0])
-            k+=0.25
-        # Middle Right
-        k=0.75
-        list8=[]
-        paramlist8 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/3.0, w = w)
-            list8.append((x1,y1))
-            # listt.append(t1)
-            paramlist8.append([k, 0.5, w, np.pi/2.0])
-            k+=0.25
-        # Bottom Right
-        k=0.75
-        list9=[]
-        paramlist9 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/3.0, w = w)
-            list9.append((x1,y1))
-            # listt.append(t1)
-            paramlist9.append([k, 0.9, w, np.pi/2.0])
-            k+=0.25
-        print("Column 3 Complete.")
-            
-        k=0.75
-        list10=[]
-        paramlist10 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/2.0, w = w)
-            list10.append((x1,y1))
-            # listt.append(t1)
-            paramlist10.append([k, 0.9, w, np.pi/2.0])
-            k+=0.25
-        k=0.75
-        list11=[]
-        paramlist11 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/2.0, w = w)
-            list11.append((x1,y1))
-            # listt.append(t1)
-            paramlist11.append([k, 0.9, w, np.pi/2.0])
-            k+=0.25
-        k=0.75
-        list12=[]
-        paramlist12 = []
-        while k <= 1.25:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/2.0, w = w)
-            list12.append((x1,y1))
-            # listt.append(t1)
-            paramlist12.append([k, 0.9, w, np.pi/2.0])
-            k+=0.25
-        print("Column 4 Complete.")
-            
-    elif startinga == 1.5: 
-        # Top Left
-        k=0.5
-        list1 = []
-        paramlist1 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
-            list1.append((x1,y1))
-            listt.append(t1)
-            paramlist1.append([k, 0.0, w])
-            k+=0.5
-        # Middle Left
-        k=0.5
-        list2=[]
-        paramlist2 = []
-        while k <= 1.5:
-          x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w)
-          list2.append((x1,y1))
-          # listt.append(t1)
-          paramlist2.append([k, 0.5, w])
-          k+=0.5
-        # Bottom Left    
-        k=0.5
-        list3=[]
-        paramlist3 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w)
-            list3.append((x1,y1))
-            # listt.append(t1)
-            paramlist3.append([k, 0.9, w])
-            k+=0.5
-        print("Column 1 Complete.")
-    
-        # Top Middle
-        k=0.5
-        list4=[]
-        paramlist4 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a=k, e = 0, i = np.pi/6.0, w = w)
-            list4.append((x1,y1))
-            # listt.append(t1)
-            paramlist4.append([k, 0.0, w, np.pi/4.0])
-            k+=0.5
-        # Center
-        k=0.5
-        list5=[]
-        paramlist5 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a=k, e = 0.5, i = np.pi/6.0, w = w)
-            list5.append((x1,y1))
-            # listt.append(t1)
-            paramlist5.append([k, 0.5, w, np.pi/4.0])
-            k+=0.5
-        # Bottom Middle
-        k=0.5
-        list6=[]
-        paramlist6 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/6.0, w = w)
-            list6.append((x1,y1))
-            # listt.append(t1)
-            paramlist6.append([k, 0.9, w, np.pi/4.0])
-            k+=0.5
-        print("Column 2 Complete.")    
-    
-        # Top Right
-        k=0.5
-        list7=[]
-        paramlist7 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/3.0, w = w)
-            list7.append((x1,y1))
-            # listt.append(t1)
-            paramlist7.append([k, 0.0, w, np.pi/2.0])
-            k+=0.5
-        # Middle Right
-        k=0.5
-        list8=[]
-        paramlist8 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/3.0, w = w)
-            list8.append((x1,y1))
-            # listt.append(t1)
-            paramlist8.append([k, 0.5, w, np.pi/2.0])
-            k+=0.5
-        # Bottom Right
-        k=0.5
-        list9=[]
-        paramlist9 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/3.0, w = w)
-            list9.append((x1,y1))
-            # listt.append(t1)
-            paramlist9.append([k, 0.9, w, np.pi/2.0])
-            k+=0.5
-        print("Column 3 Complete.")
-        
-        k=0.5
-        list10=[]
-        paramlist10 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/2.0, w = w)
-            list10.append((x1,y1))
-            # listt.append(t1)
-            paramlist10.append([k, 0.9, w, np.pi/2.0])
-            k+=0.5    
-        k=0.5
-        list11=[]
-        paramlist11 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/2.0, w = w)
-            list11.append((x1,y1))
-            # listt.append(t1)
-            paramlist11.append([k, 0.9, w, np.pi/2.0])
-            k+=0.5
-        k=0.5
-        list12=[]
-        paramlist12 = []
-        while k <= 1.5:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/2.0, w = w)
-            list12.append((x1,y1))
-            # listt.append(t1)
-            paramlist12.append([k, 0.9, w, np.pi/2.0])
-            k+=0.5
-        print("Column 4 Complete.")    
-    else:
-        # Top Left
-        k=0.5
-        list1 = []
-        paramlist1 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a=k,e=0, w=w)
-            list1.append((x1,y1))
-            listt.append(t1)
-            k+=0.5
-        paramlist1 = [(0, 0, w)]
-        # Middle Left
-        k=0.5
-        list2=[]
-        paramlist2 = []
-        while k <= startinga:
-          x1, y1, t1 = OrbGeoAlt(a=k,e=0.5, w=w)
-          list2.append((x1,y1))
-          k+=0.5
-        paramlist2 = [(0.5, 0, w)]
-        # Bottom Left    
-        k=0.5
-        list3=[]
-        paramlist3 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a=k,e=0.9, w=w)
-            list3.append((x1,y1))
-            k+=0.5
-        paramlist3 = [(0.9, 0, w)]
-        print("Column 1 Complete.")
-    
-        # Top Middle
-        k=0.5
-        list4=[]
-        paramlist4 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a=k, e = 0, i = np.pi/6.0, w = w)
-            list4.append((x1,y1))
-            k+=0.5
-        paramlist4 = [(0.0, np.pi/6.0, w)]    
-        # Center
-        k=0.5
-        list5=[]
-        paramlist5 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a=k, e = 0.5, i = np.pi/6.0, w = w)
-            list5.append((x1,y1))
-            k+=0.5
-        paramlist5 = [(0.5, np.pi/6.0, w)] 
-        # Bottom Middle
-        k=0.5
-        list6=[]
-        paramlist6 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/6.0, w = w)
-            list6.append((x1,y1))
-            k+=0.5
-        paramlist6 = [(0.9, np.pi/6.0, w)] 
-        print("Column 2 Complete.")
-
-        # Top Right
-        k=0.5
-        list7=[]
-        paramlist7 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/3.0, w = w)
-            list7.append((x1,y1))           
-            k+=0.5
-        paramlist7 = [(0.0, np.pi/3.0, w)] 
-        # Middle Right
-        k=0.5
-        list8=[]
-        paramlist8 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/3.0, w = w)
-            list8.append((x1,y1))
-            k+=0.5
-        paramlist8 = [(0.5, np.pi/3.0, w)] 
-        # Bottom Right
-        k=0.5
-        list9=[]
-        paramlist9 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/3.0, w = w)
-            list9.append((x1,y1))
-            k+=0.5
-        paramlist9 = [(0.9, np.pi/3.0, w)] 
-        print("Column 3 Complete.")
-        
-        k=0.5
-        list10=[]
-        paramlist10 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.0, i = np.pi/2.0, w = w)
-            list10.append((x1,y1))
-            k+=0.5 
-        paramlist10 = [(0.0, np.pi/2.0, w)]    
-        k=0.5
-        list11=[]
-        paramlist11 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.5, i = np.pi/2.0, w = w)
-            list11.append((x1,y1))
-            k+=0.5
-        paramlist11 = [(0.5, np.pi/2.0, w)]  
-        k=0.5
-        list12=[]
-        paramlist12 = []
-        while k <= startinga:
-            x1, y1, t1 = OrbGeoAlt(a = k, e = 0.9, i = np.pi/2.0, w = w)
-            list12.append((x1,y1))
-            k+=0.5
-        paramlist12 = [(0.9, np.pi/2.0, w)]  
-        print("Column 4 Complete.")
-                   
-    totlist = [
-        list1,list4,list7, list10,
-        list2,list5,list8, list11,
-        list3,list6,list9, list12
     ]
-    totparam = [
-        paramlist1, paramlist4, paramlist7, paramlist10,
-        paramlist2, paramlist5, paramlist8, paramlist11,
-        paramlist3, paramlist6, paramlist9, paramlist12           
-    ]
+    
+    start = time.perf_counter()
+    
+    with Pool(processes = 3) as pool:
+        result = pool.map(WorkProj, param)
+    
+    
+    # Test source
+    # totlist, totparam, listt = WorkProj(param[0])
+    
+    for i in range(len(result)):
+        totlist.append(result[i][0])
+        totparam.append(result[i][1])
+        listt.append(result[i][2])
+    
+    end_time = time.perf_counter()
+    totaltime = end_time - start
+    print(f"Time to Compute was {totaltime:.4f} seconds.")
+              
     return totlist, totparam, listt
 
-def DataHist(w = 0, step = 0.001, end = 10, Linearonly = True):
+def WorkProj(param):
+    """
+    """
+    list1 = []
+    listt = []
+    paramlist = []
+    
+    e, i, w, end, step, start = param
+    
+    stepthrough = np.arange(start, end + step, step)
+    
+    
+    for val in stepthrough:
+            x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
+            
+            list1.append((x,y))
+            # if val == 0 and e == 0 and i == 0:
+            #     listt = []
+            #     listt.append(t)
+    
+    return list1, param, listt
+
+def DataHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     """
     """
     Linear = Linearonly
@@ -835,7 +514,7 @@ def DataHist(w = 0, step = 0.001, end = 10, Linearonly = True):
     
     return totlist, param
 
-def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga = 1.5):
+def MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5):
     """
     Creates a 3 by 3 plot of 3 planetary orbits each with varying semimajor axes
     according to differing parameters.
@@ -878,7 +557,7 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
     
     # Data points being created for each plots
     # 3 for each section
-    list, totparam, listt = DataProj(t0, a, w, W, i, e, startinga)
+    list, totparam, listt = DataProj(w = w, start = start, end = end, step = step)
     
     # # Initially Calculates the Velocity to place these into a list
     # vlistmin = []
@@ -915,15 +594,17 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
         iterlist = list[j]
         g = 0
         param = totparam[j]
-        e, i, w = param[0]
-        rtemp, xchange, ychange = Rchange(param = [e, i, w, startinga, 0.5], coords = True)
-        vel = Velocity(param = [e, i, w, startinga, 0.5])
+        
+        rtemp, xchange, ychange, rtemp_log = Rchange(param, coords = True)
+        
+        vel = Velocity(param)
         # Iterates through the data clump to access
         # the data set 
         for g in range(len(iterlist)):
             # This contains each data set in the data clump
             initialx, initialy = iterlist[g]
-            t = listt[g]
+            # Don't know why this is here, keeping it just in case
+            # t = listt[g]
             # Calculates the velocity of each data point in the data set
             
             rlist.append(rtemp)
@@ -940,7 +621,7 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
             # to its positioning
             colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
                              "pink", "blue", "red", "green", "cyan"]
-            if startinga == 1.25:
+            if end == 1.25:
                 if g == 0:
                     label = "a = 0.75"
                     color = colorlist[g]
@@ -950,7 +631,7 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
                 else:
                     label = "a = 1.25"
                     color = colorlist[g]
-            elif startinga == 1.5:
+            elif end == 1.5:
                 if g == 0:
                     label = "a = 0.5"
                     color = colorlist[g]
@@ -961,7 +642,7 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
                     label = "a = 1.5"
                     color = colorlist[g]
             else:
-                rangelist = np.arange(0.5,startinga+0.5,0.5)
+                rangelist = np.arange(0.5,end+0.5,0.5)
                 alpha = rangelist[g]
                 label = f"a = {alpha}"
                 color = colorlist[g % 10]   
@@ -1006,7 +687,7 @@ def MultiPlotProj(t0 = 0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0, startinga
     
     return rlist
 
-def MultiPlotHist(w = 0, step = 0.001, end = 10, Linearonly = True):
+def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     """
     """
     if Linearonly == True:
@@ -1019,9 +700,9 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linearonly = True):
     
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     if Linearonly == True:
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $0$ (Linear)")
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$ (Linear)")
     else:
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $0$ (Linear & Log)")
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$ (Linear & Log)")
     # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
@@ -1055,39 +736,33 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linearonly = True):
             
             datahist_lin, bins, patches_lin = ax.hist(
                 flat_data_lin, bins=logbins_lin, range=(0.5, end+0.5),
-                stacked=True, histtype="barstacked",
+                stacked=True, histtype="step",
                 weights=weights_lin
             )
         else:
             datahist_lin, bins, patches_lin = ax.hist(
                 flat_data_lin, bins=logbins_lin, range=(0.5, end+0.5),
-                stacked=True, histtype="barstacked",
-                weights=weights_lin,
+                stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+                weights=weights_lin, fc = "none",
             )
             datahist_log, bins, patches_log = ax.hist(
                 flat_data_log, bins=logbins_log, range=(0.5, end+0.5),
-                stacked=True, histtype="barstacked",
-                weights=weights_log
+                stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                weights=weights_log, fc = "none",
             )
         
         if Linearonly == True:
             for patch in patches_lin:
-                patch.set_facecolor("black")
-                patch.set_edgecolor("black")
-                patch.set_fill(False)
+                patch.set_edgecolor("k")
         else:
             for patch in patches_lin:
-                patch.set_facecolor("black")
-                patch.set_edgecolor("black")
-                patch.set_fill(False)
+                patch.set_edgecolor("k")
             for patch in patches_log:
-                patch.set_facecolor("red")
-                patch.set_edgecolor("red")
-                patch.set_fill(False)
+                patch.set_edgecolor("r")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,10)
         ax.set_xscale("log")
-        
+    
     
     plt.text(1.25e-6,25,"e=0")
     plt.text(1.25e-6,15,"e=0.5")
@@ -1096,23 +771,42 @@ def MultiPlotHist(w = 0, step = 0.001, end = 10, Linearonly = True):
     plt.text(1.5e-3,30.5,"i=30")
     plt.text(5.5e-2,30.5,"i=60")
     plt.text(2.75, 30.5,"i=90")
-    handles = [patches.Rectangle((0,0),1,1,color = c, ec = "k") for c in colorlist]
+    handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
     if Linearonly == True:
         labels = ["Linear"]
     else:
         labels = ["Linear", "Log"]
     fig.legend(handles, labels)
     if Linearonly == True:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_0_0001_Linear.png')
+        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_Linear.png')
     else:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_0__0001_LinLog.png')
+        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_LinLog.png')
     plt.show()
     return iterlistlin
 
+def CompletePlotHist(w = 0, step = 0.002, end = 20):
+    """"""
+    colorlist = ["black", "red"]
 
+    
+    wstep = np.linspace(0,np.pi/2,100)
+    for i in wstep:
+        steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = True)
+        
+        steplinlist, x, y, steploglist = steptotlist
+        
+        for j in steplinlist:
+            flat_data_lin = np.concatenate([arr[arr != 0] for arr in steploglist])
+            flat_data_log = np.concatenate([arr[arr != 0] for arr in steplinlist])
+            
+        
+
+    return colorlist
+    
 if __name__ == "__main__":
-    # rlist = MultiPlotProj(w = np.pi/4., startinga= 20)
-    rtemp = MultiPlotHist(w = 0, step = 0.001, end = 20, Linearonly = False)
+    # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
+    rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = True)
+    clist = CompletePlotHist(w = 0, step = 0.002, end = 20)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

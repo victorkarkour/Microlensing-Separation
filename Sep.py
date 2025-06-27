@@ -7,6 +7,7 @@ import matplotlib.patches as patches
 import time
 from multiprocessing import Pool
 import gc
+import math
 
 def NewtRaf(M, e, maxiter=50, tol=1e-8):
     """
@@ -709,7 +710,8 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
         iterlistlin, x, y, iterlistlog = totlist[j]
         # Convert list of arrays to a single array, filtering out zeros
         flat_data_lin = np.concatenate([arr[arr != 0] for arr in iterlistlin])
-        flat_data_log = np.concatenate([arr[arr != 0] for arr in iterlistlog])
+        if Linearonly == False:
+            flat_data_log = np.concatenate([arr[arr != 0] for arr in iterlistlog])
         # Create variables for bin sizes
         nbin = 200
         amin = 0.5
@@ -785,27 +787,113 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     return iterlistlin
 
 def CompletePlotHist(w = 0, step = 0.002, end = 20):
-    """"""
-    colorlist = ["black", "red"]
-
+    """
     
-    wstep = np.linspace(0,np.pi/2,100)
+    """
+    totlinarray = [[] for _ in range(12)]
+    totlogarray = [[] for _ in range(12)]
+    # totlinarray = np.array(totlinarray)
+    # totlogarray = np.array(totlogarray)
+    
+    
+    colorlist = ["black", "red"]
+    wstep = np.linspace(0,np.pi/2,2)
     for i in wstep:
-        steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = True)
+        steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
+        for j in range(len(steptotlist)):
+            steplinlist, x, y, steploglist = steptotlist[j]
+            flat_data_lin = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
+            flat_data_log = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
+            totlinarray[j].extend(flat_data_lin.tolist())
+            totlogarray[j].extend(flat_data_log.tolist())
+        gc.collect()
+    
+    for j in range(12):
+        totlinarray[j] = np.array(totlinarray[j])
+        totlogarray[j] = np.array(totlogarray[j])
+                
+    # totlinarray = np.concat(totlinarray,iterlinarray)
+    # totlinarray = np.concat(totlogarray,iterlogarray)
+    
+    #     for i in wstep:
+    # steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
+    # for j in range(len(steptotlist)):
+    #     j = 0
+    #     steplinlist, x, y, steploglist = steptotlist[j]
         
-        steplinlist, x, y, steploglist = steptotlist
+    #     flat_data_lin = np.concatenate([arr[arr != 0] for arr in steploglist])
+    #     flat_data_log = np.concatenate([arr[arr != 0] for arr in steplinlist])
+    # if math.isclose(0,i) and j == 0:
+    #     totlinarray = np.copy(flat_data_lin)
+    #     totlogarray = np.copy(flat_data_log)
+    # else:
+    #     np.concatenate((totlinarray, flat_data_lin), axis = 1)
+    #     np.concatenate((totlogarray, flat_data_log), axis = 1)
+    # gc.collect()
+    fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
+    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $0$ to $\frac{\pi}{2}$ (Linear & Log)")
+    # Iterates through each subplot in the 3x4 figure
+    
+    for j, ax  in enumerate(axs.flatten()):
+        iterlin = totlinarray[j]
+        iterlog = totlogarray[j]
+        # Create variables for bin sizes
+        nbin = 200
+        amin = 0.5
+        amax = 21
+        # Make logbinsizes for all
+        logbinsize = (np.log10(amin)-np.log10(amax))/nbin
         
-        for j in steplinlist:
-            flat_data_lin = np.concatenate([arr[arr != 0] for arr in steploglist])
-            flat_data_log = np.concatenate([arr[arr != 0] for arr in steplinlist])
-            
+        # Calculate weights for normalization
+        # Check if this is wrong or not, cause of the np.ones_like()
+        weights_lin = np.abs(np.ones_like(iterlin) / (len(iterlin) * logbinsize))    
+        weights_log = np.abs(np.ones_like(iterlog) / (len(iterlog) * logbinsize))  
+        # Creates the log spaced bins for our data
+        # Stupid fix to stupid problems :)
+        if j == 0:
+            logbins_lin = np.linspace(amin,amax,nbin)
+            logbins_log = np.geomspace(amin,amax,nbin)
+        else:    
+            logbins_lin = np.geomspace(amin,amax, nbin)
+            logbins_log = np.geomspace(amin,amax,nbin)
+                
+        datahist_lin, bins, patches_lin = ax.hist(
+            iterlin, bins=logbins_lin, range=(0.5, end+0.5),
+            stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+            weights=weights_lin, fc = "none",
+        )
+        datahist_log, bins, patches_log = ax.hist(
+            iterlog, bins=logbins_log, range=(0.5, end+0.5),
+            stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+            weights=weights_log, fc = "none",
+        )
         
-
+        for patch in patches_lin:
+            patch.set_edgecolor("k")
+        for patch in patches_log:
+            patch.set_edgecolor("r")
+        ax.set_xlim(0.5,20.5)
+        ax.set_ylim(0,10)
+        ax.set_xscale("log")
+    
+    
+    plt.text(1.25e-6,25,"e=0")
+    plt.text(1.25e-6,15,"e=0.5")
+    plt.text(1.25e-6,5,"e=0.9")
+    plt.text(4e-5,30.5,"i=0")
+    plt.text(1.5e-3,30.5,"i=30")
+    plt.text(5.5e-2,30.5,"i=60")
+    plt.text(2.75, 30.5,"i=90")
+    handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
+    labels = ["Linear", "Log"]
+    fig.legend(handles, labels)
+    plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
+    plt.show()
     return colorlist
     
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
-    rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = True)
+    # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = True)
     clist = CompletePlotHist(w = 0, step = 0.002, end = 20)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)

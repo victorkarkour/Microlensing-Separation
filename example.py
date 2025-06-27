@@ -76,5 +76,8 @@ import numpy as np
 # # Create the legend using the patch objects and the captured line object
 # fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
 # plt.show()
-logbins = np.linspace(0,np.pi/2,100)
-print(logbins)
+# logbins = np.linspace(0,np.pi/2,100)
+# print(logbins)
+a = np.empty((12,1))
+print(np.shape(a))
+print(a)

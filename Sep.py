@@ -790,8 +790,16 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     """
     
     """
-    totlinarray = [[] for _ in range(12)]
-    totlogarray = [[] for _ in range(12)]
+    # ORIGINAL START
+    # totlinarray = [[] for _ in range(12)]
+    # totlogarray = [[] for _ in range(12)]
+    
+    nbin = 200
+    amin = 0.5
+    amax = 21
+    totlindict = [{i: 0 for i in np.geomspace(amin,amax, nbin)} for _ in range(12)]
+    totlogdict = [{i: 0 for i in np.geomspace(amin,amax, nbin)} for _ in range(12)]
+    
     # totlinarray = np.array(totlinarray)
     # totlogarray = np.array(totlogarray)
     
@@ -802,15 +810,27 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
         steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
         for j in range(len(steptotlist)):
             steplinlist, x, y, steploglist = steptotlist[j]
-            flat_data_lin = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
-            flat_data_log = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
-            totlinarray[j].extend(flat_data_lin.tolist())
-            totlogarray[j].extend(flat_data_log.tolist())
+            totliniter = totlindict[j]
+            totlogiter = totlogdict[j]
+            flat_data_lin = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
+            flat_data_log = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
+            
+            
+            # FIX IF CONDITION SO THAT ALL VALUES OF flat_data ARE INCLUDED, NOT JUST the 0th index
+            for val in totliniter.keys():
+                if np.any(flat_data_lin, where = np.isclose(val,flat_data_lin, atol= 0.1)):
+                    conlinlist = np.where(np.isclose(val,flat_data_lin,atol= 0.1))
+                    totliniter[val] += len(conlinlist[0])
+                elif np.any(flat_data_log, where = np.isclose(val,flat_data_log, atol= 0.1)):
+                    conloglist = np.where(np.isclose(val,flat_data_log,atol= 0.1))
+                    totlogiter[val] += len(conloglist[0])
         gc.collect()
     
+    totlinlist = [[] for _ in range(12)]
+    totloglist = [[] for _ in range(12)]
     for j in range(12):
-        totlinarray[j] = np.array(totlinarray[j])
-        totlogarray[j] = np.array(totlogarray[j])
+        totlinlist[j] = [key for key, val in totlindict[j].items() for _ in range(val)]
+        totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
                 
     # totlinarray = np.concat(totlinarray,iterlinarray)
     # totlinarray = np.concat(totlogarray,iterlogarray)
@@ -835,8 +855,8 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
-        iterlin = totlinarray[j]
-        iterlog = totlogarray[j]
+        iterlin = totlinlist[j]
+        iterlog = totloglist[j]
         # Create variables for bin sizes
         nbin = 200
         amin = 0.5
@@ -887,14 +907,14 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
     labels = ["Linear", "Log"]
     fig.legend(handles, labels)
-    plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
+    plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_002_LinLog.png')
     plt.show()
     return colorlist
     
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = True)
-    clist = CompletePlotHist(w = 0, step = 0.002, end = 20)
+    clist = CompletePlotHist(w = 0, step = 0.02, end = 20)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]
@@ -920,22 +940,3 @@ if __name__ == "__main__":
 # colors = ["g", "r", "b"]
 # labels = ["a = 0.5", "a = 1.0", "a = 1.5"]
 
-# for j, ax  in enumerate(axs.flatten()):
-#     if j == 0:
-#         ax.hist(veltot[j], 10, stacked = True, facecolor = colors, label = labels, log = True)
-#     elif j == 6 or 7 or 8:
-#         ax.hist(veltot[j], 10, stacked = False, facecolor = colors, log = True)
-#     else:
-#         ax.hist(veltot[j], 10, stacked = True, facecolor = colors, log = True)
-#     ax.autoscale()    
-# fig.legend()
-# plt.show()
-# line = np.linspace(-0.5,0.5,5)
-# y = [0, 0, 0, 0 ,0]
-# dots = [0.1, 1, 2 ,4 ,5]
-# fig, ax = plt.subplots()
-# ax.scatter(line,y, s = dots, label = "0.1, 1, 2, 4, 5")
-# ax.set_xlim(-.75,.75)
-# ax.set_ylim(-.75,.75)
-# fig.legend()
-# plt.show()

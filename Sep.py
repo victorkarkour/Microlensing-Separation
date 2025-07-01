@@ -8,6 +8,7 @@ import time
 from multiprocessing import Pool
 import gc
 import math
+from collections import Counter
 
 def NewtRaf(M, e, maxiter=50, tol=1e-8):
     """
@@ -369,8 +370,12 @@ def Rchange(param, coords = False):
         values at which the radius was close to the ring radius
 
     """
-    rlistlog = [] # Point at which it was less than 0.001
-    rlistlin = []
+    # rlistlog = [] 
+    # rlistlin = []
+    
+    totlindict = {}
+    totlogdict = {}
+    
     xlist = []
     ylist = []
     r0 = 1 # Einstein Ring Radius
@@ -389,9 +394,12 @@ def Rchange(param, coords = False):
             r = np.sqrt(x**2+y**2)
 
             if coords == False:
-                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                conlin = np.where(np.abs(r-r0)<=0.01)
+                totlindict[val] = len(conlin[0])
             else: 
-                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                # rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                conlin = np.where(np.abs(r-r0)<=0.01)
+                totlindict[val] = len(conlin[0])
                 xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
                 ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
     elif Linear == False:
@@ -405,7 +413,8 @@ def Rchange(param, coords = False):
     
             r = np.sqrt(x**2+y**2)
         
-            rlistlog.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+            conlog = np.where(np.abs(r-r0)<=0.01)
+            totlogdict[val] = len(conlog[0])
         gc.collect()
         # Linear Portion
         stepthrough = np.arange(0.5, end + step, step)
@@ -415,13 +424,17 @@ def Rchange(param, coords = False):
             r = np.sqrt(x**2+y**2)
 
             if coords == False:
-                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                # rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                conlin = np.where(np.abs(r-r0)<=0.01)
+                totlindict[val] = len(conlin[0])
             else: 
-                rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                # rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0)
+                conlin = np.where(np.abs(r-r0)<=0.01)
+                totlindict[val] = len(conlin[0])
                 xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
                 ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
                
-    return rlistlin, xlist, ylist, rlistlog
+    return totlindict, xlist, ylist, totlogdict
 
 def DataProj(w = 0, start = 0.5, end = 20, step = 0.5):
     """
@@ -797,8 +810,8 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     nbin = 200
     amin = 0.5
     amax = 21
-    totlindict = [{i: 0 for i in np.geomspace(amin,amax, nbin)} for _ in range(12)]
-    totlogdict = [{i: 0 for i in np.geomspace(amin,amax, nbin)} for _ in range(12)]
+    totlindict = [{} for _ in range(12)]
+    totlogdict = [{} for _ in range(12)]
     
     # totlinarray = np.array(totlinarray)
     # totlogarray = np.array(totlogarray)
@@ -809,21 +822,18 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     for i in wstep:
         steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
         for j in range(len(steptotlist)):
-            steplinlist, x, y, steploglist = steptotlist[j]
+            # steplinlist, x, y, steploglist = steptotlist[j]
+            steplindict, x, y, steplogdict = steptotlist[j]
             totliniter = totlindict[j]
             totlogiter = totlogdict[j]
-            flat_data_lin = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
-            flat_data_log = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
+            # flat_data_lin = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
+            # flat_data_log = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
             
+            totliniter = dict(Counter(steplindict) + Counter(totliniter))
+            totlogiter = dict(Counter(steplogdict) + Counter(totlogiter))
             
-            # FIX IF CONDITION SO THAT ALL VALUES OF flat_data ARE INCLUDED, NOT JUST the 0th index
-            for val in totliniter.keys():
-                if np.any(flat_data_lin, where = np.isclose(val,flat_data_lin, atol= 0.1)):
-                    conlinlist = np.where(np.isclose(val,flat_data_lin,atol= 0.1))
-                    totliniter[val] += len(conlinlist[0])
-                elif np.any(flat_data_log, where = np.isclose(val,flat_data_log, atol= 0.1)):
-                    conloglist = np.where(np.isclose(val,flat_data_log,atol= 0.1))
-                    totlogiter[val] += len(conloglist[0])
+            totlindict[j] = totliniter 
+            totlogdict[j] = totlogiter
         gc.collect()
     
     totlinlist = [[] for _ in range(12)]
@@ -907,14 +917,14 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
     labels = ["Linear", "Log"]
     fig.legend(handles, labels)
-    plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_002_LinLog.png')
+    plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
     plt.show()
     return colorlist
     
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = True)
-    clist = CompletePlotHist(w = 0, step = 0.02, end = 20)
+    clist = CompletePlotHist(w = 0, step = 0.002, end = 20)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

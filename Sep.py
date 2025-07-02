@@ -324,6 +324,7 @@ def DotSize(vel, velmax, velmin):
     ratio : array of floats <br>
         dot size proportional to velocity
     """
+    # Makes an empty array of the length of the vel array
     ratio = np.empty(len(vel))
     
     # for i in range(len(vel)):
@@ -339,10 +340,11 @@ def DotSize(vel, velmax, velmin):
     # num = np.subtract(np.log10(np.abs(vel)) , np.log10(np.abs(velmin)))
     # denom = np.subtract(np.log10(np.abs(velmax)) , np.log10(np.abs(velmin)))
     
+    # Numerator eq
     num = np.subtract(np.abs(vel) , np.abs(velmin))
-    
+    # Denominator eq
     denom = np.abs(velmax) - np.abs(velmin) 
-    
+    # Combined eq
     ratio =  (40.0 - (np.divide(num,denom)) * 39.0)
     
     return ratio
@@ -372,32 +374,41 @@ def Rchange(param, coords = False):
     """
     # rlistlog = [] 
     # rlistlin = []
-    
+    # By making this a dictionary, it vastly improves layout of counts of semimajor axis dots
     totlindict = {}
     totlogdict = {}
     
+    # Coordinate Lists
     xlist = []
     ylist = []
     r0 = 1 # Einstein Ring Radius
+    
+    # Has different parameter sets if conditions are met
     if coords == True:
         e, i, w, end, step, start = param
         Linear = True
     else:    
         e, i, w, end, step, Linear = param
     
+    # Only steps through Linear portion of points
     if Linear == True:
         stepthrough = np.arange(0.5, end + step, step)
         
+        # Goes through each value of a in the stepthrough
         for val in stepthrough:
             x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
     
             r = np.sqrt(x**2+y**2)
 
             if coords == False:
+                # Whereever there is this value, it finds the indices of each point in the list
                 conlin = np.where(np.abs(r-r0)<=0.01)
+                # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
                 totlindict[val] = len(conlin[0])
             else: 
                 # rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                
+                # Same thing as coords == False but has coord lists for Multiplot
                 conlin = np.where(np.abs(r-r0)<=0.01)
                 totlindict[val] = len(conlin[0])
                 xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
@@ -407,7 +418,7 @@ def Rchange(param, coords = False):
         steps = np.linspace(0, 10000,10000)
         loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
         stepthrough = 10**loga 
-   
+        # ^ Stepthrough for log
         for val in stepthrough:
             x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
     
@@ -440,10 +451,11 @@ def DataProj(w = 0, start = 0.5, end = 20, step = 0.5):
     """
     
     """
+    # List initialization
     listt = []
     totlist = []
     totparam = []
-    
+    # Parameter list for MultiPlot
     param = [
     # Row 1
     (0. , 0., w, end, step, start), (0., np.pi/6, w, end, step, start), (0., np.pi/3, w, end, step, start), (0., np.pi/2, w, end, step, start),
@@ -463,6 +475,7 @@ def DataProj(w = 0, start = 0.5, end = 20, step = 0.5):
     # Test source
     # totlist, totparam, listt = WorkProj(param[0])
     
+    # Splits the total result into different results
     for i in range(len(result)):
         totlist.append(result[i][0])
         totparam.append(result[i][1])
@@ -481,14 +494,16 @@ def WorkProj(param):
     listt = []
     paramlist = []
     
+    # Takes data from DataProj
     e, i, w, end, step, start = param
     
     stepthrough = np.arange(start, end + step, step)
     
-    
+    # For each value in the stepthrough, calculates orbit
     for val in stepthrough:
             x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
             
+            # Appends results of orbital projection
             list1.append((x,y))
             # if val == 0 and e == 0 and i == 0:
             #     listt = []
@@ -499,7 +514,10 @@ def WorkProj(param):
 def DataHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     """
     """
+    # Goes from both Linear and Log calculations to just Linear
     Linear = Linearonly
+    
+    # Parameters for Paralellization
     param = [
     # Row 1
     (0. , 0., w, end, step, Linear), (0., np.pi/6, w, end, step, Linear), (0., np.pi/3, w, end, step, Linear), (0., np.pi/2, w, end, step, Linear),
@@ -511,8 +529,8 @@ def DataHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     ]
     
     start = time.perf_counter()
-    
-    with Pool(processes = 6) as pool:
+    # Multi Processing
+    with Pool(processes = 10) as pool:
         totlist = pool.map(Rchange, param)
     
     
@@ -566,14 +584,15 @@ def MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5):
     
     # Initialize Lists
     listt = []
-    
     rlist = []
     
     # Data points being created for each plots
     # 3 for each section
+    
+    # Gets everything ready for multiprocessing of orbital projections
     list, totparam, listt = DataProj(w = w, start = start, end = end, step = step)
     
-    # # Initially Calculates the Velocity to place these into a list
+    # DEPRECATED
     # vlistmin = []
     # vlistmax = []
     # veltot = []
@@ -603,12 +622,14 @@ def MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5):
     fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$")
     # Iterates through each subplot in the 3x3 figure
     for j, ax  in enumerate(axs.flatten()):
-        # Takes the first data clump in the list
-        # This contains three other data sets
+        # Takes the first data set in the list
+        # These contain 12 other data sets  
+        
         iterlist = list[j]
         g = 0
         param = totparam[j]
         
+        # Finds points <= 0.01 for each projection
         rtemp, xchange, ychange, rtemp_log = Rchange(param, coords = True)
         
         vel = Velocity(param)
@@ -807,20 +828,17 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     # totlinarray = [[] for _ in range(12)]
     # totlogarray = [[] for _ in range(12)]
     
-    nbin = 200
-    amin = 0.5
-    amax = 21
+    # Dictionary for storing Rchange results
     totlindict = [{} for _ in range(12)]
     totlogdict = [{} for _ in range(12)]
     
-    # totlinarray = np.array(totlinarray)
-    # totlogarray = np.array(totlogarray)
-    
-    
     colorlist = ["black", "red"]
-    wstep = np.linspace(0,np.pi/2,2)
+    # For making the stepthrough of omega
+    wstep = np.linspace(0,np.pi/2,100)
     for i in wstep:
+        # Each omega calculates its own data groups
         steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
+        # Once complete, takes the data through each set
         for j in range(len(steptotlist)):
             # steplinlist, x, y, steploglist = steptotlist[j]
             steplindict, x, y, steplogdict = steptotlist[j]
@@ -829,9 +847,11 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
             # flat_data_lin = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
             # flat_data_log = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
             
+            # Adds new counts onto previous counts
             totliniter = dict(Counter(steplindict) + Counter(totliniter))
             totlogiter = dict(Counter(steplogdict) + Counter(totlogiter))
             
+            # Makes initializes new counts onto new dictionaries
             totlindict[j] = totliniter 
             totlogdict[j] = totlogiter
         gc.collect()
@@ -839,32 +859,17 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     totlinlist = [[] for _ in range(12)]
     totloglist = [[] for _ in range(12)]
     for j in range(12):
+        # Turns dictionaries into lists for easier processing
         totlinlist[j] = [key for key, val in totlindict[j].items() for _ in range(val)]
         totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
                 
-    # totlinarray = np.concat(totlinarray,iterlinarray)
-    # totlinarray = np.concat(totlogarray,iterlogarray)
     
-    #     for i in wstep:
-    # steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
-    # for j in range(len(steptotlist)):
-    #     j = 0
-    #     steplinlist, x, y, steploglist = steptotlist[j]
-        
-    #     flat_data_lin = np.concatenate([arr[arr != 0] for arr in steploglist])
-    #     flat_data_log = np.concatenate([arr[arr != 0] for arr in steplinlist])
-    # if math.isclose(0,i) and j == 0:
-    #     totlinarray = np.copy(flat_data_lin)
-    #     totlogarray = np.copy(flat_data_log)
-    # else:
-    #     np.concatenate((totlinarray, flat_data_lin), axis = 1)
-    #     np.concatenate((totlogarray, flat_data_log), axis = 1)
-    # gc.collect()
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $0$ to $\frac{\pi}{2}$ (Linear & Log)")
     # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
+        # Takes newly made lists for data collection
         iterlin = totlinlist[j]
         iterlog = totloglist[j]
         # Create variables for bin sizes
@@ -897,7 +902,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
             stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
             weights=weights_log, fc = "none",
         )
-        
+        # Turns histogram bars into respective colors
         for patch in patches_lin:
             patch.set_edgecolor("k")
         for patch in patches_log:
@@ -906,7 +911,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
         ax.set_ylim(0,10)
         ax.set_xscale("log")
     
-    
+    # Text for understanding positions of each figure 
     plt.text(1.25e-6,25,"e=0")
     plt.text(1.25e-6,15,"e=0.5")
     plt.text(1.25e-6,5,"e=0.9")
@@ -917,6 +922,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
     labels = ["Linear", "Log"]
     fig.legend(handles, labels)
+    # Saves plot
     plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
     plt.show()
     return colorlist

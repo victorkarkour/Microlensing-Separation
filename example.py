@@ -40,7 +40,7 @@
 # import matplotlib.pyplot as plt
 # import matplotlib.patches as patches
 import numpy as np
-
+from collections import Counter
 # # Example data (replace with your actual 'list')
 # n = 2
 # list = [
@@ -76,8 +76,20 @@ import numpy as np
 # # Create the legend using the patch objects and the captured line object
 # fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
 # plt.show()
-# logbins = np.linspace(0,np.pi/2,100)
-# print(logbins)
-a = np.empty((12,1))
-print(np.shape(a))
-print(a)
+# logbins = np.geomspace(0.5,20,200)
+# # print(logbins)
+# totlindict = {i: 0 for i in logbins}
+# print(totlindict)
+# arr1 = np.random.random(size= 20)
+# print(arr1)
+# val = 1
+# conloglist = np.where(np.isclose(val,arr1,atol= 0.1))
+# if np.any(conloglist[0]) == False:
+#     print(0)
+# else:
+#     print(len(conloglist[0]))
+dict1 = {1 : 15}
+dict2 = {}
+
+dict2 = Counter(dict1) + Counter(dict2)
+print(dict(dict2))

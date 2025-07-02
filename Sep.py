@@ -349,7 +349,7 @@ def DotSize(vel, velmax, velmin):
     
     return ratio
 
-def Rchange(param, coords = False):
+def Rchange(param, coords = False, inclination = False):
     """
     Stores all the points in the data where the radius of the orbit
     is very close to the Einstein ring radius.
@@ -388,7 +388,7 @@ def Rchange(param, coords = False):
         e, i, w, end, step, start = param
         Linear = True
     else:    
-        e, i, w, end, step, Linear = param
+        e, i, w, end, step, Linear, inclination = param
     
     # Only steps through Linear portion of points
     if Linear == True:
@@ -414,36 +414,44 @@ def Rchange(param, coords = False):
                 xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
                 ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
     elif Linear == False:
-        # Log Portion
-        steps = np.linspace(0, 10000,10000)
-        loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
-        stepthrough = 10**loga 
-        # ^ Stepthrough for log
-        for val in stepthrough:
-            x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
+        if inclination == False:
+            # Log Portion
+            steps = np.linspace(0, 10000,10000)
+            loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
+            stepthrough = 10**loga 
+            for val in stepthrough:
+                x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
     
-            r = np.sqrt(x**2+y**2)
+                r = np.sqrt(x**2+y**2)
         
-            conlog = np.where(np.abs(r-r0)<=0.01)
-            totlogdict[val] = len(conlog[0])
-        gc.collect()
-        # Linear Portion
-        stepthrough = np.arange(0.5, end + step, step)
-        for val in stepthrough:
-            x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                conlog = np.where(np.abs(r-r0)<=0.01)
+                totlogdict[val] = len(conlog[0])
+            gc.collect()
+            # Linear Portion
+            stepthrough = np.arange(0.5, end + step, step)
+            for val in stepthrough:
+                x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
     
-            r = np.sqrt(x**2+y**2)
-
-            if coords == False:
-                # rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0))
+                r = np.sqrt(x**2+y**2)
+            
                 conlin = np.where(np.abs(r-r0)<=0.01)
                 totlindict[val] = len(conlin[0])
-            else: 
-                # rlistlin.append(np.where(np.abs(r-r0)<=0.01, val, 0)
-                conlin = np.where(np.abs(r-r0)<=0.01)
-                totlindict[val] = len(conlin[0])
-                xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
-                ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+        else:
+            # Log Portion
+            steps = np.linspace(0, 10000,10000)
+            loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
+            stepthrough = 10**loga
+            for aval in stepthrough:
+                for ival in i:
+                    x, y, t = OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+    
+                    r = np.sqrt(x**2+y**2)
+        
+                    conlog = np.where(np.abs(r-r0)<=0.01)
+                    if aval in totlogdict:
+                        totlogdict[aval] += len(conlog[0])
+                    else:
+                        totlogdict[aval] = len(conlog[0])
                
     return totlindict, xlist, ylist, totlogdict
 
@@ -511,7 +519,7 @@ def WorkProj(param):
     
     return list1, param, listt
 
-def DataHist(w = 0, step = 0.002, end = 10, Linearonly = True):
+def DataHist(w = 0, step = 0.002, end = 10, Linearonly = False, inclination = False, istep = None):
     """
     """
     # Goes from both Linear and Log calculations to just Linear
@@ -527,6 +535,10 @@ def DataHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     (0.9, 0., w, end, step, Linear), (0.9, np.pi/6, w, end, step, Linear), (0.9, np.pi/3, w, end, step, Linear), (0.9, np.pi/2, w, end, step, Linear)
         
     ]
+    
+    if inclination:
+        param = [(0. , istep, w, end, step, Linear, inclination) , (0.5, istep, w, end, step, Linear, inclination) ]
+    
     
     start = time.perf_counter()
     # Multi Processing
@@ -820,7 +832,7 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     plt.show()
     return iterlistlin
 
-def CompletePlotHist(w = 0, step = 0.002, end = 20):
+def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
     """
     
     """
@@ -832,12 +844,19 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     totlindict = [{} for _ in range(12)]
     totlogdict = [{} for _ in range(12)]
     
-    colorlist = ["black", "red"]
+    
     # For making the stepthrough of omega
-    wstep = np.linspace(0,np.pi/2,100)
+    wstep = np.linspace(0,np.pi/2,10)
+    if inclination:
+        # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
+        cosstep = np.linspace(0,1,10)
+        istep = np.arccos(cosstep)
     for i in wstep:
         # Each omega calculates its own data groups
-        steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
+        if inclination:
+            steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False, inclination = inclination, istep = istep)
+        else:
+            steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
         # Once complete, takes the data through each set
         for j in range(len(steptotlist)):
             # steplinlist, x, y, steploglist = steptotlist[j]
@@ -863,9 +882,11 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
         totlinlist[j] = [key for key, val in totlindict[j].items() for _ in range(val)]
         totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
                 
-    
-    fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $0$ to $\frac{\pi}{2}$ (Linear & Log)")
+    if inclination:
+        fig, axs = plt.subplots(2,1, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+    else:
+        fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
+    fig.suptitle("Orbital Projection with Alterations in e, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$ (Log)")
     # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
@@ -891,22 +912,34 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
         else:    
             logbins_lin = np.geomspace(amin,amax, nbin)
             logbins_log = np.geomspace(amin,amax,nbin)
-                
-        datahist_lin, bins, patches_lin = ax.hist(
-            iterlin, bins=logbins_lin, range=(0.5, end+0.5),
-            stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
-            weights=weights_lin, fc = "none",
-        )
-        datahist_log, bins, patches_log = ax.hist(
-            iterlog, bins=logbins_log, range=(0.5, end+0.5),
-            stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
-            weights=weights_log, fc = "none",
-        )
+        
+        if inclination == False:
+                    
+            datahist_lin, bins, patches_lin = ax.hist(
+                iterlin, bins=logbins_lin, range=(0.5, end+0.5),
+                stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+                weights=weights_lin, fc = "none",
+            )
+            datahist_log, bins, patches_log = ax.hist(
+                iterlog, bins=logbins_log, range=(0.5, end+0.5),
+                stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                weights=weights_log, fc = "none",
+            )
+        else:
+            datahist_log, bins, patches_log = ax.hist(
+                iterlog, bins=logbins_log, range=(0.5, end+0.5),
+                stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                weights=weights_log, fc = "none",
+            )
         # Turns histogram bars into respective colors
-        for patch in patches_lin:
-            patch.set_edgecolor("k")
-        for patch in patches_log:
-            patch.set_edgecolor("r")
+        if inclination == False:
+            for patch in patches_lin:
+                patch.set_edgecolor("k")
+            for patch in patches_log:
+                patch.set_edgecolor("r")
+        else:
+            for patch in patches_log:
+                patch.set_edgecolor("r")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,10)
         ax.set_xscale("log")
@@ -914,23 +947,36 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20):
     # Text for understanding positions of each figure 
     plt.text(1.25e-6,25,"e=0")
     plt.text(1.25e-6,15,"e=0.5")
-    plt.text(1.25e-6,5,"e=0.9")
-    plt.text(4e-5,30.5,"i=0")
-    plt.text(1.5e-3,30.5,"i=30")
-    plt.text(5.5e-2,30.5,"i=60")
-    plt.text(2.75, 30.5,"i=90")
+    # plt.text(1.25e-6,5,"e=0.9")
+    if inclination == False:
+        plt.text(1.25e-6,5,"e=0.9")
+        plt.text(4e-5,30.5,"i=0")
+        plt.text(1.5e-3,30.5,"i=30")
+        plt.text(5.5e-2,30.5,"i=60")
+        plt.text(2.75, 30.5,"i=90")
+    if inclination == False:
+        colorlist = ["black", "red"]
+        labels = ["Linear", "Log"]
+    else:
+        colorlist = ["red"]
+        labels = ["Log"]
+        
     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-    labels = ["Linear", "Log"]
+        
+        
     fig.legend(handles, labels)
     # Saves plot
-    plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
+    if inclination == False:
+        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
+    else:
+        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_incline_0002_Log.png')
     plt.show()
     return colorlist
     
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = True)
-    clist = CompletePlotHist(w = 0, step = 0.002, end = 20)
+    clist = CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

@@ -219,6 +219,7 @@ def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
     t : list <br>
         time associated with planet's position
     """
+    
     # Initial Equations
     A = a*(np.cos(W)*np.cos(w) - np.sin(W)*np.sin(w)*np.cos(i))
     B = a*(np.sin(W)*np.cos(w) + np.cos(W)*np.sin(w)*np.cos(i))
@@ -387,8 +388,10 @@ def Rchange(param, coords = False, inclination = False):
     if coords == True:
         e, i, w, end, step, start = param
         Linear = True
-    else:    
+    else:
         e, i, w, end, step, Linear, inclination = param
+        # if inclination:
+        #     istep = i
     
     # Only steps through Linear portion of points
     if Linear == True:
@@ -443,10 +446,14 @@ def Rchange(param, coords = False, inclination = False):
             stepthrough = 10**loga
             for aval in stepthrough:
                 for ival in i:
+                    # a = aval
+                    # with Pool(processes = 4) as pool:
+                    #     totcoords = pool.map(OrbGeoAlt, [a, e, i, w])
+                    # x, y, t = totcoords
+                    
                     x, y, t = OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
-    
                     r = np.sqrt(x**2+y**2)
-        
+                    
                     conlog = np.where(np.abs(r-r0)<=0.01)
                     if aval in totlogdict:
                         totlogdict[aval] += len(conlog[0])
@@ -540,16 +547,19 @@ def DataHist(w = 0, step = 0.002, end = 10, Linearonly = False, inclination = Fa
         param = (0.5, istep, w, end, step, Linear, inclination)
     
     
-    start = time.perf_counter()
+    
     # Multi Processing
     if inclination == False:
+        start = time.perf_counter()
         with Pool(processes = 4) as pool:
             totlist = pool.map(Rchange, param)
+        end_time = time.perf_counter()
+        totaltime = end_time - start
+        print(f"Time to Compute was {totaltime:.4f} seconds.")
     else:
         totlist = Rchange(param)
-    end_time = time.perf_counter()
-    totaltime = end_time - start
-    print(f"Time to Compute was {totaltime:.4f} seconds.")
+    
+    
 
 
     # totlist = [
@@ -854,12 +864,13 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
     logbinsize = (np.log10(amin)-np.log10(amax))/nbin
     
     # For making the stepthrough of omega
-    wstep = np.linspace(0,np.pi/2,10)
+    wstep = np.linspace(0,np.pi/2,2)
     if inclination:
         # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
-        cosstep = np.linspace(0,1,10)
+        cosstep = np.linspace(0,1,2)
         istep = np.arccos(cosstep)
     for i in wstep:
+        print("Value of omega currently: ", i, " and current position in array: ", np.where(wstep == i))
         # Each omega calculates its own data groups
         if inclination:
             steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False, inclination = inclination, istep = istep)
@@ -905,8 +916,9 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
                 # totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                 totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
             
+                # Might not have to use this (MAKE SURE YOU DON'T HAVE TO USE IT)
                 # weights_lin = np.abs(np.ones_like(totliniter) / (len(totliniter) * logbinsize))    
-                weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))  
+                # weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))  
             
             
                 # logbins_lin = np.geomspace(amin,amax, nbin)
@@ -979,31 +991,27 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
         for val in range(len(histlist)):
             hist, bins = histlist[val]
             if val == 0:
-                # histprev = np.zeros_like(hist)
-                # StepPatch = axs.stairs(hist + histprev, bins, edgecolor = "1", fill = False)
                 tothist = np.zeros_like(hist)
                 tothist = tothist + hist
             elif val == len(histlist)-1:
                 tothist = tothist + hist
-                normhistlist = np.linalg.norm(tothist)
-                norm = 1 / normhistlist
+                norm = np.abs(1 / (logbinsize * np.sum(tothist)))
                 StepPatch = axs.stairs(tothist * norm, bins, edgecolor = "r", fill = False)
             else:
-                # histprev, binsprev = histlist[val-1]
                 tothist = tothist + hist
-                # StepPatch = axs.stairs(hist + tothist, bins, edgecolor = "r", fill = False)
             
                 
 
         axs.set_xlim(0.5,20.5)
-        axs.set_ylim(0,1)
+        # axs.set_ylim(0,1)
         axs.set_xscale("log")
         
     # Text for understanding positions of each figure 
-    plt.text(1.25e-6,25,"e=0")
-    plt.text(1.25e-6,15,"e=0.5")
-    # plt.text(1.25e-6,5,"e=0.9")
+    
     if inclination == False:
+        plt.text(1.25e-6,25,"e=0")
+        plt.text(1.25e-6,15,"e=0.5")
+        plt.text(1.25e-6,5,"e=0.9")
         plt.text(1.25e-6,5,"e=0.9")
         plt.text(4e-5,30.5,"i=0")
         plt.text(1.5e-3,30.5,"i=30")
@@ -1024,7 +1032,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
     if inclination == False:
         plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
     else:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_incline_10_0002_Log.png')
+        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_incline_2_0002_Log.png')
     plt.show()
     return colorlist
     

@@ -537,19 +537,21 @@ def DataHist(w = 0, step = 0.002, end = 10, Linearonly = False, inclination = Fa
     ]
     
     if inclination:
-        param = [(0. , istep, w, end, step, Linear, inclination) , (0.5, istep, w, end, step, Linear, inclination) ]
+        param = (0.5, istep, w, end, step, Linear, inclination)
     
     
     start = time.perf_counter()
     # Multi Processing
-    with Pool(processes = 10) as pool:
-        totlist = pool.map(Rchange, param)
-    
-    
+    if inclination == False:
+        with Pool(processes = 4) as pool:
+            totlist = pool.map(Rchange, param)
+    else:
+        totlist = Rchange(param)
     end_time = time.perf_counter()
     totaltime = end_time - start
     print(f"Time to Compute was {totaltime:.4f} seconds.")
-    
+
+
     # totlist = [
     #     list1,list4,list7, list10,
     #     list2,list5,list8, list11,
@@ -836,14 +838,20 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
     """
     
     """
-    # ORIGINAL START
-    # totlinarray = [[] for _ in range(12)]
-    # totlogarray = [[] for _ in range(12)]
     
     # Dictionary for storing Rchange results
     totlindict = [{} for _ in range(12)]
     totlogdict = [{} for _ in range(12)]
+    totlinlist = [[] for _ in range(12)]
+    totloglist = [[] for _ in range(12)]
+    histlist = []
     
+    # Create variables for bin sizes
+    nbin = 200
+    amin = 0.5
+    amax = 21
+    # Make logbinsizes for all
+    logbinsize = (np.log10(amin)-np.log10(amax))/nbin
     
     # For making the stepthrough of omega
     wstep = np.linspace(0,np.pi/2,10)
@@ -858,92 +866,139 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
         else:
             steptotlist, param = DataHist(w = i, step = step, end = end, Linearonly = False)
         # Once complete, takes the data through each set
-        for j in range(len(steptotlist)):
-            # steplinlist, x, y, steploglist = steptotlist[j]
-            steplindict, x, y, steplogdict = steptotlist[j]
-            totliniter = totlindict[j]
-            totlogiter = totlogdict[j]
-            # flat_data_lin = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
-            # flat_data_log = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
+        if inclination == False:
+            for j in range(len(steptotlist)):
+                # steplinlist, x, y, steploglist = steptotlist[j]
+                if inclination:
+                    steplindict, x, y, steplogdict = steptotlist
+                else:
+                    steplindict, x, y, steplogdict = steptotlist[j]
+                # flat_data_lin = np.concatenate([arr[arr != 0] for arr in steplinlist], axis = None)
+                # flat_data_log = np.concatenate([arr[arr != 0] for arr in steploglist], axis = None)
+                # Adds new counts onto previous counts
+                totliniter = steplindict
+                totlogiter = steplogdict
             
-            # Adds new counts onto previous counts
-            totliniter = dict(Counter(steplindict) + Counter(totliniter))
-            totlogiter = dict(Counter(steplogdict) + Counter(totlogiter))
+                # totlinlist[j] = [key for key, val in totliniter.items() for _ in range(val)]
+                totloglist[j] = [key for key, val in totlogiter.items() for _ in range(val)]
             
-            # Makes initializes new counts onto new dictionaries
-            totlindict[j] = totliniter 
-            totlogdict[j] = totlogiter
+                # weights_lin = np.abs(np.ones_like(totliniter) / (len(totliniter) * logbinsize))    
+                weights_log = np.abs(np.ones_like(totloglist[j]) / (len(totloglist[j]) * logbinsize))  
+            
+                # logbins_lin = np.geomspace(amin,amax, nbin)
+                logbins_log = np.geomspace(amin,amax,nbin)
+            
+                hist_log, histbins_log = np.histogram(totloglist[j],bins = logbins_log, range=(0.5, end+0.5))
+            
+                # totliniter = dict(Counter(steplindict) + Counter(totliniter))
+                # totlogiter = dict(Counter(steplogdict) + Counter(totlogiter))
+            
+                # Makes initializes new counts onto new dictionaries
+                # totlindict[j] = totliniter 
+                # totlogdict[j] = totlogiter
+            
+                histlist.append((hist_log, histbins_log))
+        else:
+                steplindict, x, y, steplogdict = steptotlist
+                totliniter = steplindict
+                totlogiter = steplogdict
+                # totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+            
+                # weights_lin = np.abs(np.ones_like(totliniter) / (len(totliniter) * logbinsize))    
+                weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))  
+            
+            
+                # logbins_lin = np.geomspace(amin,amax, nbin)
+                logbins_log = np.geomspace(amin,amax,nbin)
+            
+                hist_log, histbins_log = np.histogram(totloglist,bins = logbins_log, range=(0.5, end+0.5))
+                
+                histlist.append((hist_log, histbins_log))
         gc.collect()
     
-    totlinlist = [[] for _ in range(12)]
-    totloglist = [[] for _ in range(12)]
-    for j in range(12):
-        # Turns dictionaries into lists for easier processing
-        totlinlist[j] = [key for key, val in totlindict[j].items() for _ in range(val)]
-        totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
+    # for j in range(12):
+    #     # Turns dictionaries into lists for easier processing
+    #     totlinlist[j] = [key for key, val in totlindict[j].items() for _ in range(val)]
+    #     totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
                 
     if inclination:
-        fig, axs = plt.subplots(2,1, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+        fig, axs = plt.subplots(1,1, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
     else:
         fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    fig.suptitle("Orbital Projection with Alterations in e, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$ (Log)")
+    fig.suptitle("Orbital Projection with Alterations in e = 0.5, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$ (Log)")
     # Iterates through each subplot in the 3x4 figure
-    
-    for j, ax  in enumerate(axs.flatten()):
+    if inclination == False:
+        for j, ax  in enumerate(axs.flatten()):
         # Takes newly made lists for data collection
-        iterlin = totlinlist[j]
-        iterlog = totloglist[j]
-        # Create variables for bin sizes
-        nbin = 200
-        amin = 0.5
-        amax = 21
-        # Make logbinsizes for all
-        logbinsize = (np.log10(amin)-np.log10(amax))/nbin
+            iterlin = totlinlist[j]
+            iterlog = totloglist[j]
+            # Create variables for bin sizes
+            nbin = 200
+            amin = 0.5
+            amax = 21
+            # Make logbinsizes for all
+            logbinsize = (np.log10(amin)-np.log10(amax))/nbin
         
-        # Calculate weights for normalization
-        # Check if this is wrong or not, cause of the np.ones_like()
-        weights_lin = np.abs(np.ones_like(iterlin) / (len(iterlin) * logbinsize))    
-        weights_log = np.abs(np.ones_like(iterlog) / (len(iterlog) * logbinsize))  
-        # Creates the log spaced bins for our data
-        # Stupid fix to stupid problems :)
-        if j == 0:
-            logbins_lin = np.linspace(amin,amax,nbin)
-            logbins_log = np.geomspace(amin,amax,nbin)
-        else:    
-            logbins_lin = np.geomspace(amin,amax, nbin)
-            logbins_log = np.geomspace(amin,amax,nbin)
+            # Calculate weights for normalization
+            # Check if this is wrong or not, cause of the np.ones_like()
+            weights_lin = np.abs(np.ones_like(iterlin) / (len(iterlin) * logbinsize))    
+            weights_log = np.abs(np.ones_like(iterlog) / (len(iterlog) * logbinsize))  
+            # Creates the log spaced bins for our data
+            # Stupid fix to stupid problems :)
+            if j == 0:
+                logbins_lin = np.linspace(amin,amax,nbin)
+                logbins_log = np.geomspace(amin,amax,nbin)
+            else:    
+                logbins_lin = np.geomspace(amin,amax, nbin)
+                logbins_log = np.geomspace(amin,amax,nbin)
         
-        if inclination == False:
+            if inclination == False:
                     
-            datahist_lin, bins, patches_lin = ax.hist(
-                iterlin, bins=logbins_lin, range=(0.5, end+0.5),
-                stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
-                weights=weights_lin, fc = "none",
-            )
-            datahist_log, bins, patches_log = ax.hist(
-                iterlog, bins=logbins_log, range=(0.5, end+0.5),
-                stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
-                weights=weights_log, fc = "none",
-            )
-        else:
-            datahist_log, bins, patches_log = ax.hist(
-                iterlog, bins=logbins_log, range=(0.5, end+0.5),
-                stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
-                weights=weights_log, fc = "none",
-            )
+                datahist_lin, bins, patches_lin = ax.hist(
+                    iterlin, bins=logbins_lin, range=(0.5, end+0.5),
+                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+                    weights=weights_lin, fc = "none",
+                )
+                datahist_log, bins, patches_log = ax.hist(
+                    iterlog, bins=logbins_log, range=(0.5, end+0.5),
+                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                    weights=weights_log, fc = "none",
+                )
+            
+            
         # Turns histogram bars into respective colors
-        if inclination == False:
-            for patch in patches_lin:
-                patch.set_edgecolor("k")
-            for patch in patches_log:
-                patch.set_edgecolor("r")
-        else:
-            for patch in patches_log:
-                patch.set_edgecolor("r")
+        for patch in patches_lin:
+            patch.set_edgecolor("k")
+        for patch in patches_log:
+            patch.set_edgecolor("r")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,10)
         ax.set_xscale("log")
-    
+    else:
+        for val in range(len(histlist)):
+            hist, bins = histlist[val]
+            if val == 0:
+                # histprev = np.zeros_like(hist)
+                # StepPatch = axs.stairs(hist + histprev, bins, edgecolor = "1", fill = False)
+                tothist = np.zeros_like(hist)
+                tothist = tothist + hist
+            elif val == len(histlist)-1:
+                tothist = tothist + hist
+                normhistlist = np.linalg.norm(tothist)
+                norm = 1 / normhistlist
+                StepPatch = axs.stairs(tothist * norm, bins, edgecolor = "r", fill = False)
+            else:
+                # histprev, binsprev = histlist[val-1]
+                tothist = tothist + hist
+                # StepPatch = axs.stairs(hist + tothist, bins, edgecolor = "r", fill = False)
+            
+                
+
+        axs.set_xlim(0.5,20.5)
+        axs.set_ylim(0,1)
+        axs.set_xscale("log")
+        
     # Text for understanding positions of each figure 
     plt.text(1.25e-6,25,"e=0")
     plt.text(1.25e-6,15,"e=0.5")
@@ -969,7 +1024,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
     if inclination == False:
         plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
     else:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_incline_0002_Log.png')
+        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_incline_10_0002_Log.png')
     plt.show()
     return colorlist
     

@@ -37,7 +37,7 @@
 # # You can verify the solution by plugging it back into Kepler's equation
 # # The result should be very close to zero
 # print("Verification (Kepler(Solution, M, e)):", Kepler(Solution, M, e))
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # import matplotlib.patches as patches
 import numpy as np
 from collections import Counter
@@ -88,8 +88,33 @@ from collections import Counter
 #     print(0)
 # else:
 #     print(len(conloglist[0]))
-dict1 = {1 : 15}
-dict2 = {}
+# dict1 = {1 : 15}
+# dict2 = {}
 
-dict2 = Counter(dict1) + Counter(dict2)
-print(dict(dict2))
+# dict2 = Counter(dict1) + Counter(dict2)
+# print(dict(dict2))
+
+vel = np.arange(1,50,2)
+x = np.arange(1,50,2)
+y = np.zeros_like(x)
+y2 = np.ones_like(x) * -0.005
+velmin = vel.min()
+velmax = vel.max()
+num = np.subtract(np.abs(vel) , np.abs(velmin))
+denom = np.abs(velmax) - np.abs(velmin)
+ratio =  (40.0 - (np.divide(num,denom)) * 39.0)
+
+plt.figure(figsize=(10,6))
+plt.scatter(x, y, s = ratio, label = "Dot Size")
+plt.scatter(x, y2, s = vel, label = "Vel")
+plt.title("Dot Size Formula")
+plt.text(45,0.01,s = "Min Dot")
+plt.text(-2,0.01,s="Max Dot")
+plt.text(45,-0.02,s = "Max Vel")
+plt.text(-2,-0.02,s="Min Vel")
+plt.xlim(-5,55)
+plt.yticks([])
+plt.ylim(-0.1,0.1)
+plt.legend()
+plt.savefig('/College Projects/Microlensing Separation/Figures/DotSize.png')
+plt.show()

@@ -547,18 +547,16 @@ def DataHist(w = 0, step = 0.002, end = 10, Linearonly = False, inclination = Fa
         param = (0.5, istep, w, end, step, Linear, inclination)
     
     
-    
+    start = time.perf_counter()
     # Multi Processing
     if inclination == False:
-        start = time.perf_counter()
         with Pool(processes = 4) as pool:
             totlist = pool.map(Rchange, param)
-        end_time = time.perf_counter()
-        totaltime = end_time - start
-        print(f"Time to Compute was {totaltime:.4f} seconds.")
     else:
         totlist = Rchange(param)
-    
+    end_time = time.perf_counter()
+    totaltime = end_time - start
+    print(f"Time to Compute was {totaltime:.4f} seconds.")
     
 
 

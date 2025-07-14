@@ -378,6 +378,7 @@ def Rchange(param, coords = False, inclination = False):
     # By making this a dictionary, it vastly improves layout of counts of semimajor axis dots
     totlindict = {}
     totlogdict = {}
+    totlinsemidict = {}
     
     # Coordinate Lists
     xlist = []
@@ -439,6 +440,7 @@ def Rchange(param, coords = False, inclination = False):
             
                 conlin = np.where(np.abs(r-r0)<=0.01)
                 totlindict[val] = len(conlin[0])
+                totlinsemidict[val] = round(len(conlin[0]) / val)
         else:
             # Log Portion
             steps = np.linspace(0, 10000,10000)
@@ -460,7 +462,7 @@ def Rchange(param, coords = False, inclination = False):
                     else:
                         totlogdict[aval] = len(conlog[0])
                
-    return totlindict, xlist, ylist, totlogdict
+    return totlindict, xlist, ylist, totlogdict, totlinsemidict
 
 def DataProj(w = 0, start = 0.5, end = 20, step = 0.5):
     """
@@ -535,11 +537,11 @@ def DataHist(w = 0, step = 0.002, end = 10, Linearonly = False, inclination = Fa
     # Parameters for Paralellization
     param = [
     # Row 1
-    (0. , 0., w, end, step, Linear), (0., np.pi/6, w, end, step, Linear), (0., np.pi/3, w, end, step, Linear), (0., np.pi/2, w, end, step, Linear),
+    (0. , 0., w, end, step, Linear, inclination), (0., np.pi/6, w, end, step, Linear, inclination), (0., np.pi/3, w, end, step, Linear, inclination), (0., np.pi/2, w, end, step, Linear, inclination),
     # Row 2
-    (0.5, 0., w, end, step, Linear), (0.5, np.pi/6, w, end, step, Linear), (0.5, np.pi/3, w, end, step, Linear), (0.5, np.pi/2, w, end, step, Linear),
+    (0.5, 0., w, end, step, Linear, inclination), (0.5, np.pi/6, w, end, step, Linear, inclination), (0.5, np.pi/3, w, end, step, Linear, inclination), (0.5, np.pi/2, w, end, step, Linear, inclination),
     # Row 3
-    (0.9, 0., w, end, step, Linear), (0.9, np.pi/6, w, end, step, Linear), (0.9, np.pi/3, w, end, step, Linear), (0.9, np.pi/2, w, end, step, Linear)
+    (0.9, 0., w, end, step, Linear, inclination), (0.9, np.pi/6, w, end, step, Linear, inclination), (0.9, np.pi/3, w, end, step, Linear, inclination), (0.9, np.pi/2, w, end, step, Linear, inclination)
         
     ]
     
@@ -549,9 +551,12 @@ def DataHist(w = 0, step = 0.002, end = 10, Linearonly = False, inclination = Fa
     
     start = time.perf_counter()
     # Multi Processing
-    # if inclination == False:
-    with Pool(processes = 3) as pool:
-        totlist = pool.map(Rchange, param)
+    if inclination == True:
+        with Pool(processes = 3) as pool:
+            totlist = pool.map(Rchange, param)
+    else:
+        with Pool(processes = 6) as pool:
+            totlist = pool.map(Rchange, param)
     # else:
     #     totlist = Rchange(param)
     end_time = time.perf_counter()
@@ -747,10 +752,15 @@ def MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5):
 def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     """
     """
+    
+    # totlinlist = [[] for _ in range(12)]
+    # totloglist = [[] for _ in range(12)]
+    # totlinsemilist = [[] for _ in range(12)]
+    
     if Linearonly == True:
         colorlist = ["black"]
     else:
-        colorlist = ["black", "red"]
+        colorlist = ["black", "red", "blue"]
     
     totlist, param = DataHist(w = w, step = step, end = end, Linearonly = Linearonly)
     
@@ -763,11 +773,16 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
-        iterlistlin, x, y, iterlistlog = totlist[j]
-        # Convert list of arrays to a single array, filtering out zeros
-        flat_data_lin = np.concatenate([arr[arr != 0] for arr in iterlistlin])
-        if Linearonly == False:
-            flat_data_log = np.concatenate([arr[arr != 0] for arr in iterlistlog])
+        steplindict, x, y, steplogdict, steplinsemidict = totlist[j]
+        
+        totliniter = steplindict
+        totlinitersemi = steplinsemidict
+        totlogiter = steplogdict
+        
+        totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+        totlinsemilist = [key for key, val in totlinitersemi.items() for _ in range(val)]
+        totloglist = [key for key, val in totlogiter.items() for _ in range(val)] 
+        
         # Create variables for bin sizes
         nbin = 200
         amin = 0.5
@@ -775,10 +790,10 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
         # Make logbinsizes for all
         logbinsize = (np.log10(amin)-np.log10(amax))/nbin
         
-        # Calculate weights for normalization
-        # Check if this is wrong or not, cause of the np.ones_like()
-        weights_lin = np.abs(np.ones_like(flat_data_lin) / (len(flat_data_lin) * logbinsize))    
-        weights_log = np.abs(np.ones_like(flat_data_log) / (len(flat_data_log) * logbinsize))  
+        weights_lin = np.abs(np.ones_like(totlinlist) / (len(totlinlist) * logbinsize))
+        weights_linsemi = np.abs(np.ones_like(totlinsemilist) / (len(totlinsemilist) * logbinsize))    
+        weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))
+        
         # Creates the log spaced bins for our data
         # Stupid fix to stupid problems :)
         if j == 0 and Linearonly == True:
@@ -793,22 +808,26 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
         if Linearonly == True:
             
             datahist_lin, bins, patches_lin = ax.hist(
-                flat_data_lin, bins=logbins_lin, range=(0.5, end+0.5),
+                totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
                 stacked=True, histtype="step",
                 weights=weights_lin
             )
         else:
             datahist_lin, bins, patches_lin = ax.hist(
-                flat_data_lin, bins=logbins_lin, range=(0.5, end+0.5),
+                totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
                 stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
                 weights=weights_lin, fc = "none",
             )
             datahist_log, bins, patches_log = ax.hist(
-                flat_data_log, bins=logbins_log, range=(0.5, end+0.5),
+                totloglist, bins=logbins_log, range=(0.5, end+0.5),
                 stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
                 weights=weights_log, fc = "none",
             )
-        
+            datahist_linsemi , bins, patches_linsemi = ax.hist(
+                totlinsemilist, bins=logbins_lin, range=(0.5, end+0.5),
+                stacked=True, histtype="step", alpha = 0.40, edgecolor = "blue",
+                weights=weights_linsemi, fc = "none",
+            )
         if Linearonly == True:
             for patch in patches_lin:
                 patch.set_edgecolor("k")
@@ -817,6 +836,8 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
                 patch.set_edgecolor("k")
             for patch in patches_log:
                 patch.set_edgecolor("r")
+            for patch in patches_linsemi:
+                patch.set_edgecolor("b")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,10)
         ax.set_xscale("log")
@@ -833,14 +854,14 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     if Linearonly == True:
         labels = ["Linear"]
     else:
-        labels = ["Linear", "Log"]
+        labels = ["Linear", "Log", "Linear / a"]
     fig.legend(handles, labels)
     if Linearonly == True:
         plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_Linear.png')
     else:
         plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_LinLog.png')
     plt.show()
-    return iterlistlin
+    return totlist
 
 def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
     """
@@ -891,7 +912,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
                 totliniter = steplindict
                 totlogiter = steplogdict
             
-                # totlinlist[j] = [key for key, val in totliniter.items() for _ in range(val)]
+                totlinlist[j] = [key for key, val in totliniter.items() for _ in range(val)]
                 totloglist[j] = [key for key, val in totlogiter.items() for _ in range(val)]
             
                 # weights_lin = np.abs(np.ones_like(totliniter) / (len(totliniter) * logbinsize))    
@@ -1040,8 +1061,8 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True):
     
 if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
-    # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = True)
-    clist = CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True)
+    rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, Linearonly = False)
+    # clist = CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True)
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

@@ -895,10 +895,10 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     logbins_log = np.geomspace(amin,amax,nbin)
     
     # For making the stepthrough of omega
-    wstep = np.linspace(0,np.pi/2,3)
+    wstep = np.linspace(0,np.pi/2,75)
     if inclination:
         # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
-        cosstep = np.linspace(0,1,3)
+        cosstep = np.linspace(0,1,75)
         istep = np.arccos(cosstep)
     for i in wstep:
         print("Value of omega currently: ", i, " and current position in array: ", np.where(wstep == i))

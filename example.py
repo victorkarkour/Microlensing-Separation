@@ -118,8 +118,12 @@ from collections import Counter
 # plt.legend()
 # plt.savefig('/College Projects/Microlensing Separation/Figures/DotSize.png')
 # plt.show()
-wstep = np.linspace(0,np.pi/2,10)
-cosstep = np.linspace(0,1,10)
-istep = np.arccos(cosstep)
-print("Steps in omega: " , wstep)
-print("Steps in i: ", istep)
+# wstep = np.linspace(0,np.pi/2,10)
+# cosstep = np.linspace(0,1,10)
+# istep = np.arccos(cosstep)
+# print("Steps in omega: " , wstep)
+# print("Steps in i: ", istep)
+end = 20
+step = 0.002
+stepthrough = np.arange(0.5, end + step, step)
+print(stepthrough)

@@ -459,7 +459,22 @@ def Rchange(param, coords = False, inclination = False):
                             totlogdict[aval] += len(conlog[0])
                         else:
                             totlogdict[aval] = len(conlog[0])
-               
+    elif Linear == "Linear / a":
+        # Linear / a Portion
+        stepthrough = np.arange(0.5, end + step, step)
+        for aval in stepthrough:
+            for ival in i:
+                x, y, t = OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                r = np.sqrt(x**2+y**2)
+                # Whereever there is this value, it finds the indices of each point in the list
+                conlin = np.where(np.abs(r-r0)<=0.01)
+                    # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                
+                # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
+                if aval in totlindict:
+                    totlindict[aval] = round(len(conlin[0]) / aval)
+                else:
+                    totlindict[aval] = round(len(conlin[0]) / aval)
     return totlindict, xlist, ylist, totlogdict, totlinsemidict
 
 def DataProj(w = 0, start = 0.5, end = 20, step = 0.5):
@@ -544,13 +559,21 @@ def DataHist(w = 0, step = 0.002, end = 10, which = "Linear", inclination = Fals
     ]
     
     if inclination:
-        param = [(0.25, istep, w, end, step, Linear, inclination), (0.50, istep, w, end, step, Linear, inclination), (0.75, istep, w, end, step, Linear, inclination)]
+        param = [
+            # Row 1
+            (0.1, istep, w, end, step, Linear, inclination), (0.40, istep, w, end, step, Linear, inclination), (0.7, istep, w, end, step, Linear, inclination),
+            # Row 2     
+            (0.2, istep, w, end, step, Linear, inclination), (0.50, istep, w, end, step, Linear, inclination), (0.8, istep, w, end, step, Linear, inclination),     
+            # Row 3     
+            (0.3, istep, w, end, step, Linear, inclination), (0.6, istep, w, end, step, Linear, inclination), (0.9, istep, w, end, step, Linear, inclination)
+            
+                 ]
     
     
     start = time.perf_counter()
     # Multi Processing
     if inclination == True:
-        with Pool(processes = 3) as pool:
+        with Pool(processes = 9) as pool:
             totlist = pool.map(Rchange, param)
     else:
         with Pool(processes = 6) as pool:
@@ -765,9 +788,9 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     if Linearonly == True:
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$ (Linear)")
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$ \n (Linear)")
     else:
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$ (Linear & Log)")
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$ \n (For Linear, Lin Semi, & Log)")
     # Iterates through each subplot in the 3x4 figure
     
     for j, ax  in enumerate(axs.flatten()):
@@ -857,7 +880,7 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, Linearonly = True):
     if Linearonly == True:
         plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_Linear.png')
     else:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_LinLog.png')
+        plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_LinLinSemiLog.png')
     plt.show()
     return totlist
 
@@ -873,16 +896,18 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
         if which == "Log":
             colorlist = ["red"]
             labels = ["Log"]
-        else:
+        elif which == "Linear":
             colorlist = ["black"]
             labels = ["Linear"]
-    
+        else:
+            colorlist = ["blue"]
+            labels = ["Linear / a"]
     # Dictionary for storing Rchange results
     totlindict = [{} for _ in range(12)]
     totlogdict = [{} for _ in range(12)]
     totlinlist = [[] for _ in range(12)]
     totloglist = [[] for _ in range(12)]
-    tothistlist = [[] for _ in range(3)]
+    tothistlist = [[] for _ in range(9)]
     
     # Create variables for bin sizes
     nbin = 200
@@ -956,7 +981,12 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
                         totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                         hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins_lin, range=(0.5, end+0.5))
                         histlist.append((hist_lin, histbins_lin))
-                    
+                    elif which == "Linear / a":
+                        totliniter = steplindict
+                        totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                        hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins_lin, range=(0.5, end+0.5))
+                        histlist.append((hist_lin, histbins_lin))
+                            
                     else:
                         return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
                     
@@ -969,10 +999,10 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     #     totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
                 
     if inclination:
-        fig, axs = plt.subplots(3,1, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+        fig, axs = plt.subplots(3,3, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
     else:
         fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    fig.suptitle("Orbital Projection with Alterations in e = 0.25-0.75, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$ (Lin)")
+    fig.suptitle("Orbital Projection with Alterations in e = 0.25-0.75, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n (Linear)")
     # Iterates through each subplot in the 3x4 figure
     if inclination == False:
         for j, ax  in enumerate(axs.flatten()):
@@ -1024,6 +1054,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     else:
         for j, ax  in enumerate(axs.flatten()):
             histlist = tothistlist[j]
+            iterparam = param[j]
             for val in range(len(histlist)):
                 hist, bins = histlist[val]
                 if val == 0:
@@ -1036,7 +1067,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
                 else:
                     tothist = tothist + hist
             
-                
+            ax.text(7e0, 2.5, f"$e = {iterparam[0]}$")    
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
         ax.set_xlim(0.5,20.5)
         # axs.set_ylim(0,1)
@@ -1063,7 +1094,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     if inclination == False:
         plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
     else:
-        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_3plots_incline_75_0002_Lin.png')
+        plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_9plots_incline_75_0002_Lin.png')
     plt.show()
     return colorlist
     

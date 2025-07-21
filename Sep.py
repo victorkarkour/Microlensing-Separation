@@ -397,7 +397,8 @@ def Rchange(param, coords = False, inclination = False):
     # Only steps through Linear portion of points
     if Linear == "Linear":
         # Linear Portion
-        stepthrough = np.arange(0.5, end + step, step)
+        # stepthrough = np.arange(0.5, end + step, step)
+        stepthrough = stepdata(0, 0.5, end, 10000)
         # Goes through each value of a in the stepthrough
         for aval in stepthrough:
             for ival in i:
@@ -421,9 +422,10 @@ def Rchange(param, coords = False, inclination = False):
     elif Linear == "Log":
         if inclination == False:
             # Log Portion
-            steps = np.linspace(0, 10000,10000)
-            loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
-            stepthrough = 10**loga 
+            # steps = np.linspace(0, 10000,10000)
+            # loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
+            # stepthrough = 10**loga 
+            stepthrough = stepdata(1, 0.5, end, 10000)
             for val in stepthrough:
                 x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
     
@@ -433,7 +435,8 @@ def Rchange(param, coords = False, inclination = False):
                 totlogdict[val] = len(conlog[0])
             gc.collect()
             # Linear Portion
-            stepthrough = np.arange(0.5, end + step, step)
+            # stepthrough = np.arange(0.5, end + step, step)
+            stepthrough = stepdata(0, 0.5, end, 10000)
             for val in stepthrough:
                 x, y, t = OrbGeoAlt(a = val, e = e, i = i ,w = w)
     
@@ -445,9 +448,10 @@ def Rchange(param, coords = False, inclination = False):
         else:
             if Linear == "Log":
                 # Log Portion
-                steps = np.linspace(0, 10000,10000)
-                loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
-                stepthrough = 10**loga
+                # steps = np.linspace(0, 10000,10000)
+                # loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
+                # stepthrough = 10**loga
+                stepthrough = stepdata(1, 0.5, end, 10000)
                 for aval in stepthrough:
                     for ival in i:
                     
@@ -461,14 +465,15 @@ def Rchange(param, coords = False, inclination = False):
                             totlogdict[aval] = len(conlog[0])
     elif Linear == "Linear / a":
         # Linear / a Portion
-        stepthrough = np.arange(0.5, end + step, step)
+        # stepthrough = np.arange(0.5, end + step, step)
+        stepthrough = stepdata(0, 0.5, end, 10000)
         for aval in stepthrough:
             for ival in i:
                 x, y, t = OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                 r = np.sqrt(x**2+y**2)
                 # Whereever there is this value, it finds the indices of each point in the list
                 conlin = np.where(np.abs(r-r0)<=0.01)
-                    # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
                 
                 # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
                 if aval in totlindict:
@@ -476,6 +481,17 @@ def Rchange(param, coords = False, inclination = False):
                 else:
                     totlindict[aval] = round(len(conlin[0]) / aval)
     return totlindict, xlist, ylist, totlogdict, totlinsemidict
+
+def stepdata(alpha, xmin, xmax, nsamples):
+    """
+    """
+    step = np.linspace(0,1,nsamples+2)[1:-1]
+    
+    if alpha == 1.:
+        return xmin * (xmax/xmin) ** step
+    else:
+        exp = 1. - alpha
+        return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
 
 def DataProj(w = 0, start = 0.5, end = 20, step = 0.5):
     """
@@ -920,10 +936,10 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     logbins_log = np.geomspace(amin,amax,nbin)
     
     # For making the stepthrough of omega
-    wstep = np.linspace(0,np.pi/2,75)
+    wstep = np.linspace(0,np.pi/2,2)
     if inclination:
         # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
-        cosstep = np.linspace(0,1,75)
+        cosstep = np.linspace(0,1,2)
         istep = np.arccos(cosstep)
     for i in wstep:
         print("Value of omega currently: ", i, " and current position in array: ", np.where(wstep == i))

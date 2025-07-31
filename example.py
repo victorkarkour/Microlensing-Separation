@@ -123,14 +123,15 @@ from collections import Counter
 # istep = np.arccos(cosstep)
 # print("Steps in omega: " , wstep)
 # print("Steps in i: ", istep)
-xmin = 0.5
-xmax = 20
-nsamples = 10000
-alpha = -1
-step = np.linspace(0,1,nsamples+2)[1:-1]
+# xmin = 0.5
+# xmax = 20
+# nsamples = 10000
+# alpha = -1
+# step = np.linspace(0,1,nsamples+2)[1:-1]
     
-if alpha == 1.:
-    print( xmin * (xmax/xmin) ** step)
-else:
-    exp = 1. - alpha
-    print((step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp))
+# if alpha == 1.:
+#     print( xmin * (xmax/xmin) ** step)
+# else:
+#     exp = 1. - alpha
+#     print((step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp))
+

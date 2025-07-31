@@ -954,7 +954,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
         # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
         cosstep = np.linspace(0,1,10)
         istep = np.arccos(cosstep)
-        estep = np.linspace(0.1,0.9, 10)
+        estep = np.linspace(0,0.9, 10)
     for i in wstep:
         print("Value of omega currently: ", i, " and current position in array: ", np.where(wstep == i))
         # Each omega calculates its own data groups
@@ -1032,7 +1032,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
     else:
         fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-    fig.suptitle("Orbital Projection with Alterations in e = 0.1-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n (Log)")
+    fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n (Log)")
     # Iterates through each subplot in the 3x4 figure
     if inclination == False:
         for j, ax  in enumerate(axs.flatten()):

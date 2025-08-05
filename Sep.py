@@ -9,6 +9,7 @@ from multiprocessing import Pool
 import gc
 import math
 from collections import Counter
+from scipy.stats import gamma
 
 def NewtRaf(M, e, maxiter=50, tol=1e-8):
     """
@@ -1124,7 +1125,7 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
         plt.show()
     return tothistlist
 
-def UnityPlotHist(numestep = 10, numdiv = 2, which = "Log"):
+def UnityPlotHist(numestep = 10, numdiv = 2, which = "Log", etype = "Uniform"):
     """
     """
     if which == "Log":
@@ -1146,22 +1147,32 @@ def UnityPlotHist(numestep = 10, numdiv = 2, which = "Log"):
     
     
     # Initialize Lists
-    estep = np.linspace(0,0.9, numestep)
+    if etype == "Uniform":
+        estep = np.linspace(0,0.9, numestep)
+    elif etype == "Gamma":
+        alpha = 1.35 # Shape (Alpha)
+        theta = 5.05 # Scale (Beta)
+        x = np.linspace(0,1,numestep)
+        estep = gamma.pdf(x, a = alpha, scale = theta)
+    elif etype == "Circular":
+        estep = 0
     esteplist = []*numdiv
     param = []
     
     # Slices estep into parts for parallelization
     slices = int(numestep / numdiv)
-    for i in range(numdiv):
-        esteplist.append(estep[i*slices:(i+1)*slices])
+    if etype != "Circular":
+        for i in range(numdiv):
+            esteplist.append(estep[i*slices:(i+1)*slices])
     
-        # Step, end, inclincation, which, estep
-        param.append((0, 0.002, 20, True, which, esteplist[i]))
-    
-    
-    # Processing using parallelization
-    with Pool(processes = numdiv) as pool:
-            totlist = pool.map(CompletePlotHist, param)
+            # Step, end, inclincation, which, estep
+            param.append((0, 0.002, 20, True, which, esteplist[i]))
+        
+        # Processing using parallelization        
+        with Pool(processes = numdiv) as pool:
+                totlist = pool.map(CompletePlotHist, param)        
+    else:
+        totlist = CompletePlotHist(0,0.002,20,True, which)
 
     # Make Figure
     fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))

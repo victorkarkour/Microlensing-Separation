@@ -380,7 +380,7 @@ def Rchange(param, coords = False, inclination = False):
     totlindict = {}
     totlogdict = {}
     totlinsemidict = {}
-    
+    totevaldict = {}
     # Coordinate Lists
     xlist = []
     ylist = []
@@ -415,12 +415,17 @@ def Rchange(param, coords = False, inclination = False):
                             totlindict[aval] += len(conlin[0])
                         else:
                             totlindict[aval] = len(conlin[0])
+                        if eval in totevaldict:
+                            totevaldict[eval] += len(conlin[0])
+                        else:
+                            totevaldict[eval] = len(conlin[0])
                 else: 
                     # Same thing as coords == False but has coord lists for Multiplot
                     totlindict[val] = len(conlin[0])
                     if coords:
                         xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
                         ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+        return totlindict, xlist, ylist, totlogdict, totevaldict
     elif Linear == "Log":
         if inclination == False:
             # Log Portion
@@ -455,6 +460,7 @@ def Rchange(param, coords = False, inclination = False):
             
                 conlin = np.where(np.abs(r-r0)<=0.01)
                 totlinsemidict[val] = round(len(conlin[0]))
+            return totlindict, xlist, ylist, totlogdict, totlinsemidict
         else:
             if Linear == "Log":
                 # Log Portion
@@ -472,6 +478,11 @@ def Rchange(param, coords = False, inclination = False):
                                 totlogdict[aval] += len(conlog[0])
                             else:
                                 totlogdict[aval] = len(conlog[0])
+                            if eval in totevaldict:
+                                totevaldict[eval] += len(conlog[0])
+                            else:
+                                totevaldict[eval] = len(conlog[0])
+            return totlindict, xlist, ylist, totlogdict, totevaldict
     elif Linear == "Linear / a":
         # Linear / a Portion
         stepthrough = stepdata(0.5, 0.5, end, 10000)
@@ -489,7 +500,11 @@ def Rchange(param, coords = False, inclination = False):
                         totlindict[aval] = round(len(conlin[0]) / aval)
                     else:
                         totlindict[aval] = round(len(conlin[0]) / aval)
-    return totlindict, xlist, ylist, totlogdict, totlinsemidict
+                    if eval in totevaldict:
+                        totevaldict[eval] += len(conlin[0])
+                    else:
+                        totevaldict[eval] = len(conlin[0])
+        return totlindict, xlist, ylist, totlogdict, totevaldict
 
 def stepdata(alpha, xmin, xmax, nsamples):
     """
@@ -812,7 +827,7 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, which = "Log"):
     
     fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
     if which == "Linear":
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$" f"\n (Linear)")
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$" f"\n ({which})")
     else:
         fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)")
     # Iterates through each subplot in the 3x4 figure
@@ -911,10 +926,11 @@ def MultiPlotHist(w = 0, step = 0.002, end = 10, which = "Log"):
     plt.show()
     return totlist
 
-def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = "Log", estep_outer = []):
+def CompletePlotHist(param):
     """
     
     """
+    w, step, end, inclination, which, estep_outer = param
     
     if inclination == False:
         colorlist = ["black", "red"]
@@ -930,14 +946,10 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
             colorlist = ["blue"]
             labels = ["Linear / a"]
     # Dictionary for storing Rchange results
-    totlindict = [{} for _ in range(12)]
-    totlogdict = [{} for _ in range(12)]
-    # totlinlist = [[] for _ in range(12)]
-    # totloglist = [[] for _ in range(12)]
-    # tothistlist = [[] for _ in range(9)]
     totlinlist = []
     totloglist = []
     tothistlist = []
+    evalhistlist = []
     
     # Create variables for bin sizes
     nbin = 200
@@ -945,19 +957,21 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     amax = 21
     # Make logbinsizes for all
     logbinsize = (np.log10(amin)-np.log10(amax))/nbin
-    
     logbins = np.geomspace(amin,amax, nbin)
+    evalbins = np.linspace(0,0.9,80)
+    
     
     # For making the stepthrough of omega
-    wstep = np.linspace(0,np.pi/2,10)
+    wstep = np.linspace(0,np.pi/2,2)
     if inclination:
         # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
-        cosstep = np.linspace(0,1,10)
+        cosstep = np.linspace(0,1,2)
         istep = np.arccos(cosstep)
+        # Only works if estep_outer has values in the list
         if len(estep_outer) != 0:
             estep = estep_outer
         else:
-            estep = np.linspace(0,0.9, 10)
+            estep = np.linspace(0,0.9, 2)
     for i in wstep:
         print("Value of omega currently: ", i, " and current position in array: ", np.where(wstep == i))
         # Each omega calculates its own data groups
@@ -988,32 +1002,49 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
         else:
                 # for j in range(len(steptotlist)):
                     # steplindict, x, y, steplogdict, blank = steptotlist[j]
-                    steplindict, x, y, steplogdict, blank = steptotlist
+                    steplindict, x, y, steplogdict, evaldict = steptotlist
                     # histlist = tothistlist[j]
                     histlist = tothistlist
+                    evallist = evalhistlist
                     if which == "Log":
-        
+                        # Log histogram
                         totlogiter = steplogdict
                         totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
                         hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
                         histlist.append((hist_log, histbins_log))
-                    
+                        # E value histogram
+                        totevaliter = evaldict
+                        totevallist = [key for key, val in totevaliter.items() for _ in range(val)]
+                        hist_eval, histbins_eval = np.histogram(totevallist,bins = evalbins, range=(0.0, 0.9))
+                        evallist.append((hist_eval, histbins_eval))
                     elif which == "Linear":
-                        
+                        # Linear histogram
                         totliniter = steplindict
                         totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                         hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
                         histlist.append((hist_lin, histbins_lin))
+                        # E value histogram
+                        totevaliter = evaldict
+                        totevallist = [key for key, val in totevaliter.items() for _ in range(val)]
+                        hist_eval, histbins_eval = np.histogram(totevallist,bins = evalbins, range=(0.0, 0.9))
+                        evallist.append((hist_eval, histbins_eval))
                     elif which == "Linear / a":
+                        # Linear / a histogram
                         totliniter = steplindict
                         totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                         hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
                         histlist.append((hist_lin, histbins_lin))
+                        # E value histogram
+                        totevaliter = evaldict
+                        totevallist = [key for key, val in totevaliter.items() for _ in range(val)]
+                        hist_eval, histbins_eval = np.histogram(totevallist,bins = evalbins, range=(0.0, 0.9))
+                        evallist.append((hist_eval, histbins_eval))
                             
                     else:
                         return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
                     
                     tothistlist = histlist
+                    evalhistlist = evallist
         gc.collect()
     
     # for j in range(12):
@@ -1021,12 +1052,12 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     #     totlinlist[j] = [key for key, val in totlindict[j].items() for _ in range(val)]
     #     totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
                 
-    if inclination:
+    if inclination or len(estep_outer) == 0:
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n (Log)")
-    elif len(estep_outer) != 0:
+        fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
+    elif len(estep_outer) == 0:
         fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-        fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n (Log)")
+        fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
     # Iterates through each subplot in the 3x4 figure
     if inclination == False:
         for j, ax  in enumerate(axs.flatten()):
@@ -1119,15 +1150,18 @@ def CompletePlotHist(w = 0, step = 0.002, end = 20, inclination = True, which = 
     if inclination == False:
         fig.legend(handles, labels)
         plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
-    elif len(estep_outer) != 0:
+    elif len(estep_outer) == 0:
         fig.legend(handles, labels)
         plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_eccent_incline_10_0002_Log.png')
         plt.show()
-    return tothistlist
+    return tothistlist, evalhistlist
 
 def UnityPlotHist(numestep = 10, numdiv = 2, which = "Log", etype = "Uniform"):
     """
     """
+    totlist = []
+    evallist = []
+    
     if which == "Log":
         colorlist = ["red"]
         labels = ["Log"]
@@ -1152,12 +1186,13 @@ def UnityPlotHist(numestep = 10, numdiv = 2, which = "Log", etype = "Uniform"):
     elif etype == "Gamma":
         alpha = 1.35 # Shape (Alpha)
         theta = 5.05 # Scale (Beta)
-        x = np.linspace(0,1,numestep)
+        x = np.linspace(0,0.9,numestep)
         estep = gamma.pdf(x, a = alpha, scale = theta)
     elif etype == "Circular":
         estep = 0
     esteplist = []*numdiv
     param = []
+    eccbinsize = (0-1)/80
     
     # Slices estep into parts for parallelization
     slices = int(numestep / numdiv)
@@ -1170,14 +1205,21 @@ def UnityPlotHist(numestep = 10, numdiv = 2, which = "Log", etype = "Uniform"):
         
         # Processing using parallelization        
         with Pool(processes = numdiv) as pool:
-                totlist = pool.map(CompletePlotHist, param)        
+                tothistlist = pool.map(CompletePlotHist, param)
+        for j in range(len(tothistlist)):
+            totlist.append(tothistlist[j][0])
+            evallist.append(tothistlist[j][1])
+                        
     else:
-        totlist = CompletePlotHist(0,0.002,20,True, which)
+        totlist, evallist = CompletePlotHist(0,0.002,20,True, which)
+        
+        
+    
 
-    # Make Figure
+    # FIGURE FOR SEMIMAJOR AXIS
     fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-    fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n (Log)")        
-    # Combine Histogram Calculations        
+    fig.suptitle("Orbital Projection with Marginalizations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
+    # Combine Histogram Calculations
     for i in range(len(totlist)):
         histlist = totlist[i]
         for val in range(len(histlist)):
@@ -1194,13 +1236,54 @@ def UnityPlotHist(numestep = 10, numdiv = 2, which = "Log", etype = "Uniform"):
                     tothist = tothist + hist
     ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
     ax.set_xlim(0.5,20.5)
-    ax.set_xscale("log")    
-        
+    ax.set_xscale("log")
+    ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
+    ax.set_ylabel(r"Counts")
+    
     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
         
     fig.legend(handles, labels)
-    plt.savefig('CompleteHist_eccent_incline_80_0002_Log.png')
-    plt.show()
+    plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_eccent_incline_80_0002_Log.png')
+
+    # ECCENTRICITY FIGURE    
+    fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+    fig.suptitle("Eccentricity of Normalized Separation with Marginalizations in "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
+    # Combine Histogram Calculations
+    
+    for i in range(len(evallist)):
+        histlist = evallist[i]
+        for val in range(len(histlist)):
+                hist, bins = histlist[val]
+                if etype == "Gamma":
+                    norm = np.abs(1 / (eccbinsize * np.sum(hist)))
+                    hist = norm * hist
+                
+                if val == 0:
+                    if i == 0:
+                        evalhist = np.zeros_like(hist)
+                    evalhist = evalhist + hist
+                
+                elif val == len(histlist)-1 and i == len(evallist)-1:
+                    evalhist = evalhist + hist
+                    if etype == "Uniform":
+                        norm = np.abs(1 / (eccbinsize * np.sum(evalhist)))
+                        StepPatch = ax.stairs(evalhist * norm, bins, edgecolor = colorlist[0], fill = False)
+                    
+                    StepPatch = ax.stairs(evalhist , bins, edgecolor = colorlist[0], fill = False)
+                else:
+                    evalhist = evalhist + hist
+    
+    ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
+    ax.set_xlim(0,1)
+    # Comment might change
+    # ax.set_xscale("log")
+    ax.set_xlabel(r"Eccentricity")    
+    ax.set_ylabel(r"Counts")
+    
+    handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
+        
+    fig.legend(handles, labels)
+    plt.savefig('/College Projects/Microlensing Separation/Figures/Eccentricity_Log.png')
     
     return tothist
     
@@ -1208,7 +1291,7 @@ if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, which = "Log")
     # clist = CompletePlotHist(step = 0.002, end = 20, inclination = True, which = "Log")
-    tothist = UnityPlotHist(numestep=80, numdiv=10, which = "Log")
+    tothist = UnityPlotHist(numestep=2, numdiv=2, which = "Log", etype = "Uniform")
 
 # x,y,t = OrbGeoAlt(a=1, e=0.0,w=np.pi/4, i = np.pi/6)
 # param = [0.5, 0.5, np.pi/2, 0]

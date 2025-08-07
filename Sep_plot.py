@@ -14,11 +14,13 @@ from Sep_gen import Sep_gen
 
 class Sep_plot(Sep_gen):
 
-    def __init__(self, numestep = 10, numdiv = 2, which = "Log", etype = "Uniform"):
+    def __init__(self, numestep = 10, numdiv = 2, which = "Log", etype = "Uniform", wnum = 10, inum = 10):
         self.numestep = numestep
         self.numdiv = numdiv
         self.which = which
         self.etype = etype
+        self.wnum = wnum
+        self.inum = inum
 
     def DataProj(self, w = 0, start = 0.5, end = 20, step = 0.5):
         """
@@ -465,16 +467,16 @@ class Sep_plot(Sep_gen):
         
         
         # For making the stepthrough of omega
-        wstep = np.linspace(0,np.pi/2,2)
+        wstep = np.linspace(0,np.pi/2,self.wnum)
         if inclination:
             # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
-            cosstep = np.linspace(0,1,2)
+            cosstep = np.linspace(0,1,self.inum)
             istep = np.arccos(cosstep)
             # Only works if estep_outer has values in the list
             if len(estep_outer) != 0:
                 estep = estep_outer
             else:
-                estep = np.linspace(0,0.9, 2)
+                estep = np.linspace(0,0.9, self.numestep)
         for i in wstep:
             print("Value of omega currently: ", i, " and current position in array: ", np.where(wstep == i))
             # Each omega calculates its own data groups
@@ -798,7 +800,7 @@ if __name__ == "__main__":
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, which = "Log")
     # clist = CompletePlotHist(step = 0.002, end = 20, inclination = True, which = "Log")
-    tothist = Sep_plot(numestep=80, numdiv=10, which = "Linear", etype = "Uniform")
+    tothist = Sep_plot(numestep=80, numdiv=10, which = "Linear", etype = "Uniform", wnum = 75, inum = 75)
     tothist.UnityPlotHist()
 
 

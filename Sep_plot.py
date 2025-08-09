@@ -1,26 +1,26 @@
-import astropy.constants as ac
+# import astropy.constants as ac
 import numpy as np
-import scipy.signal as signal
-import scipy.optimize as sc
+# import scipy.signal as signal
+# import scipy.optimize as sc
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import time
 from multiprocessing import Pool
 import gc
-import math
-from collections import Counter
+# import math
+# from collections import Counter
 from scipy.stats import gamma
 from Sep_gen import Sep_gen
 
+
 class Sep_plot(Sep_gen):
 
-    def __init__(self, numestep = 10, numdiv = 2, which = "Log", etype = "Uniform", wnum = 10, inum = 10):
+    def __init__(self, numestep = 10, numdiv = 2):# which = "Log", wnum = 10, inum = 10):
         self.numestep = numestep
         self.numdiv = numdiv
-        self.which = which
-        self.etype = etype
-        self.wnum = wnum
-        self.inum = inum
+        # self.which = which
+        # self.wnum = wnum
+        # self.inum = inum
 
     def DataProj(self, w = 0, start = 0.5, end = 20, step = 0.5):
         """
@@ -86,41 +86,43 @@ class Sep_plot(Sep_gen):
         
         return list1, param, listt
 
-    def DataHist(self, w = 0, step = 0.002, end = 10, which = "Linear", inclination = False, istep = None, estep = None):
+    @classmethod
+    def DataHist(cls, w = 0, step = 0.002, end = 10, which = "Linear", inclination = False, istep = None, estep = None):
         """
         """
         # Goes from both Linear and Log calculations to just Linear
         Linear = which
         
         # Parameters for Paralellization
-        param = [
-        # Row 1
-        (0. , 0., w, end, step, Linear, inclination), (0., np.pi/6, w, end, step, Linear, inclination), (0., np.pi/3, w, end, step, Linear, inclination), (0., np.pi/2, w, end, step, Linear, inclination),
-        # Row 2
-        (0.5, 0., w, end, step, Linear, inclination), (0.5, np.pi/6, w, end, step, Linear, inclination), (0.5, np.pi/3, w, end, step, Linear, inclination), (0.5, np.pi/2, w, end, step, Linear, inclination),
-        # Row 3
-        (0.9, 0., w, end, step, Linear, inclination), (0.9, np.pi/6, w, end, step, Linear, inclination), (0.9, np.pi/3, w, end, step, Linear, inclination), (0.9, np.pi/2, w, end, step, Linear, inclination)
+        # param = [
+        # # Row 1
+        # (0. , 0., w, end, step, Linear, inclination), (0., np.pi/6, w, end, step, Linear, inclination), (0., np.pi/3, w, end, step, Linear, inclination), (0., np.pi/2, w, end, step, Linear, inclination),
+        # # Row 2
+        # (0.5, 0., w, end, step, Linear, inclination), (0.5, np.pi/6, w, end, step, Linear, inclination), (0.5, np.pi/3, w, end, step, Linear, inclination), (0.5, np.pi/2, w, end, step, Linear, inclination),
+        # # Row 3
+        # (0.9, 0., w, end, step, Linear, inclination), (0.9, np.pi/6, w, end, step, Linear, inclination), (0.9, np.pi/3, w, end, step, Linear, inclination), (0.9, np.pi/2, w, end, step, Linear, inclination)
             
-        ]
+        # ]
         
-        if inclination:
-            # param = [
-            #     # Row 1
-            #     (0.1, istep, w, end, step, Linear, inclination), (0.40, istep, w, end, step, Linear, inclination), (0.7, istep, w, end, step, Linear, inclination),
-            #     # Row 2     
-            #     (0.2, istep, w, end, step, Linear, inclination), (0.50, istep, w, end, step, Linear, inclination), (0.8, istep, w, end, step, Linear, inclination),     
-            #     # Row 3     
-            #     (0.3, istep, w, end, step, Linear, inclination), (0.6, istep, w, end, step, Linear, inclination), (0.9, istep, w, end, step, Linear, inclination)
+        if inclination and not estep:
+            param = [
+                # Row 1
+                (0.1, istep, w, end, step, Linear, inclination), (0.40, istep, w, end, step, Linear, inclination), (0.7, istep, w, end, step, Linear, inclination),
+                # Row 2     
+                (0.2, istep, w, end, step, Linear, inclination), (0.50, istep, w, end, step, Linear, inclination), (0.8, istep, w, end, step, Linear, inclination),     
+                # Row 3     
+                (0.3, istep, w, end, step, Linear, inclination), (0.6, istep, w, end, step, Linear, inclination), (0.9, istep, w, end, step, Linear, inclination)
                 
-            #          ]
+                     ]
+        else:
             param = [estep, istep, w, end, step, Linear, inclination]
         
         start = time.perf_counter()
         # Multi Processing
-        if inclination == True:
+        if inclination == True and estep:
             totlist = super().Rchange(param = param)
-        else:
-            with Pool(processes = 6) as pool:
+        elif inclination:
+            with Pool(processes = 9) as pool:
                 totlist = pool.map(super().Rchange, param)
         # else:
         #     totlist = Rchange(param)
@@ -431,11 +433,12 @@ class Sep_plot(Sep_gen):
         plt.show()
         return totlist
 
-    def CompletePlotHist(self, param):
+    @staticmethod
+    def CompletePlotHist(param):
         """
         
         """
-        w, step, end, inclination, which, estep_outer = param
+        step, end, inclination, which, estep_outer, inum, wnum = param
         
         if inclination == False:
             colorlist = ["black", "red"]
@@ -453,7 +456,10 @@ class Sep_plot(Sep_gen):
         # Dictionary for storing Rchange results
         totlinlist = []
         totloglist = []
-        tothistlist = []
+        if len(estep_outer) == 0:
+             tothistlist =[[] for _ in range(9)]
+        else:
+            tothistlist = []
         evalhistlist = []
         
         # Create variables for bin sizes
@@ -463,27 +469,27 @@ class Sep_plot(Sep_gen):
         # Make logbinsizes for all
         logbinsize = (np.log10(amin)-np.log10(amax))/nbin
         logbins = np.geomspace(amin,amax, nbin)
-        evalbins = np.linspace(0,0.9,80)
+        
         
         
         # For making the stepthrough of omega
-        wstep = np.linspace(0,np.pi/2,self.wnum)
+        wstep = np.linspace(0,np.pi/2,wnum)
         if inclination:
             # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
-            cosstep = np.linspace(0,1,self.inum)
+            cosstep = np.linspace(0,1,inum)
             istep = np.arccos(cosstep)
             # Only works if estep_outer has values in the list
             if len(estep_outer) != 0:
                 estep = estep_outer
-            else:
-                estep = np.linspace(0,0.9, self.numestep)
-        for i in wstep:
-            print("Value of omega currently: ", i, " and current position in array: ", np.where(wstep == i))
+        for k in wstep:
+            print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
             # Each omega calculates its own data groups
-            if inclination:
-                steptotlist, param = self.DataHist(w = i, step = step, end = end, which = which, inclination = inclination, istep = istep, estep = estep)
+            if inclination and len(estep_outer) != 0:
+                steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep, estep = estep)
+            elif inclination:
+                steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep)
             else:
-                steptotlist, param = self.DataHist(w = i, step = step, end = end, which = which)
+                steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which)
             # Once complete, takes the data through each set
             if inclination == False:
                 for j in range(len(steptotlist)):
@@ -505,64 +511,70 @@ class Sep_plot(Sep_gen):
                 
                     # histlist.append((hist_log, histbins_log))
             else:
-                    # for j in range(len(steptotlist)):
-                        # steplindict, x, y, steplogdict, blank = steptotlist[j]
-                        steplindict, x, y, steplogdict, evaldict = steptotlist
-                        # histlist = tothistlist[j]
+                    if len(estep_outer) != 0:
+                        steplindict, x, y, steplogdict, evalcirc = steptotlist
                         histlist = tothistlist
-                        evallist = evalhistlist
+                        evallist = evalcirc
                         if which == "Log":
                             # Log histogram
                             totlogiter = steplogdict
                             totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
                             hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
                             histlist.append((hist_log, histbins_log))
-                            # E value histogram
-                            totevaliter = evaldict
-                            totevallist = [key for key, val in totevaliter.items() for _ in range(val)]
-                            hist_eval, histbins_eval = np.histogram(totevallist,bins = evalbins, range=(0.0, 0.9))
-                            evallist.append((hist_eval, histbins_eval))
                         elif which == "Linear":
                             # Linear histogram
                             totliniter = steplindict
                             totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                             hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
                             histlist.append((hist_lin, histbins_lin))
-                            # E value histogram
-                            totevaliter = evaldict
-                            totevallist = [key for key, val in totevaliter.items() for _ in range(val)]
-                            hist_eval, histbins_eval = np.histogram(totevallist,bins = evalbins, range=(0.0, 0.9))
-                            evallist.append((hist_eval, histbins_eval))
                         elif which == "Linear / a":
                             # Linear / a histogram
                             totliniter = steplindict
                             totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                             hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                            histlist.append((hist_lin, histbins_lin))
-                            # E value histogram
-                            totevaliter = evaldict
-                            totevallist = [key for key, val in totevaliter.items() for _ in range(val)]
-                            hist_eval, histbins_eval = np.histogram(totevallist,bins = evalbins, range=(0.0, 0.9))
-                            evallist.append((hist_eval, histbins_eval))
-                                
+                            histlist.append((hist_lin, histbins_lin))  
                         else:
                             return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
                         
-                        tothistlist = histlist
-                        evalhistlist = evallist
+                        # E = 0 histogram
+                        totcirclist = [key for key, val in evallist.items() for _ in range(val)]
+                        histcirc, binscirc = np.histogram(totcirclist, bins = logbins, range=(0.5, end+0.5))
+                        evalhistlist = [(histcirc, binscirc)]
+                    else:
+                      for j in range(len(steptotlist)):
+                        steplindict, x, y, steplogdict, blank = steptotlist[j]
+                        
+                        histlist = tothistlist[j]
+                        if which == "Log":
+                            # Log histogram
+                            totlogiter = steplogdict
+                            totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+                            hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+                            histlist.append((hist_log, histbins_log))
+                        elif which == "Linear":
+                            # Linear histogram
+                            totliniter = steplindict
+                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                            histlist.append((hist_lin, histbins_lin))
+                        elif which == "Linear / a":
+                            # Linear / a histogram
+                            totliniter = steplindict
+                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                            histlist.append((hist_lin, histbins_lin))  
+                        else:
+                            return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
+                        tothistlist[j] = histlist
             gc.collect()
         
-        # for j in range(12):
-        #     # Turns dictionaries into lists for easier processing
-        #     totlinlist[j] = [key for key, val in totlindict[j].items() for _ in range(val)]
-        #     totloglist[j] = [key for key, val in totlogdict[j].items() for _ in range(val)]
                     
-        if inclination or len(estep_outer) == 0:
-            fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-            fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
+        if inclination and len(estep_outer) == 0:
+            fig, axs = plt.subplots(3,3,figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+            fig.suptitle("Orbital Projection with Alterations in e = 0.1-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         elif len(estep_outer) == 0:
             fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-            fig.suptitle("Orbital Projection with Alterations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
+            fig.suptitle("Orbital Projection with Alterations in e = 0.1-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         # Iterates through each subplot in the 3x4 figure
         if inclination == False:
             for j, ax  in enumerate(axs.flatten()):
@@ -611,13 +623,10 @@ class Sep_plot(Sep_gen):
             ax.set_xlim(0.5,20.5)
             ax.set_ylim(0,10)
             ax.set_xscale("log")
-        elif len(estep_outer) != 0:
-            # for j, ax  in enumerate(axs.flatten()):
-                # histlist = tothistlist[j]
-                # iterparam = param[j]
-                histlist = tothistlist
-                iterparam = param
-                
+        elif len(estep_outer) == 0:
+            for j, ax  in enumerate(axs.flatten()):
+                histlist = tothistlist[j]
+                iterparam = param[j]
                 for val in range(len(histlist)):
                     hist, bins = histlist[val]
                     if val == 0:
@@ -633,6 +642,7 @@ class Sep_plot(Sep_gen):
                 ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
                 ax.set_xlim(0.5,20.5)
                 ax.set_xscale("log")
+                ax.text(8, 5, f"e = {iterparam[0]}")
             
         # Text for understanding positions of each figure 
         
@@ -654,28 +664,18 @@ class Sep_plot(Sep_gen):
         # Saves plot
         if inclination == False:
             fig.legend(handles, labels)
-            plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
         elif len(estep_outer) == 0:
             fig.legend(handles, labels)
-            plt.savefig('/College Projects/Microlensing Separation/Figures/CompleteHist_eccent_incline_10_0002_Log.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/CompleteHist_9plots_incline_{inum}_0002_{which}.png')
             plt.show()
         return tothistlist, evalhistlist
 
-    def UnityPlotHist(self):
+    def UnityPlotHist(self, which, wnum, inum):
         """
         """
         totlist = []
-        evallist = []
-        
-        if self.which == "Log":
-            colorlist = ["red"]
-            labels = ["Log"]
-        elif self.which == "Linear":
-            colorlist = ["black"]
-            labels = ["Linear"]
-        else:
-            colorlist = ["blue"]
-            labels = ["Linear / a"]
+        evalcirc = []
         
         # Create variables for bin sizes
         nbin = 200
@@ -686,63 +686,64 @@ class Sep_plot(Sep_gen):
         
         
         # Initialize Lists
-        if self.etype == "Uniform":
-            estep = np.linspace(0,0.98, self.numestep)
-            label = ["Uniform"]
-            color = ["blue"]
-        elif self.etype == "Gamma":
-            alpha = 1.35 # Shape (Alpha)
-            theta = 5.05 # Scale (Beta)
-            x = np.linspace(0,1,self.numestep)
-            label = ["Gamma"]
-            color = ["red"]
-            estep = gamma.pdf(x, a = alpha, scale = theta)
-        elif self.etype == "Circular":
-            estep = 0
-            label = ["Circular"]
-            color = ["black"]
+        estep = np.linspace(0,0.98, self.numestep)
+        labels = ["Uniform", "Gamma", "Circular"]
+        colorlist = ["blue", "red", "black"]
+        # Gamma Portion
+        alpha = 1.35 # Shape (Alpha)
+        theta = 5.05 # Scale (Beta)
+        x = np.linspace(0,0.98,self.numestep)
+        gammastep = gamma.pdf(x, a = alpha, scale = theta)
+        
         esteplist = []*self.numdiv
         param = []
-        eccbinsize = (0-1)/80
         
         # Slices estep into parts for parallelization
         slices = int(self.numestep / self.numdiv)
-        if self.etype != "Circular":
-            for i in range(self.numdiv):
-                esteplist.append(estep[i*slices:(i+1)*slices])
+        for i in range(self.numdiv):
+            esteplist.append(estep[i*slices:(i+1)*slices])
         
-                # Step, end, inclincation, which, estep
-                param.append((0, 0.002, 20, True, self.which, esteplist[i]))
+            # Step, end, inclincation, which, estep
+            param.append((0.002, 20, True, which, esteplist[i], wnum, inum))
             
-            # Processing using parallelization        
-            with Pool(processes = self.numdiv) as pool:
-                    tothistlist = pool.map(self.CompletePlotHist, param)
-            for j in range(len(tothistlist)):
-                totlist.append(tothistlist[j][0])
-                evallist.append(tothistlist[j][1])
-                            
-        else:
-            totlist, evallist = self.CompletePlotHist(0,0.002,20,True, self.which)
+        # Processing using parallelization        
+        with Pool(processes = self.numdiv) as pool:
+                tothistlist = pool.map(Sep_plot.CompletePlotHist, param)
+        for j in range(len(tothistlist)):
+            totlist.append(tothistlist[j][0])
+            evalcirc.append(tothistlist[j][1])
         
 
+        circhist = evalcirc[0]
+        
         # FIGURE FOR SEMIMAJOR AXIS
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        fig.suptitle("Orbital Projection with Marginalizations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({self.which})")        
+        fig.suptitle("Orbital Projection with Marginalizations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
         # Combine Histogram Calculations
         for i in range(len(totlist)):
             histlist = totlist[i]
+            circiter = circhist[0]
             for val in range(len(histlist)):
                     hist, bins = histlist[val]
+                    ecirchist, circbins = circiter
+                    # For Gamma weighting
+                    gammanorm = np.sum(gammastep)
+                    gammahist = gammanorm * hist
                     if val == 0:
                         if i == 0:
                             tothist = np.zeros_like(hist)
+                            totgammahist = tothist
                         tothist = tothist + hist
+                        totgammahist = totgammahist + gammahist
                     elif val == len(histlist)-1 and i == len(totlist)-1:
                         tothist = tothist + hist
-                        norm = np.abs(1 / (logbinsize * np.sum(tothist)))
-                        StepPatch = ax.stairs(tothist * norm, bins, edgecolor = colorlist[0], fill = False)
+                        norm = np.abs(1 / (np.sum(self.numestep)))
+                        StepPatch = ax.stairs(tothist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
+                        StepPatch = ax.stairs(totgammahist, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                        StepPatch = ax.stairs(ecirchist, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
                     else:
                         tothist = tothist + hist
+                        totgammahist = totgammahist + gammahist
         ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
         ax.set_xlim(0.5,20.5)
         ax.set_xscale("log")
@@ -750,58 +751,20 @@ class Sep_plot(Sep_gen):
         ax.set_ylabel(r"Counts")
         
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
-            
+        
         fig.legend(handles, labels)
-        plt.savefig(f'/College Projects/Microlensing Separation/Figures/CompleteHist_eccent_incline_80_0002_{self.which}.png')
-
-        # ECCENTRICITY FIGURE    
-        fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        fig.suptitle("Eccentricity of Normalized Separation with Marginalizations in "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({self.which})")        
-        # Combine Histogram Calculations
-        
-        for i in range(len(evallist)):
-            histlist = evallist[i]
-            for val in range(len(histlist)):
-                    hist, bins = histlist[val]
-                    if self.etype == "Gamma":
-                        norm = np.abs(1 / (eccbinsize * np.sum(hist)))
-                        hist = norm * hist
-                    
-                    if val == 0:
-                        if i == 0:
-                            evalhist = np.zeros_like(hist)
-                        evalhist = evalhist + hist
-                    
-                    elif val == len(histlist)-1 and i == len(evallist)-1:
-                        evalhist = evalhist + hist
-                        if self.etype == "Uniform":
-                            norm = np.abs(1 / (eccbinsize * np.sum(evalhist)))
-                            StepPatch = ax.stairs(evalhist * norm, bins, edgecolor = colorlist[0], fill = False)
-                        
-                        StepPatch = ax.stairs(evalhist , bins, edgecolor = colorlist[0], fill = False)
-                    else:
-                        evalhist = evalhist + hist
-        
-        ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
-        ax.set_xlim(0,1)
-        # Comment might change
-        # ax.set_xscale("log")
-        ax.set_xlabel(r"Eccentricity")    
-        ax.set_ylabel(r"Counts")
-        
-        
-        handle = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in color]        
-        fig.legend(handles, label)
-        plt.savefig(f'/College Projects/Microlensing Separation/Figures/Eccentricity_{self.which}.png')
+        plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
         
         return tothist
     
 if __name__ == "__main__":
+    tothist = Sep_plot(numestep=10, numdiv=2)
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, which = "Log")
-    # clist = CompletePlotHist(step = 0.002, end = 20, inclination = True, which = "Log")
-    tothist = Sep_plot(numestep=80, numdiv=10, which = "Linear", etype = "Uniform", wnum = 75, inum = 75)
-    tothist.UnityPlotHist()
+    
+    #step, end, inclination, which, estep_outer, inum, wnum
+    clist = tothist.CompletePlotHist([0.002, 20, True,"Log", [], 75, 75])
+    # tothist.UnityPlotHist(which = "Linear", wnum = 3, inum = 3)
 
 
 

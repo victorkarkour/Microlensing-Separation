@@ -135,17 +135,18 @@ from collections import Counter
 #     exp = 1. - alpha
 #     print((step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp))
 
-estep = np.linspace(0,0.9, 80)
-estep1 = estep[0:20]
-estep2 = estep[len(estep1):len(estep1)*2]
+# estep = np.linspace(0,0.9, 80)
+# estep1 = estep[0:20]
+# estep2 = estep[len(estep1):len(estep1)*2]
 
 
-numestep = 80
-numdiv = 4
-slices = int(numestep / numdiv)
-esteplist = []*numdiv
-for i in range(numdiv):
-    esteplist.append(estep[i*slices:(i+1)*slices])
-# print((esteplist))
+# numestep = 80
+# numdiv = 4
+# slices = int(numestep / numdiv)
+# esteplist = []*numdiv
+# for i in range(numdiv):
+#     esteplist.append(estep[i*slices:(i+1)*slices])
+# # print((esteplist))
 empty = []
 print(len(empty))
+print(type(empty))

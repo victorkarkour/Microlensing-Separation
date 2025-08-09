@@ -5,8 +5,8 @@ import gc
 class Sep_gen:
     def __init__(self):
         self.param = []
-
-    def NewtRaf(self, M, e, maxiter=50, tol=1e-8):
+    @staticmethod
+    def NewtRaf(M, e, maxiter=50, tol=1e-8):
         """
     Custom vectorized Newton-Raphson implementation for Kepler's equation.
     More memory efficient than scipy's newton.
@@ -31,7 +31,7 @@ class Sep_gen:
         initial = M + e * np.sin(M)
         Solution = np.zeros_like(M)
     
-        Solution = sc.newton(self.Kepler, initial, fprime=self.DKepler, args=(M,e))
+        Solution = sc.newton(Sep_gen.Kepler, initial, fprime=Sep_gen.DKepler, args=(M,e))
         return Solution
     
         # Initial guess
@@ -51,8 +51,8 @@ class Sep_gen:
         #         break
                 
         # return E
-
-    def Kepler(self, En, Mn, ec):
+    @staticmethod
+    def Kepler(En, Mn, ec):
         """
         Returns the Kepler Transcendental Equation.
         
@@ -78,8 +78,8 @@ class Sep_gen:
         """
         # print(En)
         return(En-ec*np.sin(En)-Mn)
-
-    def DKepler(self, En, Mn, ec):
+    @staticmethod
+    def DKepler(En, Mn, ec):
         """
         Returns the Derivative of the Kepler Equation.
         
@@ -176,8 +176,8 @@ class Sep_gen:
             yt.append(B*Xt + G*Yt)
         
         return(xt, yt, t)
-
-    def OrbGeoAlt(self, t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
+    @staticmethod
+    def OrbGeoAlt(t0=0.0, a=1.0, w = 0.0, W = 0.0, i = 0.0, e = 0.0):
         """
         Creates and calculates the X and Y axis of a planet's orbit 
         using a different method for calculation.
@@ -238,7 +238,7 @@ class Sep_gen:
         #     end_idx = min(i + chunk_size, len(phi))
         #     Et[i:end_idx] = NewtRaf(phi[i:end_idx], e)
         
-        Et = self.NewtRaf(phi,e)
+        Et = Sep_gen.NewtRaf(phi,e)
         
         # Function of X and Y according to E
         Xt = np.cos(Et) - e
@@ -249,8 +249,8 @@ class Sep_gen:
         yt = B * Xt + G * Yt
         
         return (xt, yt, phi)
-
-    def Velocity(self, param):
+    @staticmethod
+    def Velocity(param):
         """
         Calculates the velocity of a planet's orbit.
         
@@ -286,8 +286,8 @@ class Sep_gen:
         for val in stepthrough:
         
             # Orbital Calculations
-            x1, y1, t1 = self.OrbGeoAlt(-changet, a = val, e = e, w = w, i = i)
-            x2, y2, t2 = self.OrbGeoAlt(changet, a = val, e = e, w = w, i = i)
+            x1, y1, t1 = Sep_gen.OrbGeoAlt(-changet, a = val, e = e, w = w, i = i)
+            x2, y2, t2 = Sep_gen.OrbGeoAlt(changet, a = val, e = e, w = w, i = i)
         
             # Change of degrees function
             # because of array arithmetic, we don't need to use for loops
@@ -298,8 +298,8 @@ class Sep_gen:
         # print("Last Velocity output: ", vel[-1])
         # print("Minimum Velocity: ", np.min(vel))
         return vel
-
-    def DotSize(self, vel, velmax, velmin):
+    @staticmethod
+    def DotSize(vel, velmax, velmin):
         """
         Calculates the dot size of a planet's orbit using its velocity.
         
@@ -345,8 +345,8 @@ class Sep_gen:
         ratio =  (40.0 - (np.divide(num,denom)) * 39.0)
         
         return ratio
-
-    def Rchange(self, param, coords = False, inclination = False):
+    @staticmethod
+    def Rchange(param, coords = False, inclination = False):
         """
         Stores all the points in the data where the radius of the orbit
         is very close to the Einstein ring radius.
@@ -394,41 +394,63 @@ class Sep_gen:
         if Linear == "Linear":
             # Linear Portion
             # stepthrough = np.arange(0.5, end + step, step)
-            stepthrough = self.stepdata(0, 0.5, end, 10000)
+            stepthrough = Sep_gen.stepdata(0, 0.5, end, 10000)
             # Goes through each value of a in the stepthrough
             for aval in stepthrough:
                 for ival in i:
-                    for eval in e:    
-                        x, y, t = self.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
-                        r = np.sqrt(x**2+y**2)
-                        # Whereever there is this value, it finds the indices of each point in the list
-                        conlin = np.where(np.abs(r-r0)<=0.01)
-            
-                        if coords == False and inclination:
-                            # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
-                            if aval in totlindict:
-                                totlindict[aval] += len(conlin[0])
-                            else:
-                                totlindict[aval] = len(conlin[0])
-                            if eval == 0:
-                                if eval in totevaldict:
-                                    totevaldict[eval] += len(conlin[0])
-                                else:
-                                    totevaldict[eval] = len(conlin[0])
-                        else: 
-                            # Same thing as coords == False but has coord lists for Multiplot
-                            if aval in totlindict:
+                    if e is list:
+                        for eval in e:    
+                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                            r = np.sqrt(x**2+y**2)
+                            # Whereever there is this value, it finds the indices of each point in the list
+                            conlin = np.where(np.abs(r-r0)<=0.01)
+                
+                            if coords == False and inclination:
+                                # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                                if aval in totlindict:
                                     totlindict[aval] += len(conlin[0])
-                            else:
-                                    totlindict[aval] = len(conlin[0])
-                            if eval == 0:
-                                if eval in totevaldict:
-                                    totevaldict[eval] += len(conlin[0])
                                 else:
-                                    totevaldict[eval] = len(conlin[0])
-                            if coords:
-                                xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
-                                ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+                                    totlindict[aval] = len(conlin[0])
+                                if eval == 0:
+                                    if aval in totevaldict:
+                                        totevaldict[aval] += len(conlin[0])
+                                    else:
+                                        totevaldict[aval] = len(conlin[0])
+                            else: 
+                                # Same thing as coords == False but has coord lists for Multiplot
+                                if aval in totlindict:
+                                    totlindict[aval] += len(conlin[0])
+                                else:
+                                    totlindict[aval] = len(conlin[0])
+                                if coords:
+                                    xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
+                                    ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+                        else:
+                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                            r = np.sqrt(x**2+y**2)
+                            # Whereever there is this value, it finds the indices of each point in the list
+                            conlin = np.where(np.abs(r-r0)<=0.01)
+                
+                            if coords == False and inclination:
+                                # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                                if aval in totlindict:
+                                    totlindict[aval] += len(conlin[0])
+                                else:
+                                    totlindict[aval] = len(conlin[0])
+                                if eval == 0:
+                                    if aval in totevaldict:
+                                        totevaldict[aval] += len(conlin[0])
+                                    else:
+                                        totevaldict[aval] = len(conlin[0])
+                            else: 
+                                # Same thing as coords == False but has coord lists for Multiplot
+                                if aval in totlindict:
+                                    totlindict[aval] += len(conlin[0])
+                                else:
+                                    totlindict[aval] = len(conlin[0])
+                                if coords:
+                                    xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
+                                    ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
             return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Log":
             if inclination == False:
@@ -436,9 +458,9 @@ class Sep_gen:
                 # steps = np.linspace(0, 10000,10000)
                 # loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
                 # stepthrough = 10**loga 
-                stepthrough = self.stepdata(1, 0.5, end, 10000)
+                stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
                 for val in stepthrough:
-                    x, y, t = self.OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                    x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
         
                     r = np.sqrt(x**2+y**2)
             
@@ -447,18 +469,18 @@ class Sep_gen:
                 gc.collect()
                 # Linear Portion
                 # stepthrough = np.arange(0.5, end + step, step)
-                stepthrough = self.stepdata(0, 0.5, end, 10000)
+                stepthrough = Sep_gen.stepdata(0, 0.5, end, 10000)
                 for val in stepthrough:
-                    x, y, t = self.OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                    x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
         
                     r = np.sqrt(x**2+y**2)
                 
                     conlin = np.where(np.abs(r-r0)<=0.01)
                     totlindict[val] = len(conlin[0])
                 # Power Law Portion
-                stepthrough = self.stepdata(2, 0.5, end, 10000)
+                stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
                 for val in stepthrough:
-                    x, y, t = self.OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                    x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
         
                     r = np.sqrt(x**2+y**2)
                 
@@ -473,45 +495,69 @@ class Sep_gen:
                     stepthrough = 10**loga
                     for aval in stepthrough:
                         for ival in i:
-                            for eval in e:
-                                x, y, t = self.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                            if e is list:
+                                for eval in e:
+                                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                                    r = np.sqrt(x**2+y**2)
+                            
+                                    conlog = np.where(np.abs(r-r0)<=0.01)
+                                    if aval in totlogdict:
+                                        totlogdict[aval] += len(conlog[0])
+                                    else:
+                                        totlogdict[aval] = len(conlog[0])
+                                    if eval == 0:
+                                        if aval in totevaldict:
+                                            totevaldict[aval] += len(conlin[0])
+                                        else:
+                                            totevaldict[aval] = len(conlin[0])
+                            else:
+                                x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                                 r = np.sqrt(x**2+y**2)
-                        
+                            
                                 conlog = np.where(np.abs(r-r0)<=0.01)
                                 if aval in totlogdict:
                                     totlogdict[aval] += len(conlog[0])
                                 else:
                                     totlogdict[aval] = len(conlog[0])
-                                if eval == 0:
-                                    if eval in totevaldict:
-                                        totevaldict[eval] += len(conlin[0])
-                                    else:
-                                        totevaldict[eval] = len(conlin[0])
                 return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Linear / a":
         # Linear / a Portion
-            stepthrough = self.stepdata(0.5, 0.5, end, 10000)
+            stepthrough = Sep_gen.stepdata(0.5, 0.5, end, 10000)
             for aval in stepthrough:
                 for ival in i:
-                    for eval in e:
-                        x, y, t = self.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                    if e is list:
+                        for eval in e:
+                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                            r = np.sqrt(x**2+y**2)
+                            # Whereever there is this value, it finds the indices of each point in the list
+                            conlin = np.where(np.abs(r-r0)<=0.01)
+                            # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                        
+                            # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
+                            if aval in totlindict:
+                                totlindict[aval] = round(len(conlin[0]) / aval)
+                            else:
+                                totlindict[aval] = round(len(conlin[0]) / aval)
+                            if eval == 0:
+                                if aval in totevaldict:
+                                    totevaldict[aval] += len(conlin[0])
+                                else:
+                                    totevaldict[aval] = len(conlin[0])
+                    else:
+                        x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                         r = np.sqrt(x**2+y**2)
                         # Whereever there is this value, it finds the indices of each point in the list
                         conlin = np.where(np.abs(r-r0)<=0.01)
                         # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
-                    
+                        
                         # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
                         if aval in totlindict:
                             totlindict[aval] = round(len(conlin[0]) / aval)
                         else:
                             totlindict[aval] = round(len(conlin[0]) / aval)
-                        if eval in totevaldict:
-                            totevaldict[eval] += len(conlin[0])
-                        else:
-                            totevaldict[eval] = len(conlin[0])
             return totlindict, xlist, ylist, totlogdict, totevaldict
-
-    def stepdata(self, alpha, xmin, xmax, nsamples):
+    @staticmethod
+    def stepdata(alpha, xmin, xmax, nsamples):
         
         """
         """

@@ -1,15 +1,6 @@
-import astropy.constants as ac
 import numpy as np
-import scipy.signal as signal
 import scipy.optimize as sc
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import time
-from multiprocessing import Pool
 import gc
-import math
-from collections import Counter
-from scipy.stats import gamma
 
 class Sep_gen:
     def __init__(self):
@@ -419,23 +410,25 @@ class Sep_gen:
                                 totlindict[aval] += len(conlin[0])
                             else:
                                 totlindict[aval] = len(conlin[0])
-                            if eval in totevaldict:
-                                totevaldict[eval] += len(conlin[0])
+                            if eval == 0:
+                                if eval in totevaldict:
+                                    totevaldict[eval] += len(conlin[0])
+                                else:
+                                    totevaldict[eval] = len(conlin[0])
+                        else: 
+                            # Same thing as coords == False but has coord lists for Multiplot
+                            if aval in totlindict:
+                                    totlindict[aval] += len(conlin[0])
                             else:
-                                totevaldict[eval] = len(conlin[0])
-                    else: 
-                        # Same thing as coords == False but has coord lists for Multiplot
-                        if aval in totlindict:
-                                totlindict[aval] += len(conlin[0])
-                        else:
-                                totlindict[aval] = len(conlin[0])
-                        if eval in totevaldict:
-                                totevaldict[eval] += len(conlin[0])
-                        else:
-                                totevaldict[eval] = len(conlin[0])
-                        if coords:
-                            xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
-                            ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+                                    totlindict[aval] = len(conlin[0])
+                            if eval == 0:
+                                if eval in totevaldict:
+                                    totevaldict[eval] += len(conlin[0])
+                                else:
+                                    totevaldict[eval] = len(conlin[0])
+                            if coords:
+                                xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
+                                ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
             return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Log":
             if inclination == False:
@@ -489,10 +482,11 @@ class Sep_gen:
                                     totlogdict[aval] += len(conlog[0])
                                 else:
                                     totlogdict[aval] = len(conlog[0])
-                                if eval in totevaldict:
-                                    totevaldict[eval] += len(conlog[0])
-                                else:
-                                    totevaldict[eval] = len(conlog[0])
+                                if eval == 0:
+                                    if eval in totevaldict:
+                                        totevaldict[eval] += len(conlin[0])
+                                    else:
+                                        totevaldict[eval] = len(conlin[0])
                 return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Linear / a":
         # Linear / a Portion

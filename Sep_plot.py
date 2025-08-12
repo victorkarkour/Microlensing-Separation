@@ -87,7 +87,7 @@ class Sep_plot(Sep_gen):
         return list1, param, listt
 
     @classmethod
-    def DataHist(cls, w = 0, step = 0.002, end = 10, which = "Linear", inclination = False, istep = None, estep = None):
+    def DataHist(cls, w = 0, step = 0.002, end = 10, which = "Linear", inclination = False, istep = None, estep = []):
         """
         """
         # Goes from both Linear and Log calculations to just Linear
@@ -104,7 +104,7 @@ class Sep_plot(Sep_gen):
             
         # ]
         
-        if inclination and not estep:
+        if inclination and len(estep) == 0:
             param = [
                 # Row 1
                 (0.1, istep, w, end, step, Linear, inclination), (0.40, istep, w, end, step, Linear, inclination), (0.7, istep, w, end, step, Linear, inclination),
@@ -119,7 +119,7 @@ class Sep_plot(Sep_gen):
         
         start = time.perf_counter()
         # Multi Processing
-        if inclination == True and estep:
+        if inclination == True and len(estep) != 0:
             totlist = super().Rchange(param = param)
         elif inclination:
             with Pool(processes = 9) as pool:
@@ -642,7 +642,7 @@ class Sep_plot(Sep_gen):
                 ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
                 ax.set_xlim(0.5,20.5)
                 ax.set_xscale("log")
-                ax.text(8, 5, f"e = {iterparam[0]}")
+                ax.text(8, 4, f"e = {iterparam[0]}")
             
         # Text for understanding positions of each figure 
         
@@ -758,12 +758,12 @@ class Sep_plot(Sep_gen):
         return tothist
     
 if __name__ == "__main__":
-    tothist = Sep_plot(numestep=10, numdiv=2)
+    tothist = Sep_plot(numestep=10, numdiv=5)
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, which = "Log")
     
     #step, end, inclination, which, estep_outer, inum, wnum
-    clist = tothist.CompletePlotHist([0.002, 20, True,"Log", [], 75, 75])
+    clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])
     # tothist.UnityPlotHist(which = "Linear", wnum = 3, inum = 3)
 
 

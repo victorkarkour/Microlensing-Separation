@@ -398,7 +398,7 @@ class Sep_gen:
             # Goes through each value of a in the stepthrough
             for aval in stepthrough:
                 for ival in i:
-                    if e is list:
+                    if isinstance(e, np.ndarray):
                         for eval in e:    
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)
@@ -425,7 +425,7 @@ class Sep_gen:
                                 if coords:
                                     xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
                                     ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
-                        else:
+                    else:
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)
                             # Whereever there is this value, it finds the indices of each point in the list
@@ -495,7 +495,7 @@ class Sep_gen:
                     stepthrough = 10**loga
                     for aval in stepthrough:
                         for ival in i:
-                            if e is list:
+                            if isinstance(e, np.ndarray):
                                 for eval in e:
                                     x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                                     r = np.sqrt(x**2+y**2)
@@ -525,7 +525,7 @@ class Sep_gen:
             stepthrough = Sep_gen.stepdata(0.5, 0.5, end, 10000)
             for aval in stepthrough:
                 for ival in i:
-                    if e is list:
+                    if isinstance(e, np.ndarray):
                         for eval in e:
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)

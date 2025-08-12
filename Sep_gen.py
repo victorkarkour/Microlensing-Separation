@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.optimize as sc
 import gc
+import time
 
 class Sep_gen:
     def __init__(self):
@@ -8,25 +9,25 @@ class Sep_gen:
     @staticmethod
     def NewtRaf(M, e, maxiter=50, tol=1e-8):
         """
-    Custom vectorized Newton-Raphson implementation for Kepler's equation.
-    More memory efficient than scipy's newton.
-    
-    Parameters
-    ----------
-    M : array-like
-        Mean anomaly
-    e : float
-        Eccentricity
-    maxiter : int, optional
-        Maximum number of iterations
-    tol : float, optional
-        Convergence tolerance
+        Custom vectorized Newton-Raphson implementation for Kepler's equation.
+        More memory efficient than scipy's newton.
         
-    Returns
-    -------
-    array-like
-        Eccentric anomaly
-    """
+        Parameters
+        ----------
+        M : array-like
+            Mean anomaly
+        e : float
+            Eccentricity
+        maxiter : int, optional
+            Maximum number of iterations
+        tol : float, optional
+            Convergence tolerance
+            
+        Returns
+        -------
+        array-like
+            Eccentric anomaly
+        """
         # Old Newton-Raphson
         initial = M + e * np.sin(M)
         Solution = np.zeros_like(M)
@@ -568,6 +569,132 @@ class Sep_gen:
         else:
             exp = 1. - alpha
             return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
+    @staticmethod
+    def HistGen(param):
+        """
+        """
+        step, end, inclination, which, estep_outer, inum, wnum, _ = param
+        
+        if inclination == False:
+            colorlist = ["black", "red"]
+            labels = ["Linear", "Log"]
+        else:
+            if which == "Log":
+                colorlist = ["red"]
+                labels = ["Log"]
+            elif which == "Linear":
+                colorlist = ["black"]
+                labels = ["Linear"]
+            else:
+                colorlist = ["blue"]
+                labels = ["Linear / a"]
+        # Dictionary for storing Rchange results
+        totlinlist = []
+        totloglist = []
+        if len(estep_outer) == 0:
+             tothistlist =[[] for _ in range(9)]
+        else:
+            tothistlist = []
+        evalhistlist = []
+        
+        # Create variables for bin sizes
+        nbin = 200
+        amin = 0.5
+        amax = 21
+        # Make logbinsizes for all
+        logbinsize = (np.log10(amin)-np.log10(amax))/nbin
+        logbins = np.geomspace(amin,amax, nbin)
+        
+        print(f"start time {time.time()}, {estep_outer}")
+        
+        # For making the stepthrough of omega
+        wstep = np.linspace(0,np.pi/2,wnum)
+        if inclination:
+            # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
+            cosstep = np.linspace(0,1,inum)
+            istep = np.arccos(cosstep)
+            # Only works if estep_outer has values in the list
+            if len(estep_outer) != 0:
+                estep = estep_outer
+        for k in wstep:
+            print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
+            # Each omega calculates its own data groups
+            if inclination and len(estep_outer) != 0:
+                # steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep, estep = estep)
+                param = [estep, istep, k, end, step, which, inclination]
+            elif inclination:
+                # steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep)
+                param = [[], istep, k, end, step, which, inclination]
+            
+            start = time.perf_counter()
+            # Multi Processing
+            if inclination == True and len(estep) != 0:
+                steptotlist = Sep_gen.Rchange(param = param)
+            
+            end_time = time.perf_counter()
+            totaltime = end_time - start
+            print(f"Time to Compute was {totaltime:.4f} seconds.")    
+            
+            
+            # Once complete, takes the data through each set
+            if len(estep_outer) != 0:
+                steplindict, x, y, steplogdict, evalcirc = steptotlist
+                histlist = tothistlist
+                evallist = evalcirc
+                if which == "Log":
+                    # Log histogram
+                    totlogiter = steplogdict
+                    totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+                    hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+                    histlist.append((hist_log, histbins_log))
+                elif which == "Linear":
+                    # Linear histogram
+                    totliniter = steplindict
+                    totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                    hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                    histlist.append((hist_lin, histbins_lin))
+                elif which == "Linear / a":
+                    # Linear / a histogram
+                    totliniter = steplindict
+                    totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                    hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                    histlist.append((hist_lin, histbins_lin))  
+                else:
+                    return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
+                
+                # E = 0 histogram
+                totcirclist = [key for key, val in evallist.items() for _ in range(val)]
+                histcirc, binscirc = np.histogram(totcirclist, bins = logbins, range=(0.5, end+0.5))
+                evalhistlist = [(histcirc, binscirc)]
+            else:
+                      for j in range(len(steptotlist)):
+                        steplindict, x, y, steplogdict, blank = steptotlist[j]
+                        
+                        histlist = tothistlist[j]
+                        if which == "Log":
+                            # Log histogram
+                            totlogiter = steplogdict
+                            totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+                            hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+                            histlist.append((hist_log, histbins_log))
+                        elif which == "Linear":
+                            # Linear histogram
+                            totliniter = steplindict
+                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                            histlist.append((hist_lin, histbins_lin))
+                        elif which == "Linear / a":
+                            # Linear / a histogram
+                            totliniter = steplindict
+                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                            histlist.append((hist_lin, histbins_lin))  
+                        else:
+                            return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
+                        tothistlist[j] = histlist
+            gc.collect()
+        
+        return tothistlist, evalhistlist
         
 # param = [0, 1, np.pi/2, 0, 0, 0.1]
 # x = Sep_gen()

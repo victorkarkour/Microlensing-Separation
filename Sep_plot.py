@@ -4,14 +4,23 @@ import numpy as np
 # import scipy.optimize as sc
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib
 import time
 from multiprocessing import Pool
 import gc
+import sys
 # import math
 # from collections import Counter
 from scipy.stats import gamma
+from itertools import repeat
 from Sep_gen import Sep_gen
 
+matplotlib.use("Agg")
+# plt.figure()
+# plt.plot(1,2)
+# plt.savefig("test.png")
+# print("saved")
+# sys.exit()
 
 class Sep_plot(Sep_gen):
 
@@ -470,7 +479,7 @@ class Sep_plot(Sep_gen):
         logbinsize = (np.log10(amin)-np.log10(amax))/nbin
         logbins = np.geomspace(amin,amax, nbin)
         
-        
+        print(f"start time {time.time()}, {estep_outer}")
         
         # For making the stepthrough of omega
         wstep = np.linspace(0,np.pi/2,wnum)
@@ -659,7 +668,7 @@ class Sep_plot(Sep_gen):
             
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
             
-            
+        print(f"finich time {time.time()}, {estep_outer}")   
         
         # Saves plot
         if inclination == False:
@@ -671,7 +680,7 @@ class Sep_plot(Sep_gen):
             plt.show()
         return tothistlist, evalhistlist
 
-    def UnityPlotHist(self, which, wnum, inum):
+    def UnityPlotHist(self, which, wnum, inum, unity = False):
         """
         """
         totlist = []
@@ -702,13 +711,17 @@ class Sep_plot(Sep_gen):
         slices = int(self.numestep / self.numdiv)
         for i in range(self.numdiv):
             esteplist.append(estep[i*slices:(i+1)*slices])
+            
+            obj = Sep_gen()
         
             # Step, end, inclincation, which, estep
-            param.append((0.002, 20, True, which, esteplist[i], wnum, inum))
+            param.append((0.002, 20, True, which, esteplist[i], wnum, inum, repeat(obj)))
             
-        # Processing using parallelization        
+        # Processing using parallelization 
+        print(self.numdiv)       
         with Pool(processes = self.numdiv) as pool:
-                tothistlist = pool.map(Sep_plot.CompletePlotHist, param)
+                tothistlist = pool.map(Sep_gen.HistGen, param)
+        print("pool finished")
         for j in range(len(tothistlist)):
             totlist.append(tothistlist[j][0])
             evalcirc.append(tothistlist[j][1])
@@ -753,18 +766,49 @@ class Sep_plot(Sep_gen):
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
         
         fig.legend(handles, labels)
-        plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
-        
+        if not unity:
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
+        else:
+            plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
+            
         return tothist
     
 if __name__ == "__main__":
-    tothist = Sep_plot(numestep=10, numdiv=5)
+    
+    try:
+        numestep = int(sys.argv[1])
+    except:
+        numestep = 2
+    try:
+        numdiv = int(sys.argv[2])
+    except:
+        numdiv = 2
+    try:    
+        which = str(sys.argv[3])
+    except:
+        which = "Linear"
+    try:
+        wnum = int(sys.argv[4])
+    except:
+        wnum = 3
+    try:
+        inum = int(sys.argv[5])
+    except:
+        inum = 3
+    try:
+        unity = bool(sys.argv[6])
+    except:
+        unity=False
+    
+    tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, which = "Log")
     
     #step, end, inclination, which, estep_outer, inum, wnum
-    clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])
-    # tothist.UnityPlotHist(which = "Linear", wnum = 3, inum = 3)
+    # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])
+    tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum)
+    
+    
 
 
 

@@ -129,10 +129,10 @@ class Sep_plot(Sep_gen):
         start = time.perf_counter()
         # Multi Processing
         if inclination == True and len(estep) != 0:
-            totlist = super().Rchange(param = param)
+            totlist = Sep_gen.Rchange(param = param)
         elif inclination:
             with Pool(processes = 9) as pool:
-                totlist = pool.map(super().Rchange, param)
+                totlist = pool.map(Sep_gen.Rchange, param)
         # else:
         #     totlist = Rchange(param)
         end_time = time.perf_counter()

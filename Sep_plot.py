@@ -14,6 +14,8 @@ import sys
 from scipy.stats import gamma
 from itertools import repeat
 from Sep_gen import Sep_gen
+import click
+import os
 
 matplotlib.use("Agg")
 # plt.figure()
@@ -717,8 +719,7 @@ class Sep_plot(Sep_gen):
             # Step, end, inclincation, which, estep
             param.append((0.002, 20, True, which, esteplist[i], wnum, inum, repeat(obj)))
             
-        # Processing using parallelization 
-        print(self.numdiv)       
+        # Processing using parallelization     
         with Pool(processes = self.numdiv) as pool:
                 tothistlist = pool.map(Sep_gen.HistGen, param)
         print("pool finished")
@@ -769,37 +770,33 @@ class Sep_plot(Sep_gen):
         if not unity:
             plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
         else:
-            plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
-            
+            try:
+                print(os.get_cwd(), os.path.abspath("~/"))
+                plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
+            except:
+                print("Did not save figure, something must be wrong....")
         return tothist
-    
+
+
 if __name__ == "__main__":
-    
-    try:
-        numestep = int(sys.argv[1])
-    except:
-        numestep = 2
-    try:
-        numdiv = int(sys.argv[2])
-    except:
-        numdiv = 2
-    try:    
-        which = str(sys.argv[3])
-    except:
-        which = "Linear"
-    try:
-        wnum = int(sys.argv[4])
-    except:
-        wnum = 3
-    try:
-        inum = int(sys.argv[5])
-    except:
-        inum = 3
-    try:
-        unity = bool(sys.argv[6])
-    except:
-        unity=False
-    
+    @click.command()
+    @click.argument("numestep", required=False, type=int)#, help = "number of e values stepping through")
+    @click.argument("numdiv", required=False, type=int)#, help = "divisors for e values")
+    @click.argument("which", required=False)#, help = "type of step through (Linear, Log, Linear/a)")
+    @click.argument("wnum", required=False, type=int,)# help = "number of omegas to step through")
+    @click.argument("inum", required=False, type=int,)# help = "number of i's to step through")
+    @click.option("--unity/--no-unity", default=False, show_default=True,)# help="Toggle unity output save path.")
+    def cli(numestep, numdiv, which, wnum, inum, unity):
+        # Defaults if not provided positionally
+        if numestep is None: numestep = 10 # Usually 80
+        if numdiv is None: numdiv = 5 # Usually 10
+        if which is None: which = "Linear" # Usually Linear
+        if wnum is None: wnum = 3 # Usually 75
+        if inum is None: inum = 3 # Usually 75
+        which = which.capitalize() if which.lower() == "linear" else which
+        plotter = Sep_plot(numestep=numestep, numdiv=numdiv)
+        plotter.UnityPlotHist(which=which, wnum=wnum, inum=inum, unity=unity)
+    cli()
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
     # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
     # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, which = "Log")

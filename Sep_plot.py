@@ -767,14 +767,18 @@ class Sep_plot(Sep_gen):
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
         
         fig.legend(handles, labels)
-        if not unity:
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
-        else:
-            try:
-                print(os.get_cwd(), os.path.abspath("~/"))
+        try:
+            
+            if not unity:
+                plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
+                print(os.get_cwd(), os.path.abspath(f"/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
+            else:
                 plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
-            except:
-                print("Did not save figure, something must be wrong....")
+                print(os.get_cwd(), os.path.abspath(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
+                print("It works!")
+        except:
+            print("Did not save figure, something must be wrong....")
+            print(os.get_cwd())
         return tothist
 
 
@@ -785,7 +789,7 @@ if __name__ == "__main__":
     @click.argument("which", required=False)#, help = "type of step through (Linear, Log, Linear/a)")
     @click.argument("wnum", required=False, type=int,)# help = "number of omegas to step through")
     @click.argument("inum", required=False, type=int,)# help = "number of i's to step through")
-    @click.option("--unity/--no-unity", default=False, show_default=True,)# help="Toggle unity output save path.")
+    @click.option("--unity/--no-unity", default=False, show_default=True,)# help="Toggle unity output save path.") # Check if this needs to be removed
     def cli(numestep, numdiv, which, wnum, inum, unity):
         # Defaults if not provided positionally
         if numestep is None: numestep = 10 # Usually 80

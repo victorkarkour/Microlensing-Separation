@@ -18,12 +18,6 @@ import click
 import os
 
 matplotlib.use("Agg")
-# plt.figure()
-# plt.plot(1,2)
-# plt.savefig("test.png")
-# print("saved")
-# sys.exit()
-
 class Sep_plot(Sep_gen):
 
     def __init__(self, numestep = 10, numdiv = 2):# which = "Log", wnum = 10, inum = 10):
@@ -55,7 +49,7 @@ class Sep_plot(Sep_gen):
         start = time.perf_counter()
         
         with Pool(processes = 3) as pool:
-            result = pool.map(super().WorkProj, param)
+            result = pool.map(self.WorkProj, param)
         
         
         # Test source
@@ -87,13 +81,11 @@ class Sep_plot(Sep_gen):
         
         # For each value in the stepthrough, calculates orbit
         for val in stepthrough:
-                x, y, t = super().OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
                 
                 # Appends results of orbital projection
                 list1.append((x,y))
-                # if val == 0 and e == 0 and i == 0:
-                #     listt = []
-                #     listt.append(t)
+                listt.append(t)
         
         return list1, param, listt
 
@@ -103,17 +95,6 @@ class Sep_plot(Sep_gen):
         """
         # Goes from both Linear and Log calculations to just Linear
         Linear = which
-        
-        # Parameters for Paralellization
-        # param = [
-        # # Row 1
-        # (0. , 0., w, end, step, Linear, inclination), (0., np.pi/6, w, end, step, Linear, inclination), (0., np.pi/3, w, end, step, Linear, inclination), (0., np.pi/2, w, end, step, Linear, inclination),
-        # # Row 2
-        # (0.5, 0., w, end, step, Linear, inclination), (0.5, np.pi/6, w, end, step, Linear, inclination), (0.5, np.pi/3, w, end, step, Linear, inclination), (0.5, np.pi/2, w, end, step, Linear, inclination),
-        # # Row 3
-        # (0.9, 0., w, end, step, Linear, inclination), (0.9, np.pi/6, w, end, step, Linear, inclination), (0.9, np.pi/3, w, end, step, Linear, inclination), (0.9, np.pi/2, w, end, step, Linear, inclination)
-            
-        # ]
         
         if inclination and len(estep) == 0:
             param = [
@@ -125,15 +106,27 @@ class Sep_plot(Sep_gen):
                 (0.3, istep, w, end, step, Linear, inclination), (0.6, istep, w, end, step, Linear, inclination), (0.9, istep, w, end, step, Linear, inclination)
                 
                      ]
-        else:
+        elif inclination:
             param = [estep, istep, w, end, step, Linear, inclination]
+        else:
+            # Parameters for Paralellization
+            param = [
+            # Row 1
+            (0. , 0., w, end, step, Linear, inclination), (0., np.pi/6, w, end, step, Linear, inclination), (0., np.pi/3, w, end, step, Linear, inclination), (0., np.pi/2, w, end, step, Linear, inclination),
+            # Row 2
+            (0.5, 0., w, end, step, Linear, inclination), (0.5, np.pi/6, w, end, step, Linear, inclination), (0.5, np.pi/3, w, end, step, Linear, inclination), (0.5, np.pi/2, w, end, step, Linear, inclination),
+            # Row 3
+            (0.9, 0., w, end, step, Linear, inclination), (0.9, np.pi/6, w, end, step, Linear, inclination), (0.9, np.pi/3, w, end, step, Linear, inclination), (0.9, np.pi/2, w, end, step, Linear, inclination)
+                
+            ]
+        
         
         start = time.perf_counter()
         # Multi Processing
         if inclination == True and len(estep) != 0:
             totlist = Sep_gen.Rchange(param = param)
-        elif inclination:
-            with Pool(processes = 9) as pool:
+        else:
+            with Pool(processes = 6) as pool:
                 totlist = pool.map(Sep_gen.Rchange, param)
         # else:
         #     totlist = Rchange(param)
@@ -153,7 +146,7 @@ class Sep_plot(Sep_gen):
 
     def MultiPlotProj(self, w = 0, start = 0.5, end = 20, step = 0.5):
         """
-        Creates a 3 by 3 plot of 3 planetary orbits each with varying semimajor axes
+        Creates a 3 by 4 plot of 20 planetary orbits each with varying semimajor axes
         according to differing parameters.
         
         --------
@@ -183,153 +176,137 @@ class Sep_plot(Sep_gen):
         -------
         ### Returns 
         
-        3 by 3 Plot of Planetary Orbits
+        3 by 4 Plot of Planetary Orbits
         
         """
         
         # Initialize Lists
         listt = []
         rlist = []
-        
-        # Data points being created for each plots
-        # 3 for each section
+        totlist = []
         
         # Gets everything ready for multiprocessing of orbital projections
-        list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step)
+        # Does it for 4 omegas
+        for i in range(4):
+            list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step)
+            w += np.pi/6
+            totlist.append((list, totparam, listt))
+            i+=1
+            
         
-        # DEPRECATED
-        # vlistmin = []
-        # vlistmax = []
-        # veltot = []
-        # for i in range(len(list)):
-        #     iter = list[i]
-        #     j = 0
-        #     vellist = []
-        #     param = totparam[i]
-        #     for j in range(len(iter)):
-        #         initialx, initialy = iter[j]
-        #         t = listt[j]
-        #         parameter = param[j]
-        #         # Calculates velocity
-        #         vel = Velocity(t, parameter)
-        #         vel = vel.tolist()
-        #         vellist.append(vel)
-        #         # Takes only the local min and max
-        #         vlistmin.append(min(vel))
-        #         # print(min(vel))
-        #         vlistmax.append(max(vel))
-        #     veltot.append(vellist)
-        # # Afterwards, takes the listed values and finds the global max and global min
-        # velmax = np.max(vlistmax)
-        # velmin = 0.1
+        fig = plt.figure(figsize = (11,9))
+        # Makes the 2 x 2 figure for the 3 x 4 figures to go into
+        subfigs = fig.subfigures(2,2,hspace = 0,wspace = 0)            
         
-        fig, axs = plt.subplots(3,4, figsize = (11,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
         fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$")
-        # Iterates through each subplot in the 3x3 figure
-        for j, ax  in enumerate(axs.flatten()):
-            # Takes the first data set in the list
-            # These contain 12 other data sets  
+        for outer, subfig in enumerate(subfigs.flat):
             
-            iterlist = list[j]
-            g = 0
-            param = totparam[j]
-            
-            # Finds points <= 0.01 for each projection
-            rtemp, xchange, ychange, rtemp_log = super().Rchange(param, coords = True)
-            
-            vel = super().Velocity(param)
-            # Iterates through the data clump to access
-            # the data set 
-            for g in range(len(iterlist)):
-                # This contains each data set in the data clump
-                initialx, initialy = iterlist[g]
-                # Don't know why this is here, keeping it just in case
-                # t = listt[g]
-                # Calculates the velocity of each data point in the data set
+            list, totparam, listt = totlist[outer]
+            # Iterates through each subplot in the 3x4 figure
+            axs = subfig.subplots(3,4,sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0)) 
+            for j, ax  in enumerate(axs.flatten()):
                 
-                rlist.append(rtemp)
-                # print("Last Velocity Output: ", vel[-1])
-                velmax = np.max(vel[g])
-                # # IMPORTANT!!!!!
-                velmin = 0.1
-                # velmin = np.min(vel)
+                # Takes the first data set in the list
+                # These contain 12 other data sets  
+                iterlist = list[j]
+                param = totparam[j]
                 
-                dot = super().DotSize(vel[g],velmax,velmin)
-                # print("Last Dot Size Output: ", dot[-1])
+                # Finds points <= 0.01 for each projection
+                rtemp, xchange, ychange, rtemp_log, temp = Sep_gen.Rchange(param, coords = True)
                 
-                # Determines the colors of each data set according
-                # to its positioning
-                colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
-                                "pink", "blue", "red", "green", "cyan"]
-                if end == 1.25:
-                    if g == 0:
-                        label = "a = 0.75"
-                        color = colorlist[g]
-                    elif g == 1:
-                        label = "a = 1.0"
-                        color = colorlist[g]
+                vel = Sep_gen.Velocity(param)
+                # Iterates through the data clump to access
+                # the data set 
+                for g in range(len(iterlist)):
+                    # This contains each data set in the data clump
+                    initialx, initialy = iterlist[g]
+                    # Calculates the velocity of each data point in the data set
+                    
+                    rlist.append(rtemp)
+                    # print("Last Velocity Output: ", vel[-1])
+                    velmax = np.max(vel[g])
+                    # # IMPORTANT!!!!!
+                    velmin = 0.1
+                    
+                    dot = Sep_gen.DotSize(vel[g],velmax,velmin)
+                    # print("Last Dot Size Output: ", dot[-1])
+                    
+                    # Determines the colors of each data set according
+                    # to its positioning
+                    colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
+                                    "pink", "blue", "red", "green", "cyan"]
+                    if end == 1.25:
+                        if g == 0:
+                            label = "a = 0.75"
+                            color = colorlist[g]
+                        elif g == 1:
+                            label = "a = 1.0"
+                            color = colorlist[g]
+                        else:
+                            label = "a = 1.25"
+                            color = colorlist[g]
+                    elif end == 1.5:
+                        if g == 0:
+                            label = "a = 0.5"
+                            color = colorlist[g]
+                        elif g == 1:
+                            label = "a = 1.0"
+                            color = colorlist[g]
+                        else:
+                            label = "a = 1.5"
+                            color = colorlist[g]
                     else:
-                        label = "a = 1.25"
-                        color = colorlist[g]
-                elif end == 1.5:
-                    if g == 0:
-                        label = "a = 0.5"
-                        color = colorlist[g]
-                    elif g == 1:
-                        label = "a = 1.0"
-                        color = colorlist[g]
-                    else:
-                        label = "a = 1.5"
-                        color = colorlist[g]
-                else:
-                    rangelist = np.arange(0.5,end+0.5,0.5)
-                    alpha = rangelist[g]
-                    label = f"a = {alpha}"
-                    color = colorlist[g % 10]   
+                        rangelist = np.arange(0.5,end+0.5,0.5)
+                        alpha = rangelist[g]
+                        label = f"a = {alpha}"
+                        color = colorlist[g % 10]   
+                    
+                    # Plots the data set, including the dot size according to velocity        
+                    dataproj = ax.scatter(initialx, initialy, s=dot, color= color, label=label)
+                    # Also includes points at which |r-r0| <= 0.01
+                    data = ax.scatter(xchange[g], ychange[g], s = 8, color = "yellow")
+                    
+                    # Creates the grid for each plot
+                    ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
                 
-                # Plots the data set, including the dot size according to velocity        
-                dataproj = ax.scatter(initialx, initialy, s=dot, color= color, label=label)
-                # Also includes points at which |r-r0| <= 0.01
-                data = ax.scatter(xchange[g], ychange[g], s = 8, color = "yellow")
+                # Plots an Einstein Ring Radius of 1 around each plot
+                Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
                 
-                # Creates the grid for each plot
-                ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
-            
-            # Plots an Einstein Ring Radius of 1 around each plot
-            Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
-            
-            # Adds the Circle to the plot
-            ax.add_patch(Circ2)
-            
-            # Just grabs the labels for each plot just before it iterates through again
-            if j == 0:
-                handles, labels = ax.get_legend_handles_labels()
+                # Adds the Circle to the plot
+                ax.add_patch(Circ2)
                 
-            # Limits
-            ax.set_xlim(-2,2)
-            ax.set_ylim(-2,2)
+                # Just grabs the labels for each plot just before it iterates through again
+                if j == 0:
+                    handles, labels = ax.get_legend_handles_labels()
+                    
+                # Limits
+                ax.set_xlim(-2,2)
+                ax.set_ylim(-2,2)
+                ax.set_xticks([])
+                ax.set_yticks([])
         
         # Shows the legend of each data point
         fig.legend(handles,labels,fontsize="small")
         # Shows where the data values change according to the plot 
-        plt.text(-15.75,7.95,"e=0")
-        plt.text(-15.75,3.95,"e=0.5")
-        plt.text(-15.75,-0.1,"e=0.9")
-        plt.text(-12.25,10.25,"i=0")
-        plt.text(-8.25,10.25,"i=30")
-        plt.text(-4.25,10.25,"i=60")
-        plt.text(0,10.25,"i=90")
+        # plt.text(-15.75,7.95,"e=0")
+        # plt.text(-15.75,3.95,"e=0.5")
+        # plt.text(-15.75,-0.1,"e=0.9")
+        # plt.text(-12.25,10.25,"i=0")
+        # plt.text(-8.25,10.25,"i=30")
+        # plt.text(-4.25,10.25,"i=60")
+        # plt.text(0,10.25,"i=90")
         # plt.text()
         
         # Saves to Figure Folder
-        plt.savefig("/College Projects/Microlensing Separation/Figures/Multi_a05_20_omega_pi_4.png")
-        plt.show()
+        plt.savefig(f"/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omegas.png")
+        # plt.show()
         
         return rlist
 
     def MultiPlotHist(self, w = 0, step = 0.002, end = 10, which = "Log"):
         """
         """
+        rtotlist = []
         
         # totlinlist = [[] for _ in range(12)]
         # totloglist = [[] for _ in range(12)]
@@ -340,97 +317,103 @@ class Sep_plot(Sep_gen):
         else:
             colorlist = ["black", "red", "blue"]
         
-        totlist, param = self.DataHist(w = w, step = step, end = end, which = which)
+        for i in range(4):
+            rlist, param = self.DataHist(w = w, step = step, end = end, which = which)
+            w += np.pi/6
+            rtotlist.append((rlist, param))
+            i+=1     
         
+        fig = plt.figure(figsize = (12,10))
         
-        fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
         if which == "Linear":
-            fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$" f"\n ({which})")
+            fig.suptitle("Orbital Projections close to $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 to \frac{\pi}{2}$" f"\n ({which})")
         else:
-            fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)")
-        # Iterates through each subplot in the 3x4 figure
-        
-        for j, ax  in enumerate(axs.flatten()):
-            steplindict, x, y, steplogdict, steplinsemidict = totlist[j]
+            fig.suptitle("Orbital Projection close to $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 to \frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)")
+        # Makes the 2 x 2 figure for the 3 x 4 figures to go into
+        subfigs = fig.subfigures(2,2)            
+        plt.subplots_adjust(hspace = 0.2, wspace= 0.2)
+        for outer, subfig in enumerate(subfigs.flat):
             
-            iterparam = param[j]
-            totliniter = steplindict
-            totlinitersemi = steplinsemidict
-            totlogiter = steplogdict
+            totlist, param = rtotlist[outer]
+            # Iterates through each subplot in the 3x4 figure
+            axs = subfig.subplots(3,4,sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0)) 
             
-            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-            totlinsemilist = [key for key, val in totlinitersemi.items() for _ in range(val)]
-            totloglist = [key for key, val in totlogiter.items() for _ in range(val)] 
-            
-            # Create variables for bin sizes
-            nbin = 200
-            amin = 0.5
-            amax = 21
-            # Make logbinsizes for all
-            logbinsize = (np.log10(amin)-np.log10(amax))/nbin
-            
-            weights_lin = np.abs(np.ones_like(totlinlist) / (len(totlinlist) * logbinsize))
-            weights_linsemi = np.abs(np.ones_like(totlinsemilist) / (len(totlinsemilist) * logbinsize))    
-            weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))
-            
-            # Creates the log spaced bins for our data
-            # Stupid fix to stupid problems :)
-            if j == 0 and which == "Linear":
-                logbins_lin = np.linspace(amin,amax,1000+1)
-            else:
-                if j == 0:
-                    logbins_lin = np.linspace(amin,amax,nbin)
-                    logbins_log = np.geomspace(amin,amax,nbin)
-                else:    
-                    logbins_lin = np.geomspace(amin,amax, nbin)
-                    logbins_log = np.geomspace(amin,amax,nbin)
-            if which == "Linear":
+            for j, ax  in enumerate(axs.flatten()):
+                steplindict, x, y, steplogdict, steplinsemidict = totlist[j]
                 
-                datahist_lin, bins, patches_lin = ax.hist(
-                    totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
-                    stacked=True, histtype="step",
-                    weights=weights_lin
-                )
-            else:
-                datahist_lin, bins, patches_lin = ax.hist(
-                    totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
-                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
-                    weights=weights_lin, fc = "none",
-                )
-                datahist_log, bins, patches_log = ax.hist(
-                    totloglist, bins=logbins_log, range=(0.5, end+0.5),
-                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
-                    weights=weights_log, fc = "none",
-                )
-                datahist_linsemi , bins, patches_linsemi = ax.hist(
-                    totlinsemilist, bins=logbins_lin, range=(0.5, end+0.5),
-                    stacked=True, histtype="step", alpha = 0.40, edgecolor = "blue",
-                    weights=weights_linsemi, fc = "none",
-                )
-            if which == "Linear":
-                for patch in patches_lin:
-                    patch.set_edgecolor("k")
-            else:
-                for patch in patches_lin:
-                    patch.set_edgecolor("k")
-                for patch in patches_log:
-                    patch.set_edgecolor("r")
-                for patch in patches_linsemi:
-                    patch.set_edgecolor("b")
-            ax.set_xlim(0.5,20.5)
-            ax.set_ylim(0,10)
-            ax.set_xscale("log")
-            ax.text(6e0, 8.5, f"$e = {iterparam[0]}$") 
-            ax.text(6e0, 7.5, f"$i = {round(iterparam[1],2)}$")
-            ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
+                iterparam = param[j]
+                totliniter = steplindict
+                totlinitersemi = steplinsemidict
+                totlogiter = steplogdict
+                
+                totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                totlinsemilist = [key for key, val in totlinitersemi.items() for _ in range(val)]
+                totloglist = [key for key, val in totlogiter.items() for _ in range(val)] 
+                
+                # Create variables for bin sizes
+                nbin = 200
+                amin = 0.5
+                amax = 21
+                # Make logbinsizes for all
+                logbinsize = (np.log10(amin)-np.log10(amax))/nbin
+                
+                weights_lin = np.abs(np.ones_like(totlinlist) / (len(totlinlist) * logbinsize))
+                weights_linsemi = np.abs(np.ones_like(totlinsemilist) / (len(totlinsemilist) * logbinsize))    
+                weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))
+                
+                # Creates the log spaced bins for our data
+                # Stupid fix to stupid problems :)
+                if j == 0 and which == "Linear":
+                    logbins_lin = np.linspace(amin,amax,1000+1)
+                else:
+                    if j == 0:
+                        logbins_lin = np.linspace(amin,amax,nbin)
+                        logbins_log = np.geomspace(amin,amax,nbin)
+                    else:    
+                        logbins_lin = np.geomspace(amin,amax, nbin)
+                        logbins_log = np.geomspace(amin,amax,nbin)
+                if which == "Linear":
+                    
+                    datahist_lin, bins, patches_lin = ax.hist(
+                        totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
+                        stacked=True, histtype="step",
+                        weights=weights_lin
+                    )
+                else:
+                    datahist_lin, bins, patches_lin = ax.hist(
+                        totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
+                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+                        weights=weights_lin, fc = "none",
+                    )
+                    datahist_log, bins, patches_log = ax.hist(
+                        totloglist, bins=logbins_log, range=(0.5, end+0.5),
+                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                        weights=weights_log, fc = "none",
+                    )
+                    datahist_linsemi , bins, patches_linsemi = ax.hist(
+                        totlinsemilist, bins=logbins_lin, range=(0.5, end+0.5),
+                        stacked=True, histtype="step", alpha = 0.40, edgecolor = "blue",
+                        weights=weights_linsemi, fc = "none",
+                    )
+                if which == "Linear":
+                    for patch in patches_lin:
+                        patch.set_edgecolor("k")
+                else:
+                    for patch in patches_lin:
+                        patch.set_edgecolor("k")
+                    for patch in patches_log:
+                        patch.set_edgecolor("r")
+                    for patch in patches_linsemi:
+                        patch.set_edgecolor("b")
+                ax.set_xlim(0.5,20.5)
+                ax.set_ylim(0,10)
+                if outer != 2:
+                    ax.set_yticks([])
+                ax.set_xscale("log")
+                ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
+                ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
+                ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             
-        # plt.text(1.25e-6,25,"e=0")
-        # plt.text(1.25e-6,15,"e=0.5")
-        # plt.text(1.25e-6,5,"e=0.9")
-        # plt.text(4e-5,30.5,"i=0")
-        # plt.text(1.5e-3,30.5,"i=30")
-        # plt.text(5.5e-2,30.5,"i=60")
-        # plt.text(2.75, 30.5,"i=90")
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
         if which == "Linear":
             labels = ["Linear"]
@@ -438,10 +421,10 @@ class Sep_plot(Sep_gen):
             labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
         fig.legend(handles, labels)
         if which == "Linear":
-            plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_Linear.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omegas_0002_{which}.png')
         else:
-            plt.savefig('/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0001_LinLawLog.png')
-        plt.show()
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omegas_0002_{which}.png')
+        # plt.show()
         return totlist
 
     @staticmethod
@@ -741,7 +724,7 @@ class Sep_plot(Sep_gen):
                     hist, bins = histlist[val]
                     ecirchist, circbins = circiter
                     # For Gamma weighting
-                    gammanorm = np.sum(gammastep)
+                    gammanorm = gammastep[val]
                     gammahist = gammanorm * hist
                     if val == 0:
                         if i == 0:
@@ -753,7 +736,8 @@ class Sep_plot(Sep_gen):
                         tothist = tothist + hist
                         norm = np.abs(1 / (np.sum(self.numestep)))
                         StepPatch = ax.stairs(tothist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
-                        StepPatch = ax.stairs(totgammahist, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                        # May or may not need norm for gamma
+                        StepPatch = ax.stairs(totgammahist * norm, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
                         StepPatch = ax.stairs(ecirchist, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
                     else:
                         tothist = tothist + hist
@@ -779,31 +763,37 @@ class Sep_plot(Sep_gen):
 
 
 if __name__ == "__main__":
-    @click.command()
-    @click.argument("numestep", required=False, type=int)#, help = "number of e values stepping through")
-    @click.argument("numdiv", required=False, type=int)#, help = "divisors for e values")
-    @click.argument("which", required=False)#, help = "type of step through (Linear, Log, Linear/a)")
-    @click.argument("wnum", required=False, type=int,)# help = "number of omegas to step through")
-    @click.argument("inum", required=False, type=int,)# help = "number of i's to step through")
-    @click.option("--unity/--no-unity", default=False, show_default=True,)# help="Toggle unity output save path.")
-    def cli(numestep, numdiv, which, wnum, inum, unity):
-        # Defaults if not provided positionally
-        if numestep is None: numestep = 10 # Usually 80
-        if numdiv is None: numdiv = 5 # Usually 10
-        if which is None: which = "Linear" # Usually Linear
-        if wnum is None: wnum = 3 # Usually 75
-        if inum is None: inum = 3 # Usually 75
-        which = which.capitalize() if which.lower() == "linear" else which
-        plotter = Sep_plot(numestep=numestep, numdiv=numdiv)
-        plotter.UnityPlotHist(which=which, wnum=wnum, inum=inum, unity=unity)
-    cli()
+    # @click.command()
+    # @click.argument("numestep", required=False, type=int)#, help = "number of e values stepping through")
+    # @click.argument("numdiv", required=False, type=int)#, help = "divisors for e values")
+    # @click.argument("which", required=False)#, help = "type of step through (Linear, Log, Linear/a)")
+    # @click.argument("wnum", required=False, type=int,)# help = "number of omegas to step through")
+    # @click.argument("inum", required=False, type=int,)# help = "number of i's to step through")
+    # @click.option("--unity/--no-unity", default=False, show_default=True,)# help="Toggle unity output save path.")
+    # def cli(numestep, numdiv, which, wnum, inum, unity):
+    #     # Defaults if not provided positionally
+    #     if numestep is None: numestep = 10 # Usually 80
+    #     if numdiv is None: numdiv = 5 # Usually 10
+    #     if which is None: which = "Linear" # Usually Linear
+    #     if wnum is None: wnum = 3 # Usually 75
+    #     if inum is None: inum = 3 # Usually 75
+    #     which = which.capitalize() if which.lower() == "linear" else which
+    #     plotter = Sep_plot(numestep=numestep, numdiv=numdiv)
+    #     plotter.UnityPlotHist(which=which, wnum=wnum, inum=inum, unity=unity)
+    # cli()
+    numestep = 5
+    numdiv = 5
+    wnum = 5
+    inum = wnum
+    which = "Log"
+    unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    # rlist = MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
-    # rtemp = MultiPlotHist(w = np.pi/2., step = 0.002, end = 20, which = "Log")
+    # rlist = tothist.MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
+    rtemp = tothist.MultiPlotHist(w = np.pi/4., step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])
-    tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum)
+    # tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum, unity = unity)
     
     
 

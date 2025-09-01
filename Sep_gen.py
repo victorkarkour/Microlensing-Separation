@@ -385,7 +385,7 @@ class Sep_gen:
         # Has different parameter sets if conditions are met
         if coords == True:
             e, i, w, end, step, start = param
-            Linear = True
+            Linear = "Linear"
         else:
             e, i, w, end, step, Linear, inclination = param
             # if inclination:
@@ -394,64 +394,48 @@ class Sep_gen:
         # Only steps through Linear portion of points
         if Linear == "Linear":
             # Linear Portion
-            # stepthrough = np.arange(0.5, end + step, step)
-            stepthrough = Sep_gen.stepdata(0, 0.5, end, 10000)
             # Goes through each value of a in the stepthrough
-            for aval in stepthrough:
-                for ival in i:
-                    if isinstance(e, np.ndarray):
-                        for eval in e:    
-                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
-                            r = np.sqrt(x**2+y**2)
-                            # Whereever there is this value, it finds the indices of each point in the list
-                            conlin = np.where(np.abs(r-r0)<=0.01)
-                
-                            if coords == False and inclination:
-                                # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
-                                if aval in totlindict:
-                                    totlindict[aval] += len(conlin[0])
-                                else:
-                                    totlindict[aval] = len(conlin[0])
-                                if eval == 0:
-                                    if aval in totevaldict:
-                                        totevaldict[aval] += len(conlin[0])
+            if isinstance(i, np.ndarray):
+                stepthrough = Sep_gen.stepdata(0, 0.5, end, 10000)
+                # Goes through each value of a in the stepthrough
+                for aval in stepthrough:
+                    for ival in i:
+                        if isinstance(e, np.ndarray):
+                            for eval in e:    
+                                x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                                r = np.sqrt(x**2+y**2)
+                                # Whereever there is this value, it finds the indices of each point in the list
+                                conlin = np.where(np.abs(r-r0)<=0.01)
+                    
+                                if coords == False and inclination:
+                                    # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                                    if aval in totlindict:
+                                        totlindict[aval] += len(conlin[0])
                                     else:
-                                        totevaldict[aval] = len(conlin[0])
-                            else: 
-                                # Same thing as coords == False but has coord lists for Multiplot
-                                if aval in totlindict:
-                                    totlindict[aval] += len(conlin[0])
-                                else:
-                                    totlindict[aval] = len(conlin[0])
-                                if coords:
-                                    xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
-                                    ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+                                        totlindict[aval] = len(conlin[0])
+                                    if eval == 0:
+                                        if aval in totevaldict:
+                                            totevaldict[aval] += len(conlin[0])
+                                        else:
+                                            totevaldict[aval] = len(conlin[0])
+            else:
+                if coords:
+                    totlindict = []
+                stepthrough = np.arange(0.5, end + step, step)
+                for aval in stepthrough:
+                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
+                    r = np.sqrt(x**2+y**2)
+                    # Whereever there is this value, it finds the indices of each point in the list
+                    conlin = np.where(np.abs(r-r0)<=0.01)
+                    # Same thing as coords == False but has coord lists for Multiplot
+                    if aval in totlindict:
+                        totlindict[aval] += len(conlin[0])
                     else:
-                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
-                            r = np.sqrt(x**2+y**2)
-                            # Whereever there is this value, it finds the indices of each point in the list
-                            conlin = np.where(np.abs(r-r0)<=0.01)
-                
-                            if coords == False and inclination:
-                                # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
-                                if aval in totlindict:
-                                    totlindict[aval] += len(conlin[0])
-                                else:
-                                    totlindict[aval] = len(conlin[0])
-                                if eval == 0:
-                                    if aval in totevaldict:
-                                        totevaldict[aval] += len(conlin[0])
-                                    else:
-                                        totevaldict[aval] = len(conlin[0])
-                            else: 
-                                # Same thing as coords == False but has coord lists for Multiplot
-                                if aval in totlindict:
-                                    totlindict[aval] += len(conlin[0])
-                                else:
-                                    totlindict[aval] = len(conlin[0])
-                                if coords:
-                                    xlist.append(np.where(np.abs(r-r0)<=0.01, x, None))
-                                    ylist.append(np.where(np.abs(r-r0)<=0.01, y, None))
+                        totlindict[aval] = len(conlin[0])
+                    if coords:
+                        totlindict.append(np.where(np.abs(r-r0)<=0.01 , aval, 0))
+                        xlist.append(np.where(np.abs(r-r0)<=0.01 , x, None))
+                        ylist.append(np.where(np.abs(r-r0)<=0.01 , y, None))
             return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Log":
             if inclination == False:

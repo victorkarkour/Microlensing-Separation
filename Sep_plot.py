@@ -751,14 +751,18 @@ class Sep_plot(Sep_gen):
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
         
         fig.legend(handles, labels)
-        if not unity:
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
-        else:
-            try:
-                print(os.get_cwd(), os.path.abspath("~/"))
+        try:
+            
+            if not unity:
+                plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
+                print(os.get_cwd(), os.path.abspath(f"/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
+            else:
                 plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
-            except:
-                print("Did not save figure, something must be wrong....")
+                print(os.get_cwd(), os.path.abspath(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
+                print("It works!")
+        except:
+            print("Did not save figure, something must be wrong....")
+            print(os.get_cwd())
         return tothist
 
 

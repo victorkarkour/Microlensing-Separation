@@ -187,6 +187,7 @@ class Sep_plot(Sep_gen):
         
         # Gets everything ready for multiprocessing of orbital projections
         # Does it for 4 omegas
+        w = 0
         for i in range(4):
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step)
             w += np.pi/6
@@ -317,6 +318,7 @@ class Sep_plot(Sep_gen):
         else:
             colorlist = ["black", "red", "blue"]
         
+        w = 0
         for i in range(4):
             rlist, param = self.DataHist(w = w, step = step, end = end, which = which)
             w += np.pi/6
@@ -792,8 +794,8 @@ if __name__ == "__main__":
     which = "Log"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    # rlist = tothist.MultiPlotProj(w = np.pi/4., start = 0.5, end = 20, step = 0.5)
-    rtemp = tothist.MultiPlotHist(w = np.pi/4., step = 0.002, end = 20, which = which)
+    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
+    rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])

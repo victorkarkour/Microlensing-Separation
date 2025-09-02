@@ -687,7 +687,7 @@ class Sep_plot(Sep_gen):
         colorlist = ["blue", "red", "black"]
         # Gamma Portion
         alpha = 1.35 # Shape (Alpha)
-        theta = 5.05 # Scale (Beta)
+        theta = 1/5.05 # Scale (Beta = 1 / Scale)
         x = np.linspace(0,0.98,self.numestep)
         gammastep = gamma.pdf(x, a = alpha, scale = theta)
         

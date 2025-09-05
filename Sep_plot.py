@@ -285,18 +285,26 @@ class Sep_plot(Sep_gen):
                 ax.set_ylim(-2,2)
                 ax.set_xticks([])
                 ax.set_yticks([])
+                
+                if outer == 2:
+                    ax.text(-15.75,7.95,"e=0")
+                    ax.text(-15.75,3.95,"e=0.5")
+                    ax.text(-15.75,-0.1,"e=0.9")
+                    ax.text(-12.25,10.25,"i=0")
+                    ax.text(-8.25,10.25,"i=$\frac{\pi}{6}$")
+                    ax.text(-4.25,10.25,"i=\frac{\pi}{3}")
+                    ax.text(0,10.25,"i=\frac{\pi}{2}")
         
         # Shows the legend of each data point
         fig.legend(handles,labels,fontsize="small")
         # Shows where the data values change according to the plot 
-        # plt.text(-15.75,7.95,"e=0")
-        # plt.text(-15.75,3.95,"e=0.5")
-        # plt.text(-15.75,-0.1,"e=0.9")
-        # plt.text(-12.25,10.25,"i=0")
-        # plt.text(-8.25,10.25,"i=30")
-        # plt.text(-4.25,10.25,"i=60")
-        # plt.text(0,10.25,"i=90")
-        # plt.text()
+        # subfig.text(-15.75,7.95,"e=0")
+        # subfig.text(-15.75,3.95,"e=0.5")
+        # subfig.text(-15.75,-0.1,"e=0.9")
+        # subfig.text(-12.25,10.25,"i=0")
+        # subfig.text(-8.25,10.25,"i=30")
+        # subfig.text(-4.25,10.25,"i=60")
+        # subfig.text(0,10.25,"i=90")
         
         # Saves to Figure Folder
         plt.savefig(f"/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omegas.png")
@@ -791,11 +799,11 @@ if __name__ == "__main__":
     numdiv = 5
     wnum = 5
     inum = wnum
-    which = "Log"
+    which = "Linear"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
-    rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
+    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
+    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])

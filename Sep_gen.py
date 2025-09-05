@@ -428,14 +428,15 @@ class Sep_gen:
                     # Whereever there is this value, it finds the indices of each point in the list
                     conlin = np.where(np.abs(r-r0)<=0.01)
                     # Same thing as coords == False but has coord lists for Multiplot
-                    if aval in totlindict:
-                        totlindict[aval] += len(conlin[0])
-                    else:
-                        totlindict[aval] = len(conlin[0])
                     if coords:
                         totlindict.append(np.where(np.abs(r-r0)<=0.01 , aval, 0))
                         xlist.append(np.where(np.abs(r-r0)<=0.01 , x, None))
                         ylist.append(np.where(np.abs(r-r0)<=0.01 , y, None))
+                    else:
+                        if aval in totlindict:
+                            totlindict[aval] += len(conlin[0])
+                        else:
+                            totlindict[aval] = len(conlin[0])
             return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Log":
             if inclination == False:

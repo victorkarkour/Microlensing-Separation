@@ -16,6 +16,7 @@ from itertools import repeat
 from Sep_gen import Sep_gen
 import click
 import os
+import matplotlib.gridspec as gridspec
 
 matplotlib.use("Agg")
 class Sep_plot(Sep_gen):
@@ -195,16 +196,16 @@ class Sep_plot(Sep_gen):
             i+=1
             
         
-        fig = plt.figure(figsize = (11,9))
+        fig = plt.figure(figsize = (13,9))
         # Makes the 2 x 2 figure for the 3 x 4 figures to go into
-        subfigs = fig.subfigures(2,2,hspace = 0,wspace = 0)            
+        subfigs = fig.subfigures(2,2, hspace = 0, wspace = 0)            
         
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"$\omega$ = $\frac{\pi}{4}$")
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"From $\omega$ 0 to $\ \frac{\pi}{2}$", x = 0.49, y = 0.985)
         for outer, subfig in enumerate(subfigs.flat):
             
             list, totparam, listt = totlist[outer]
             # Iterates through each subplot in the 3x4 figure
-            axs = subfig.subplots(3,4,sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0)) 
+            axs = subfig.subplots(3,4, gridspec_kw = {"hspace" : 0, "wspace" : 0})
             for j, ax  in enumerate(axs.flatten()):
                 
                 # Takes the first data set in the list
@@ -283,20 +284,24 @@ class Sep_plot(Sep_gen):
                 # Limits
                 ax.set_xlim(-2,2)
                 ax.set_ylim(-2,2)
+                
+                
+                # if outer == 2:
+                    # ax.text(-18,7.95,"e=0")
+                    # ax.text(-18,3.95,"e=0.5")
+                    # ax.text(-18,-0.1,"e=0.9")
+                    # ax.text(-18,10.25,"i=0")
+                    # ax.text(-8.25,10.25,r"i=$\frac{\pi}{6}$")
+                    # ax.text(-4.25,10.25,r"i=$\frac{\pi}{3}$")
+                    # ax.text(0,10.25,r"i=$\frac{\pi}{2}$")
+                # else:
                 ax.set_xticks([])
                 ax.set_yticks([])
-                
-                if outer == 2:
-                    ax.text(-15.75,7.95,"e=0")
-                    ax.text(-15.75,3.95,"e=0.5")
-                    ax.text(-15.75,-0.1,"e=0.9")
-                    ax.text(-12.25,10.25,"i=0")
-                    ax.text(-8.25,10.25,"i=$\frac{\pi}{6}$")
-                    ax.text(-4.25,10.25,"i=\frac{\pi}{3}")
-                    ax.text(0,10.25,"i=\frac{\pi}{2}")
+                    
         
         # Shows the legend of each data point
-        fig.legend(handles,labels,fontsize="small")
+        fig.legend(handles,labels,fontsize="small", prop = {"size":8}, borderpad = 0.5, labelspacing = 0.75, handlelength = 2)
+        fig.tight_layout(pad=0.05, rect = (0.02, 0.02, 0.95, 0.95))
         # Shows where the data values change according to the plot 
         # subfig.text(-15.75,7.95,"e=0")
         # subfig.text(-15.75,3.95,"e=0.5")
@@ -336,12 +341,11 @@ class Sep_plot(Sep_gen):
         fig = plt.figure(figsize = (12,10))
         
         if which == "Linear":
-            fig.suptitle("Orbital Projections close to $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 to \frac{\pi}{2}$" f"\n ({which})")
+            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f" ({which})", x = 0.49, y = 0.985)
         else:
-            fig.suptitle("Orbital Projection close to $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 to \frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)")
+            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)", x = 0.49, y = 0.985)
         # Makes the 2 x 2 figure for the 3 x 4 figures to go into
-        subfigs = fig.subfigures(2,2)            
-        plt.subplots_adjust(hspace = 0.2, wspace= 0.2)
+        subfigs = fig.subfigures(2,2, hspace = 0, wspace = 0)
         for outer, subfig in enumerate(subfigs.flat):
             
             totlist, param = rtotlist[outer]
@@ -349,6 +353,9 @@ class Sep_plot(Sep_gen):
             axs = subfig.subplots(3,4,sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0)) 
             
             for j, ax  in enumerate(axs.flatten()):
+                # xticks = ax.xaxis.get_major_ticks()
+                # xticks.lable1.set_visible(False)
+                
                 steplindict, x, y, steplogdict, steplinsemidict = totlist[j]
                 
                 iterparam = param[j]
@@ -417,8 +424,12 @@ class Sep_plot(Sep_gen):
                         patch.set_edgecolor("b")
                 ax.set_xlim(0.5,20.5)
                 ax.set_ylim(0,10)
-                if outer != 2:
+                if outer == 1:
+                    ax.xaxis.set_major_locator(plt.MaxNLocator(2))
+                    ax.yaxis.set_major_locator(plt.MaxNLocator(3))
+                else:
                     ax.set_yticks([])
+                    ax.set_xticks([])
                 ax.set_xscale("log")
                 ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
                 ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
@@ -429,7 +440,8 @@ class Sep_plot(Sep_gen):
             labels = ["Linear"]
         else:
             labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
-        fig.legend(handles, labels)
+        fig.legend(handles,labels,fontsize="small")
+        fig.tight_layout(pad=1.25,h_pad=0, w_pad=0, rect = (0.08, 0.0, 0.95, 0.95))
         if which == "Linear":
             plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omegas_0002_{which}.png')
         else:
@@ -575,10 +587,10 @@ class Sep_plot(Sep_gen):
                     
         if inclination and len(estep_outer) == 0:
             fig, axs = plt.subplots(3,3,figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-            fig.suptitle("Orbital Projection with Alterations in e = 0.1-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
+            fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         elif len(estep_outer) == 0:
             fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-            fig.suptitle("Orbital Projection with Alterations in e = 0.1-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
+            fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         # Iterates through each subplot in the 3x4 figure
         if inclination == False:
             for j, ax  in enumerate(axs.flatten()):
@@ -725,7 +737,7 @@ class Sep_plot(Sep_gen):
         
         # FIGURE FOR SEMIMAJOR AXIS
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        fig.suptitle("Orbital Projection with Marginalizations in e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
+        fig.suptitle("Detections of $R_E$ with marginalizations for e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
         # Combine Histogram Calculations
         for i in range(len(totlist)):
             histlist = totlist[i]
@@ -802,8 +814,8 @@ if __name__ == "__main__":
     which = "Linear"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
-    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
+    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
+    rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])

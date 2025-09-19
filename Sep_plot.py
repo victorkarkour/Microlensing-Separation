@@ -350,7 +350,7 @@ class Sep_plot(Sep_gen):
             
             totlist, param = rtotlist[outer]
             # Iterates through each subplot in the 3x4 figure
-            axs = subfig.subplots(3,4,sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0)) 
+            axs = subfig.subplots(3,4,sharex=False,sharey=True,gridspec_kw=dict(hspace=0,wspace=0)) 
             
             for j, ax  in enumerate(axs.flatten()):
                 # xticks = ax.xaxis.get_major_ticks()
@@ -424,12 +424,9 @@ class Sep_plot(Sep_gen):
                         patch.set_edgecolor("b")
                 ax.set_xlim(0.5,20.5)
                 ax.set_ylim(0,10)
-                if outer == 1:
-                    ax.xaxis.set_major_locator(plt.MaxNLocator(2))
-                    ax.yaxis.set_major_locator(plt.MaxNLocator(3))
-                else:
-                    ax.set_yticks([])
-                    ax.set_xticks([])
+                ax.xaxis.tick_top()
+                ax.set_yticks([])
+                # ax.set_xticks([])
                 ax.set_xscale("log")
                 ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
                 ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")

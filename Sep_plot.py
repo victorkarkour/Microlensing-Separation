@@ -198,9 +198,8 @@ class Sep_plot(Sep_gen):
         
         fig = plt.figure(figsize = (13,9))
         # Makes the 2 x 2 figure for the 3 x 4 figures to go into
-        subfigs = fig.subfigures(2,2, hspace = 0, wspace = 0)            
-        
-        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"From $\omega$ 0 to $\ \frac{\pi}{2}$", x = 0.49, y = 0.985)
+        subfigs = fig.subfigures(2,2, hspace = 0, wspace = 0)
+        fig.suptitle("Orbital Projection with Alterations in e, i, and "r"From $\omega$ 0 to $\ \frac{\pi}{2}$", x = 0.49, y = 0.99)
         for outer, subfig in enumerate(subfigs.flat):
             
             list, totparam, listt = totlist[outer]
@@ -269,8 +268,29 @@ class Sep_plot(Sep_gen):
                     data = ax.scatter(xchange[g], ychange[g], s = 8, color = "yellow")
                     
                     # Creates the grid for each plot
-                    ax.grid(True,color = "grey", linestyle="--", linewidth="0.25")
+                    ax.grid(True,color = "grey", linestyle="--", linewidth="0.55", axis = "both", which = "both")
                 
+                    if outer == 1:
+                        if j < 4:
+                            ax.set_yticks([])
+                            ax.xaxis.tick_top()
+                            ax.tick_params(axis = "x", pad = -1.5)
+                            ax.xaxis.set_major_locator(plt.MaxNLocator(2))
+                            if j == 3:
+                                ax.yaxis.set_major_locator(plt.MaxNLocator(3))
+                                ax.yaxis.tick_right()
+                        elif j == 7 or j == 11 :
+                            ax.yaxis.set_major_locator(plt.MaxNLocator(3))
+                            ax.yaxis.tick_right()
+                            ax.tick_params(axis = "x", labelbottom = False)
+                        else:
+                            ax.set_yticks([])
+                            ax.tick_params(axis = "x", labelbottom = False)
+                    else:
+                        ax.tick_params(axis = "x", labelbottom = False)
+                        ax.set_yticks([])
+                    
+                    
                 # Plots an Einstein Ring Radius of 1 around each plot
                 Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
                 
@@ -300,7 +320,7 @@ class Sep_plot(Sep_gen):
                     
         
         # Shows the legend of each data point
-        fig.legend(handles,labels,fontsize="small", prop = {"size":8}, borderpad = 0.5, labelspacing = 0.75, handlelength = 2)
+        fig.legend(handles[0:10],labels[0:10],fontsize="small", prop = {"size":8}, borderpad = 0.5, labelspacing = 0.75, handlelength = 2, framealpha = 0.5)
         fig.tight_layout(pad=0.05, rect = (0.02, 0.02, 0.95, 0.95))
         # Shows where the data values change according to the plot 
         # subfig.text(-15.75,7.95,"e=0")
@@ -338,20 +358,18 @@ class Sep_plot(Sep_gen):
             rtotlist.append((rlist, param))
             i+=1     
         
-        fig = plt.figure(figsize = (12,10))
+        fig = plt.figure(figsize = (13,9))
         
         if which == "Linear":
-            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f" ({which})", x = 0.49, y = 0.985)
+            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f" ({which})", x = 0.49, y = 0.99)
         else:
-            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)", x = 0.49, y = 0.985)
+            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)", x = 0.49, y = 0.99)
         # Makes the 2 x 2 figure for the 3 x 4 figures to go into
-        subfigs = fig.subfigures(2,2, hspace = 0, wspace = 0)
+        subfigs = fig.subfigures(2,2, hspace = 0, wspace = 0) 
         for outer, subfig in enumerate(subfigs.flat):
-            
             totlist, param = rtotlist[outer]
             # Iterates through each subplot in the 3x4 figure
-            axs = subfig.subplots(3,4,sharex=False,sharey=True,gridspec_kw=dict(hspace=0,wspace=0)) 
-            
+            axs = subfig.subplots(3,4, gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = False, sharey = False) 
             for j, ax  in enumerate(axs.flatten()):
                 # xticks = ax.xaxis.get_major_ticks()
                 # xticks.lable1.set_visible(False)
@@ -424,14 +442,33 @@ class Sep_plot(Sep_gen):
                         patch.set_edgecolor("b")
                 ax.set_xlim(0.5,20.5)
                 ax.set_ylim(0,10)
-                ax.xaxis.tick_top()
-                ax.set_yticks([])
-                # ax.set_xticks([])
                 ax.set_xscale("log")
                 ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
                 ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
                 ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
-            
+                
+                
+                if outer == 1:
+                    if j < 4:
+                        ax.set_yticks([])
+                        ax.xaxis.tick_top()
+                        ax.tick_params(axis = "x", pad = -1.5)
+                        ax.xaxis.set_major_locator(plt.MaxNLocator(2))
+                        if j == 3:
+                            ax.yaxis.set_major_locator(plt.MaxNLocator(4))
+                            ax.yaxis.tick_right()
+                    elif j == 7 or j == 11 :
+                        ax.yaxis.set_major_locator(plt.MaxNLocator(4))
+                        ax.yaxis.tick_right()
+                        ax.tick_params(axis = "x", labelbottom = False)
+                    else:
+                        ax.set_yticks([])
+                        ax.tick_params(axis = "x", labelbottom = False)
+                else:
+                    ax.tick_params(axis = "x", labelbottom = False)
+                    ax.set_yticks([])
+                ax.vline(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'r')
+                
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
         if which == "Linear":
             labels = ["Linear"]
@@ -770,18 +807,20 @@ class Sep_plot(Sep_gen):
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
         
         fig.legend(handles, labels)
-        try:
-            
-            if not unity:
-                plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
-                print(os.get_cwd(), os.path.abspath(f"/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
-            else:
-                plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
-                print(os.get_cwd(), os.path.abspath(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
-                print("It works!")
-        except:
-            print("Did not save figure, something must be wrong....")
-            print(os.get_cwd())
+        # try:
+        #     #### os.getcwd IS FOR DESKTOP, IF FOR UNITY, CHANGE TO os.get_cwd
+        #     if not unity:
+        #         plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
+        #         print(os.getcwd(), os.path.abspath(f"/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
+        #     else:
+        #         plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
+        #         print(os.getcwd(), os.path.abspath(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
+        #         print("It works!")
+        # except:
+        #     print("Did not save figure, something must be wrong....")
+        #     print(os.getcwd())
+        
+        plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
         return tothist
 
 
@@ -806,13 +845,13 @@ if __name__ == "__main__":
     # cli()
     numestep = 5
     numdiv = 5
-    wnum = 5
+    wnum = 5 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     which = "Linear"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
-    rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
+    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
+    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])

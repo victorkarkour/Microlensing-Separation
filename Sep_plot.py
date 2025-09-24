@@ -340,7 +340,6 @@ class Sep_plot(Sep_gen):
     def MultiPlotHist(self, w = 0, step = 0.002, end = 10, which = "Log"):
         """
         """
-        rtotlist = []
         
         # totlinlist = [[] for _ in range(12)]
         # totloglist = [[] for _ in range(12)]
@@ -351,137 +350,125 @@ class Sep_plot(Sep_gen):
         else:
             colorlist = ["black", "red", "blue"]
         
-        w = 0
-        for i in range(4):
-            rlist, param = self.DataHist(w = w, step = step, end = end, which = which)
-            w += np.pi/6
-            rtotlist.append((rlist, param))
-            i+=1     
+        # Data
+        rlist, param = self.DataHist(w = w, step = step, end = end, which = which) 
+        rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
         
-        fig = plt.figure(figsize = (13,9))
         
+        fig, axs = plt.subplots(3,4, figsize = (9,11), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = False, sharey = False) 
+        # if which == "Linear":
+        #     fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = 0" f" ({which})", x = 0.49, y = 0.99)
+        # else:
+        #     fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = 0" f"\n (For Linear, Log, & Power Law)", x = 0.49, y = 0.99)
+            # Iterates through each subplot in the 3x4 figure 
+        for j, ax  in enumerate(axs.flatten()):
+            # xticks = ax.xaxis.get_major_ticks()
+            # xticks.lable1.set_visible(False)
+            
+            steplindict, x, y, steplogdict, steplinsemidict = rlist[j]
+            
+            iterparam = param[j]
+            totliniter = steplindict
+            totlinitersemi = steplinsemidict
+            totlogiter = steplogdict
+            
+            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+            totlinsemilist = [key for key, val in totlinitersemi.items() for _ in range(val)]
+            totloglist = [key for key, val in totlogiter.items() for _ in range(val)] 
+            
+            # Create variables for bin sizes
+            nbin = 200
+            amin = 0.5
+            amax = 21
+            # Make logbinsizes for all
+            logbinsize = (np.log10(amin)-np.log10(amax))/nbin
+            
+            weights_lin = np.abs(np.ones_like(totlinlist) / (len(totlinlist) * logbinsize))
+            weights_linsemi = np.abs(np.ones_like(totlinsemilist) / (len(totlinsemilist) * logbinsize))    
+            weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))
+            
+            # Creates the log spaced bins for our data
+            # Stupid fix to stupid problems :)
+            if j == 0 and which == "Linear":
+                logbins_lin = np.linspace(amin,amax,1000+1)
+            else:
+                if j == 0:
+                    logbins_lin = np.linspace(amin,amax,nbin)
+                    logbins_log = np.geomspace(amin,amax,nbin)
+                else:    
+                    logbins_lin = np.geomspace(amin,amax, nbin)
+                    logbins_log = np.geomspace(amin,amax,nbin)
+            if which == "Linear":
+                
+                datahist_lin, bins, patches_lin = ax.hist(
+                    totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
+                    stacked=True, histtype="step",
+                    weights=weights_lin, label = "Linear"
+                )
+            else:
+                datahist_lin, bins, patches_lin = ax.hist(
+                    totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
+                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+                    weights=weights_lin, fc = "none", label = "Linear"
+                )
+                datahist_log, bins, patches_log = ax.hist(
+                    totloglist, bins=logbins_log, range=(0.5, end+0.5),
+                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                    weights=weights_log, fc = "none", label = "Log"
+                )
+                datahist_linsemi , bins, patches_linsemi = ax.hist(
+                    totlinsemilist, bins=logbins_lin, range=(0.5, end+0.5),
+                    stacked=True, histtype="step", alpha = 0.40, edgecolor = "blue",
+                    weights=weights_linsemi, fc = "none", label = "Linear / a"
+                )
+            if which == "Linear":
+                for patch in patches_lin:
+                    patch.set_edgecolor("k")
+            else:
+                for patch in patches_lin:
+                    patch.set_edgecolor("k")
+                for patch in patches_log:
+                    patch.set_edgecolor("r")
+                for patch in patches_linsemi:
+                    patch.set_edgecolor("b")
+            ax.set_xlim(0.5,20.5)
+            ax.set_ylim(0,10)
+            ax.set_xscale("log")
+            
+            textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
+            ax.text(0.63, 0.95, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
+            # ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
+            # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
+            ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
+            ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'green', alpha = 0.75, label = "Peak Eccentricity")
+            if j < 8 or j >= 9:
+                ax.set_yticks([])
+                ax.set_xticks([])
+                ax.tick_params(axis = "x", labelbottom = False)
+            elif j == 11:
+                # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
+                # if which == "Linear":
+                #     labels = ["Linear"]
+                # else:
+                #     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
+                
+                
+                final_ax = axs.flatten()[-1]
+                handles, labels = final_ax.get_legend_handles_labels()
+                final_ax.legend(handles, labels, transform = ax.get_xaxis_tranform(), loc = "best")
+            
+        # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
+        # if which == "Linear":
+        #     labels = ["Linear"]
+        # else:
+        #     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
+        # fig.tight_layout(pad=1.25,h_pad=0, w_pad=0, rect = (0.08, 0.0, 0.95, 0.95))
         if which == "Linear":
-            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f" ({which})", x = 0.49, y = 0.99)
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_0_0002_{which}.png')
         else:
-            fig.suptitle("Detections of $R_E$ with Alterations in e, i, and "r"$\omega$ = $0 \ \text{to} \ \frac{\pi}{2}$" f"\n (For Linear, Log, & Power Law)", x = 0.49, y = 0.99)
-        # Makes the 2 x 2 figure for the 3 x 4 figures to go into
-        subfigs = fig.subfigures(2,2, hspace = 0, wspace = 0) 
-        for outer, subfig in enumerate(subfigs.flat):
-            totlist, param = rtotlist[outer]
-            # Iterates through each subplot in the 3x4 figure
-            axs = subfig.subplots(3,4, gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = False, sharey = False) 
-            for j, ax  in enumerate(axs.flatten()):
-                # xticks = ax.xaxis.get_major_ticks()
-                # xticks.lable1.set_visible(False)
-                
-                steplindict, x, y, steplogdict, steplinsemidict = totlist[j]
-                
-                iterparam = param[j]
-                totliniter = steplindict
-                totlinitersemi = steplinsemidict
-                totlogiter = steplogdict
-                
-                totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                totlinsemilist = [key for key, val in totlinitersemi.items() for _ in range(val)]
-                totloglist = [key for key, val in totlogiter.items() for _ in range(val)] 
-                
-                # Create variables for bin sizes
-                nbin = 200
-                amin = 0.5
-                amax = 21
-                # Make logbinsizes for all
-                logbinsize = (np.log10(amin)-np.log10(amax))/nbin
-                
-                weights_lin = np.abs(np.ones_like(totlinlist) / (len(totlinlist) * logbinsize))
-                weights_linsemi = np.abs(np.ones_like(totlinsemilist) / (len(totlinsemilist) * logbinsize))    
-                weights_log = np.abs(np.ones_like(totloglist) / (len(totloglist) * logbinsize))
-                
-                # Creates the log spaced bins for our data
-                # Stupid fix to stupid problems :)
-                if j == 0 and which == "Linear":
-                    logbins_lin = np.linspace(amin,amax,1000+1)
-                else:
-                    if j == 0:
-                        logbins_lin = np.linspace(amin,amax,nbin)
-                        logbins_log = np.geomspace(amin,amax,nbin)
-                    else:    
-                        logbins_lin = np.geomspace(amin,amax, nbin)
-                        logbins_log = np.geomspace(amin,amax,nbin)
-                if which == "Linear":
-                    
-                    datahist_lin, bins, patches_lin = ax.hist(
-                        totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
-                        stacked=True, histtype="step",
-                        weights=weights_lin
-                    )
-                else:
-                    datahist_lin, bins, patches_lin = ax.hist(
-                        totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
-                        weights=weights_lin, fc = "none",
-                    )
-                    datahist_log, bins, patches_log = ax.hist(
-                        totloglist, bins=logbins_log, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
-                        weights=weights_log, fc = "none",
-                    )
-                    datahist_linsemi , bins, patches_linsemi = ax.hist(
-                        totlinsemilist, bins=logbins_lin, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.40, edgecolor = "blue",
-                        weights=weights_linsemi, fc = "none",
-                    )
-                if which == "Linear":
-                    for patch in patches_lin:
-                        patch.set_edgecolor("k")
-                else:
-                    for patch in patches_lin:
-                        patch.set_edgecolor("k")
-                    for patch in patches_log:
-                        patch.set_edgecolor("r")
-                    for patch in patches_linsemi:
-                        patch.set_edgecolor("b")
-                ax.set_xlim(0.5,20.5)
-                ax.set_ylim(0,10)
-                ax.set_xscale("log")
-                ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
-                ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
-                ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
-                
-                
-                if outer == 1:
-                    if j < 4:
-                        ax.set_yticks([])
-                        ax.xaxis.tick_top()
-                        ax.tick_params(axis = "x", pad = -1.5)
-                        ax.xaxis.set_major_locator(plt.MaxNLocator(2))
-                        if j == 3:
-                            ax.yaxis.set_major_locator(plt.MaxNLocator(4))
-                            ax.yaxis.tick_right()
-                    elif j == 7 or j == 11 :
-                        ax.yaxis.set_major_locator(plt.MaxNLocator(4))
-                        ax.yaxis.tick_right()
-                        ax.tick_params(axis = "x", labelbottom = False)
-                    else:
-                        ax.set_yticks([])
-                        ax.tick_params(axis = "x", labelbottom = False)
-                else:
-                    ax.tick_params(axis = "x", labelbottom = False)
-                    ax.set_yticks([])
-                ax.vline(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'r')
-                
-        handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-        if which == "Linear":
-            labels = ["Linear"]
-        else:
-            labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
-        fig.legend(handles,labels,fontsize="small")
-        fig.tight_layout(pad=1.25,h_pad=0, w_pad=0, rect = (0.08, 0.0, 0.95, 0.95))
-        if which == "Linear":
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omegas_0002_{which}.png')
-        else:
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omegas_0002_{which}.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_0_0002_{which}.png')
         # plt.show()
-        return totlist
+        return rlist
 
     @staticmethod
     def CompletePlotHist(param):
@@ -732,7 +719,7 @@ class Sep_plot(Sep_gen):
         amin = 0.5
         amax = 21
         # Make logbinsizes for all
-        logbinsize = (np.log10(amin)-np.log10(amax))/nbin
+        logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
         
         
         # Initialize Lists
@@ -790,7 +777,7 @@ class Sep_plot(Sep_gen):
                         totgammahist = totgammahist + gammahist
                     elif val == len(histlist)-1 and i == len(totlist)-1:
                         tothist = tothist + hist
-                        norm = np.abs(1 / (np.sum(self.numestep)))
+                        norm = np.abs(1 / (np.sum(bins)*logbinsize))
                         StepPatch = ax.stairs(tothist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
                         # May or may not need norm for gamma
                         StepPatch = ax.stairs(totgammahist * norm, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
@@ -847,11 +834,11 @@ if __name__ == "__main__":
     numdiv = 5
     wnum = 5 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
-    which = "Linear"
+    which = "Log"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
-    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
+    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
+    rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])

@@ -259,24 +259,6 @@ class Sep_plot(Sep_gen):
                 
             # Creates the grid for each plot
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.55", axis = "both", which = "both")
-
-            textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
-            ax.text(0.80, 0.95, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
-                
-            if j < 8 or j >= 9:
-                ax.set_yticks([])
-                ax.set_xticks([])
-                ax.tick_params(axis = "x", labelbottom = True)
-            elif j == 11:
-                # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-                # if which == "Linear":
-                #     labels = ["Linear"]
-                # else:
-                #     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
-                
-                final_ax = axs.flatten()[-1]
-                handles, labels = final_ax.get_legend_handles_labels()
-                final_ax.legend(handles[0:5],labels[0:5],fontsize="small", transform = ax.get_xaxis_transform(), prop = {"size":8}, borderpad = 0.5, labelspacing = 0.75, handlelength = 2, framealpha = 0.5)
                 
             # Plots an Einstein Ring Radius of 1 around each plot
             Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
@@ -291,36 +273,27 @@ class Sep_plot(Sep_gen):
             # Limits
             ax.set_xlim(-2,2)
             ax.set_ylim(-2,2)
-            
-            
-            # if outer == 2:
-                # ax.text(-18,7.95,"e=0")
-                # ax.text(-18,3.95,"e=0.5")
-                # ax.text(-18,-0.1,"e=0.9")
-                # ax.text(-18,10.25,"i=0")
-                # ax.text(-8.25,10.25,r"i=$\frac{\pi}{6}$")
-                # ax.text(-4.25,10.25,r"i=$\frac{\pi}{3}$")
-                # ax.text(0,10.25,r"i=$\frac{\pi}{2}$")
-            # else:
-            ax.set_xticks([])
-            ax.set_yticks([])
                 
+            textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
+            ax.text(0.80, 0.95, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
+                
+            if j % 4 == 0:
+                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+            elif j < 8 or j >= 9:
+                # ax.set_yticks([])
+                # ax.set_xticks([])
+                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+            if j == 11:
+                handles, labels = ax.get_legend_handles_labels()
+                ax.legend(handles[0:9],labels[0:9], loc = "upper left", fontsize = "x-small",prop = {"size":8}, borderpad = 0.5, labelspacing = 0.75, handlelength = 2, framealpha = 0.5)
         
         # Shows the legend of each data point
         # fig.legend(handles[0:5],labels[0:5],fontsize="small", prop = {"size":8}, borderpad = 0.5, labelspacing = 0.75, handlelength = 2, framealpha = 0.5)
         # fig.tight_layout(pad=0.05, rect = (0.02, 0.02, 0.95, 0.95))
         fig.tight_layout()
-        # Shows where the data values change according to the plot 
-        # subfig.text(-15.75,7.95,"e=0")
-        # subfig.text(-15.75,3.95,"e=0.5")
-        # subfig.text(-15.75,-0.1,"e=0.9")
-        # subfig.text(-12.25,10.25,"i=0")
-        # subfig.text(-8.25,10.25,"i=30")
-        # subfig.text(-4.25,10.25,"i=60")
-        # subfig.text(0,10.25,"i=90")
         
         # Saves to Figure Folder
-        plt.savefig(f"/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omegas.png")
+        plt.savefig(f"/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omega_0.png")
         # plt.savefig(f"C:/Users/victo/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omega_0.png")
         # plt.show()
         
@@ -335,9 +308,9 @@ class Sep_plot(Sep_gen):
         # totlinsemilist = [[] for _ in range(12)]
         
         if which == "Linear":
-            colorlist = ["black"]
+            colorlist = ["black", "green"]
         else:
-            colorlist = ["black", "red", "blue"]
+            colorlist = ["black", "red", "blue", "green"]
         
         # Data
         rlist, param = self.DataHist(w = w, step = step, end = end, which = which) 
@@ -431,32 +404,28 @@ class Sep_plot(Sep_gen):
             # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'green', alpha = 0.75, label = "Peak Eccentricity")
-            if j < 8 or j >= 9:
+            if j % 4 == 0:
+                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+            elif j < 8 or j >= 9:
                 ax.set_yticks([])
                 ax.set_xticks([])
                 ax.tick_params(axis = "x", labelbottom = False)
-            elif j == 11:
-                # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-                # if which == "Linear":
-                #     labels = ["Linear"]
-                # else:
-                #     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
-                
-                
-                final_ax = axs.flatten()[-1]
-                handles, labels = final_ax.get_legend_handles_labels()
-                final_ax.legend(handles, labels, transform = ax.get_xaxis_tranform(), loc = "best")
             
-        # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-        # if which == "Linear":
-        #     labels = ["Linear"]
-        # else:
-        #     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
+            if j == 11:
+                handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
+                if which == "Linear":
+                    labels = ["Linear", "Peak Eccentricity"]
+                else:
+                    labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", "Peak Eccentricity"]
+                    
+                ax.legend(handles = handles, labels = labels, loc = "best", fontsize = "small")
+                
         # fig.tight_layout(pad=1.25,h_pad=0, w_pad=0, rect = (0.08, 0.0, 0.95, 0.95))
+        fig.tight_layout()
         if which == "Linear":
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_0_0002_{which}.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omega_0_0002_{which}.png')
         else:
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_0_0002_{which}.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omega_0_0002_{which}.png')
         # plt.show()
         return rlist
 
@@ -748,7 +717,7 @@ class Sep_plot(Sep_gen):
         
         # FIGURE FOR SEMIMAJOR AXIS
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        fig.suptitle("Detections of $R_E$ with marginalizations for e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
+        # fig.suptitle("Detections of $R_E$ with marginalizations for e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
         # Combine Histogram Calculations
         for i in range(len(totlist)):
             histlist = totlist[i]
@@ -767,13 +736,16 @@ class Sep_plot(Sep_gen):
                         totgammahist = totgammahist + gammahist
                     elif val == len(histlist)-1 and i == len(totlist)-1:
                         tothist = tothist + hist
-                        norm = np.abs(1 / (np.sum(bins)*logbinsize))
+                        totgammahist = totgammahist + gammahist
+                        norm = np.abs(1 / (np.sum(tothist)*logbinsize))
+                        ecircnorm = np.abs(1 / (np.sum(ecirchist) * logbinsize))
+                        gammanorm_final = np.abs(1/ (np.sum(totgammahist) * logbinsize))
                         total = np.sum(tothist)
                         print(total)
-                        StepPatch = ax.stairs(tothist, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
+                        StepPatch = ax.stairs(tothist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
                         # May or may not need norm for gamma
-                        StepPatch = ax.stairs(totgammahist, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
-                        StepPatch = ax.stairs(ecirchist, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
+                        StepPatch = ax.stairs(totgammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                        StepPatch = ax.stairs(ecirchist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
                     else:
                         tothist = tothist + hist
                         totgammahist = totgammahist + gammahist
@@ -786,6 +758,7 @@ class Sep_plot(Sep_gen):
         handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
         
         fig.legend(handles, labels)
+        fig.tight_layout()
         # try:
         #     #### os.getcwd IS FOR DESKTOP, IF FOR UNITY, CHANGE TO os.get_cwd
         #     if not unity:
@@ -799,8 +772,8 @@ class Sep_plot(Sep_gen):
         #     print("Did not save figure, something must be wrong....")
         #     print(os.getcwd())
         
-        # plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
-        plt.savefig(f"C:/Users/victo/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
+        plt.savefig(f'/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm.png')
+        # plt.savefig(f"C:/Users/victo/College Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
         return tothist
 
 
@@ -830,12 +803,12 @@ if __name__ == "__main__":
     which = "Linear"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
+    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])
-    tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum, unity = unity)
+    # tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum, unity = unity)
     
     
 

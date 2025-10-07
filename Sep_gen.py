@@ -396,7 +396,7 @@ class Sep_gen:
             # Linear Portion
             # Goes through each value of a in the stepthrough
             if isinstance(i, np.ndarray):
-                stepthrough = Sep_gen.stepdata(0, 0.5, end, 10000)
+                stepthrough = np.arange(0.5, end + step, step)
                 # Goes through each value of a in the stepthrough
                 for aval in stepthrough:
                     for ival in i:
@@ -455,7 +455,7 @@ class Sep_gen:
                 gc.collect()
                 # Linear Portion
                 # stepthrough = np.arange(0.5, end + step, step)
-                stepthrough = Sep_gen.stepdata(0, 0.5, end, 10000)
+                stepthrough = np.arange(0.5, end + step, step)
                 for val in stepthrough:
                     x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
         

@@ -276,12 +276,10 @@ class Sep_plot(Sep_gen):
                 
             textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
             ax.text(0.80, 0.95, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
-                
-            if j % 4 == 0:
-                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-            elif j < 8 or j >= 9:
-                # ax.set_yticks([])
-                # ax.set_xticks([])
+            
+            if j == 8:
+                    ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+            else:
                 ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
             if j == 11:
                 handles, labels = ax.get_legend_handles_labels()
@@ -293,9 +291,10 @@ class Sep_plot(Sep_gen):
         fig.tight_layout()
         
         # Saves to Figure Folder
-        plt.savefig(f"/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omega_0.png")
+        plt.savefig(f"/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omega_pi_2.png")
         # plt.savefig(f"C:/Users/victo/College Projects/Microlensing Separation/Figures/Multi_a05_{end}_omega_0.png")
         # plt.show()
+        
         
         return rlist
 
@@ -403,29 +402,31 @@ class Sep_plot(Sep_gen):
             # ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
             # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
-            ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'green', alpha = 0.75, label = "Peak Eccentricity")
-            if j % 4 == 0:
-                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-            elif j < 8 or j >= 9:
+            ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'green', alpha = 0.75, label = r"Expected Peak $e$")
+            if j == 0 or j == 4 or j == 8:
+                if j == 8:
+                    ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                else:
+                    ax.tick_params(axis = "both", labelbottom = True, labelleft = False)
+            else:
                 ax.set_yticks([])
                 ax.set_xticks([])
                 ax.tick_params(axis = "x", labelbottom = False)
-            
             if j == 11:
                 handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
                 if which == "Linear":
                     labels = ["Linear", "Peak Eccentricity"]
                 else:
-                    labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", "Peak Eccentricity"]
+                    labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
                     
                 ax.legend(handles = handles, labels = labels, loc = "best", fontsize = "small")
                 
         # fig.tight_layout(pad=1.25,h_pad=0, w_pad=0, rect = (0.08, 0.0, 0.95, 0.95))
         fig.tight_layout()
         if which == "Linear":
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omega_0_0002_{which}.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0002_{which}.png')
         else:
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omega_0_0002_{which}.png')
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/MultiHist_omega_pi_2_0002_{which}.png')
         # plt.show()
         return rlist
 
@@ -803,8 +804,8 @@ if __name__ == "__main__":
     which = "Linear"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5)
-    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which)
+    rlist = tothist.MultiPlotProj(w = np.pi/2, start = 0.5, end = 20, step = 0.5)
+    # rtemp = tothist.MultiPlotHist(w = np.pi/2, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])

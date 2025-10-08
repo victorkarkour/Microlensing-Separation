@@ -842,7 +842,7 @@ if __name__ == "__main__":
     # rtemp = tothist.MultiPlotHist(w = np.pi/2, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
-    tothist.CompletePlotHist([0.002, 20, False,which, [], 3, 5])
+    tothist.CompletePlotHist([0.002, 20, False,which, [], 3, 75])
     # tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum, unity = unity)
     
     

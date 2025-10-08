@@ -438,8 +438,8 @@ class Sep_plot(Sep_gen):
         step, end, inclination, which, estep_outer, inum, wnum = param
         
         if inclination == False:
-            colorlist = ["black", "red"]
-            labels = ["Linear", "Log"]
+            colorlist = ["black", "red", "blue", "green"]
+            labels = ["Linear", "Log", r"Power Law = $\alpha = 2$"]
         else:
             if which == "Log":
                 colorlist = ["red"]
@@ -453,8 +453,12 @@ class Sep_plot(Sep_gen):
         # Dictionary for storing Rchange results
         totlinlist = []
         totloglist = []
+        totsemilist = []
+        histlistlin = []
+        histlistlog = []
+        histlistsemi = []
         if len(estep_outer) == 0:
-             tothistlist =[[] for _ in range(9)]
+             tothistlist =[[] for _ in range(12)]
         else:
             tothistlist = []
         evalhistlist = []
@@ -482,33 +486,60 @@ class Sep_plot(Sep_gen):
             print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
             # Each omega calculates its own data groups
             if inclination and len(estep_outer) != 0:
+                # Eccentricity, i, and omega marginalized
                 steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep, estep = estep)
             elif inclination:
+                # i and omega marginalized
                 steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep)
             else:
-                steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which)
+                # omega marginalized
+                steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = False)
             # Once complete, takes the data through each set
             if inclination == False:
+                # For omega marginalization
                 for j in range(len(steptotlist)):
-                    # steplinlist, x, y, steploglist = steptotlist[j]
-                    if inclination:
-                        steplindict, x, y, steplogdict, blank = steptotlist
-                    else:
-                        steplindict, x, y, steplogdict = steptotlist[j]
-                    # Adds new counts onto previous counts
-                    totliniter = steplindict
-                    totlogiter = steplogdict
-                
-                    totlinlist[j] = [key for key, val in totliniter.items() for _ in range(val)]
-                    totloglist[j] = [key for key, val in totlogiter.items() for _ in range(val)]
-                    
-                    weights_log = np.abs(np.ones_like(totloglist[j]) / (len(totloglist[j]) * logbinsize))  
-                
-                    hist_log, histbins_log = np.histogram(totloglist[j],bins = logbins_log, range=(0.5, end+0.5))
-                
-                    # histlist.append((hist_log, histbins_log))
+                        steplindict, x, y, steplogdict, stepsemidict = steptotlist[j]
+                        histlist = tothistlist[j]
+                        # Log histogram
+                        totlogiter = steplogdict
+                        totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+                        hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+                        if k != 0.0:
+                            histlistiter = histlistlog[j]
+                            hist_log_iter, bins_log_iter = histlistiter
+                            hist_log = hist_log_iter + hist_log
+                            histlistlog[j] = (hist_log_iter, bins_log_iter)
+                        else:
+                            histlistlog.append((hist_log, histbins_log))
+                        # Linear histogram
+                        totliniter = steplindict
+                        totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                        hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                        if k != 0.0:
+                            histlistiter = histlistlin[j]
+                            hist_lin_iter, bins_lin_iter = histlistiter
+                            hist_lin = hist_lin_iter + hist_lin
+                            histlistlin[j] = (hist_lin_iter, bins_lin_iter)
+                        else:
+                            histlistlin.append((hist_lin, histbins_lin))
+                        # Linear / a histogram
+                        totsemiiter = stepsemidict
+                        totsemilist = [key for key, val in totsemiiter.items() for _ in range(val)]
+                        hist_semi, histbins_semi = np.histogram(totsemilist,bins = logbins, range=(0.5, end+0.5))
+                        if k != 0.0:
+                            histlistiter = histlistsemi[j]
+                            hist_semi_iter, bins_semi_iter = histlistiter
+                            hist_semi = hist_semi_iter + hist_semi
+                            histlistsemi[j] = (hist_semi_iter, bins_semi_iter)
+                        else:
+                            histlistsemi.append((hist_semi, histbins_semi))
+                        
+                        # Shouldn't be needed, all histlist values are in individual histograms
+                        # histlist.append((histlistlin, histlistlog, histlistsemi))
+                        # tothistlist[j] = histlist
             else:
                     if len(estep_outer) != 0:
+                        # For eccentricity, inclination, and omega marginalization
                         steplindict, x, y, steplogdict, evalcirc = steptotlist
                         histlist = tothistlist
                         evallist = evalcirc
@@ -538,6 +569,7 @@ class Sep_plot(Sep_gen):
                         histcirc, binscirc = np.histogram(totcirclist, bins = logbins, range=(0.5, end+0.5))
                         evalhistlist = [(histcirc, binscirc)]
                     else:
+                        # For inclination and omega marginalization
                       for j in range(len(steptotlist)):
                         steplindict, x, y, steplogdict, blank = steptotlist[j]
                         
@@ -567,59 +599,74 @@ class Sep_plot(Sep_gen):
         
                     
         if inclination and len(estep_outer) == 0:
-            fig, axs = plt.subplots(3,3,figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-            fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
+            fig, axs = plt.subplots(3,4,figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+            # fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         elif len(estep_outer) == 0:
             fig, axs = plt.subplots(3,4, figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))               
-            fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
+            # fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         # Iterates through each subplot in the 3x4 figure
-        if inclination == False:
+        if not inclination :
             for j, ax  in enumerate(axs.flatten()):
-            # Takes newly made lists for data collection
-                iterlin = totlinlist[j]
-                iterlog = totloglist[j]
-                # Create variables for bin sizes
-                nbin = 200
-                amin = 0.5
-                amax = 21
-                # Make logbinsizes for all
-                logbinsize = (np.log10(amin)-np.log10(amax))/nbin
-            
-                # Calculate weights for normalization
-                # Check if this is wrong or not, cause of the np.ones_like()
-                weights_lin = np.abs(np.ones_like(iterlin) / (len(iterlin) * logbinsize))    
-                weights_log = np.abs(np.ones_like(iterlog) / (len(iterlog) * logbinsize))  
-                # Creates the log spaced bins for our data
-                # Stupid fix to stupid problems :)
-                if j == 0:
-                    logbins_lin = np.linspace(amin,amax,nbin)
-                    logbins_log = np.geomspace(amin,amax,nbin)
-                else:    
-                    logbins_lin = np.geomspace(amin,amax, nbin)
-                    logbins_log = np.geomspace(amin,amax,nbin)
-            
-                if inclination == False:
-                        
-                    datahist_lin, bins, patches_lin = ax.hist(
-                        iterlin, bins=logbins_lin, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
-                        weights=weights_lin, fc = "none",
-                    )
-                    datahist_log, bins, patches_log = ax.hist(
-                        iterlog, bins=logbins_log, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
-                        weights=weights_log, fc = "none",
-                    )
-                
-                
-            # Turns histogram bars into respective colors
-            for patch in patches_lin:
-                patch.set_edgecolor("k")
-            for patch in patches_log:
-                patch.set_edgecolor("r")
+            # Takes newly made lists for data collection 
+                # histlist = tothistlist[j]
+                histiter_lin, bins_lin = histlistlin[j]
+                histiter_log, bins_log = histlistlog[j]
+                histiter_semi, bins_semi = histlistsemi[j]
+                iterparam = param[j]
+                # for val in range(len(histiter_lin)):
+                #     hist_lin, bins_lin = histiter_lin[val]
+                #     hist_log, bins_log = histiter_log[val]
+                #     hist_semi, bins_semi = histiter_semi[val]
+                #     if val == 0:
+                #         # Initializes
+                #         tothist = np.zeros_like(hist_lin)
+                #         tothist_lin = tothist + hist_lin
+                #         tothist_log = tothist + hist_log
+                #         tothist_semi = tothist + hist_semi
+                #     elif val == len(histiter_lin)-1:
+                #         # Takes final count and normalizes, then plots
+                #         tothist_lin = tothist + hist_lin
+                #         tothist_log = tothist + hist_log
+                #         tothist_semi = tothist + hist_semi
+                norm_lin = np.abs(1 / (logbinsize * np.sum(histiter_lin)))
+                norm_log = np.abs(1 / (logbinsize * np.sum(histiter_log)))
+                norm_semi = np.abs(1 / (logbinsize * np.sum(histiter_semi)))
+                StepPatch_lin = ax.stairs(histiter_lin * norm_lin, bins_lin, edgecolor = colorlist[0], fill = False, alpha = 0.5)
+                StepPatch_log = ax.stairs(histiter_log * norm_log, bins_log, edgecolor = colorlist[1], fill = False, alpha = 0.5)
+                StepPatch_semi = ax.stairs(histiter_semi * norm_semi, bins_semi, edgecolor = colorlist[2], fill = False, alpha = 0.5)
+                    # else:
+                    #     # Keeps counting
+                    #     tothist_lin = tothist + hist_lin
+                    #     tothist_log = tothist + hist_log
+                    #     tothist_semi = tothist + hist_semi 
+            # Initial Params for Plot
             ax.set_xlim(0.5,20.5)
             ax.set_ylim(0,10)
             ax.set_xscale("log")
+            
+            # Box for Alterations
+            rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
+            textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
+            ax.text(0.63, 0.95, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
+            ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
+            # Lines and organizing labels to be cleaner
+            ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'green', alpha = 0.75, label = r"Expected Peak $e$")
+            if j == 0 or j == 4 or j == 8:
+                if j == 8:
+                    ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                else:
+                    ax.tick_params(axis = "both", labelbottom = True, labelleft = False)
+            else:
+                ax.set_yticks([])
+                ax.set_xticks([])
+                ax.tick_params(axis = "x", labelbottom = False)
+            if j == 11:
+                handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
+                labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
+                    
+                ax.legend(handles = handles, labels = labels, loc = "best", fontsize = "small")
+            
+            
         elif len(estep_outer) == 0:
             for j, ax  in enumerate(axs.flatten()):
                 histlist = tothistlist[j]
@@ -641,29 +688,16 @@ class Sep_plot(Sep_gen):
                 ax.set_xscale("log")
                 ax.text(8, 4, f"e = {iterparam[0]}")
             
-        # Text for understanding positions of each figure 
-        
-        if inclination == False:
-            plt.text(1.25e-6,25,"e=0")
-            plt.text(1.25e-6,15,"e=0.5")
-            plt.text(1.25e-6,5,"e=0.9")
-            plt.text(1.25e-6,5,"e=0.9")
-            plt.text(4e-5,30.5,"i=0")
-            plt.text(1.5e-3,30.5,"i=30")
-            plt.text(5.5e-2,30.5,"i=60")
-            plt.text(2.75, 30.5,"i=90")
-        
             
-        handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-            
-        print(f"finich time {time.time()}, {estep_outer}")   
+        print(f"finish time {time.time()}, {estep_outer}")   
         
+        fig.tight_layout()
         # Saves plot
         if inclination == False:
-            fig.legend(handles, labels)
-            plt.savefig(f'/College Projects/Microlensing Separation/Figures/CompleteHist_0002_LinLog.png')
+            # fig.legend(handles, labels)
+            plt.savefig(f'/College Projects/Microlensing Separation/Figures/CompleteHist_0002_{wnum}_LinLogSemi.png')
         elif len(estep_outer) == 0:
-            fig.legend(handles, labels)
+            # fig.legend(handles, labels)
             plt.savefig(f'/College Projects/Microlensing Separation/Figures/CompleteHist_9plots_incline_{inum}_0002_{which}.png')
             plt.show()
         return tothistlist, evalhistlist
@@ -801,14 +835,14 @@ if __name__ == "__main__":
     numdiv = 2
     wnum = 5 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
-    which = "Linear"
+    which = "Log"
     unity = "False"
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
-    rlist = tothist.MultiPlotProj(w = np.pi/2, start = 0.5, end = 20, step = 0.5)
+    # rlist = tothist.MultiPlotProj(w = np.pi/2, start = 0.5, end = 20, step = 0.5)
     # rtemp = tothist.MultiPlotHist(w = np.pi/2, step = 0.002, end = 20, which = which)
     
     #step, end, inclination, which, estep_outer, inum, wnum
-    # clist = tothist.CompletePlotHist([0.002, 20, True,"Linear", [], 75, 75])
+    tothist.CompletePlotHist([0.002, 20, False,which, [], 3, 5])
     # tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum, unity = unity)
     
     

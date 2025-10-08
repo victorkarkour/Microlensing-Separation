@@ -439,39 +439,44 @@ class Sep_gen:
                             totlindict[aval] = len(conlin[0])
             return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Log":
-            if inclination == False:
+            if not inclination:
                 # Log Portion
-                # steps = np.linspace(0, 10000,10000)
-                # loga = np.log10(0.5) + steps/10000 * (np.log10(end)-np.log10(0.5))
-                # stepthrough = 10**loga 
                 stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
-                for val in stepthrough:
-                    x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                for aval in stepthrough:
+                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
         
                     r = np.sqrt(x**2+y**2)
             
                     conlog = np.where(np.abs(r-r0)<=0.01)
-                    totlogdict[val] = len(conlog[0])
-                gc.collect()
+                    if aval in totlogdict:
+                        totlogdict[aval] += len(conlog[0])
+                    else:
+                        totlogdict[aval] = len(conlog[0])
                 # Linear Portion
-                # stepthrough = np.arange(0.5, end + step, step)
                 stepthrough = np.arange(0.5, end + step, step)
-                for val in stepthrough:
-                    x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                for aval in stepthrough:
+                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
         
                     r = np.sqrt(x**2+y**2)
                 
                     conlin = np.where(np.abs(r-r0)<=0.01)
-                    totlindict[val] = len(conlin[0])
+                    if aval in totlindict:
+                        totlindict[aval] += len(conlin[0])
+                    else:
+                        totlindict[aval] = len(conlin[0])
                 # Power Law Portion
                 stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
-                for val in stepthrough:
-                    x, y, t = Sep_gen.OrbGeoAlt(a = val, e = e, i = i ,w = w)
+                for aval in stepthrough:
+                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
         
                     r = np.sqrt(x**2+y**2)
                 
-                    conlin = np.where(np.abs(r-r0)<=0.01)
-                    totlinsemidict[val] = round(len(conlin[0]))
+                    consemi = np.where(np.abs(r-r0)<=0.01)
+                    if aval in totlinsemidict:
+                        totlinsemidict[aval] += len(consemi[0])
+                    else:
+                        totlinsemidict[aval] = len(consemi[0])
+                gc.collect()
                 return totlindict, xlist, ylist, totlogdict, totlinsemidict
             else:
                 if Linear == "Log":
@@ -508,7 +513,7 @@ class Sep_gen:
                 return totlindict, xlist, ylist, totlogdict, totevaldict
         elif Linear == "Linear / a":
         # Linear / a Portion
-            stepthrough = Sep_gen.stepdata(0.5, 0.5, end, 10000)
+            stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
             for aval in stepthrough:
                 for ival in i:
                     if isinstance(e, np.ndarray):

@@ -510,7 +510,35 @@ class Sep_gen:
                                     totlogdict[aval] += len(conlog[0])
                                 else:
                                     totlogdict[aval] = len(conlog[0])
-                return totlindict, xlist, ylist, totlogdict, totevaldict
+                                    
+                            # Linear Portion
+                    
+                    stepthrough = np.arange(0.5, end + step, step)
+                    for aval in stepthrough:
+                        for ival in i:
+                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                
+                            r = np.sqrt(x**2+y**2)
+                        
+                            conlin = np.where(np.abs(r-r0)<=0.01)
+                            if aval in totlindict:
+                                totlindict[aval] += len(conlin[0])
+                            else:
+                                totlindict[aval] = len(conlin[0])
+                    # Power Law Portion
+                    stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
+                    for aval in stepthrough:
+                        for ival in i:
+                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                
+                            r = np.sqrt(x**2+y**2)
+                        
+                            consemi = np.where(np.abs(r-r0)<=0.01)
+                            if aval in totlinsemidict:
+                                totlinsemidict[aval] += len(consemi[0])
+                            else:
+                                totlinsemidict[aval] = len(consemi[0])
+                return totlindict, totlinsemidict, ylist, totlogdict, totevaldict
         elif Linear == "Linear / a":
         # Linear / a Portion
             stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)

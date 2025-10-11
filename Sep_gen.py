@@ -418,6 +418,18 @@ class Sep_gen:
                                             totevaldict[aval] += len(conlin[0])
                                         else:
                                             totevaldict[aval] = len(conlin[0])
+                        else:
+                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                            r = np.sqrt(x**2+y**2)
+                            # Whereever there is this value, it finds the indices of each point in the list
+                            conlin = np.where(np.abs(r-r0)<=0.01)
+                
+                            if coords == False and inclination:
+                                # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                                if aval in totlindict:
+                                    totlindict[aval] += len(conlin[0])
+                                else:
+                                    totlindict[aval] = len(conlin[0])
             else:
                 if coords:
                     totlindict = []
@@ -511,35 +523,35 @@ class Sep_gen:
                                 else:
                                     totlogdict[aval] = len(conlog[0])
                                     
-                            # Linear Portion
+                    # # Linear Portion
                     
-                    stepthrough = np.arange(0.5, end + step, step)
-                    for aval in stepthrough:
-                        for ival in i:
-                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                    # stepthrough = np.arange(0.5, end + step, step)
+                    # for aval in stepthrough:
+                    #     for ival in i:
+                    #         x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                 
-                            r = np.sqrt(x**2+y**2)
+                    #         r = np.sqrt(x**2+y**2)
                         
-                            conlin = np.where(np.abs(r-r0)<=0.01)
-                            if aval in totlindict:
-                                totlindict[aval] += len(conlin[0])
-                            else:
-                                totlindict[aval] = len(conlin[0])
+                    #         conlin = np.where(np.abs(r-r0)<=0.01)
+                    #         if aval in totlindict:
+                    #             totlindict[aval] += len(conlin[0])
+                    #         else:
+                    #             totlindict[aval] = len(conlin[0])
                     # Power Law Portion
-                    stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
-                    for aval in stepthrough:
-                        for ival in i:
-                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                    # stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
+                    # for aval in stepthrough:
+                    #     for ival in i:
+                    #         x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                 
-                            r = np.sqrt(x**2+y**2)
+                    #         r = np.sqrt(x**2+y**2)
                         
-                            consemi = np.where(np.abs(r-r0)<=0.01)
-                            if aval in totlinsemidict:
-                                totlinsemidict[aval] += len(consemi[0])
-                            else:
-                                totlinsemidict[aval] = len(consemi[0])
+                    #         consemi = np.where(np.abs(r-r0)<=0.01)
+                    #         if aval in totlinsemidict:
+                    #             totlinsemidict[aval] += len(consemi[0])
+                    #         else:
+                    #             totlinsemidict[aval] = len(consemi[0])
                 return totlindict, totlinsemidict, ylist, totlogdict, totevaldict
-        elif Linear == "Linear / a":
+        elif Linear == "Linear_a":
         # Linear / a Portion
             stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
             for aval in stepthrough:
@@ -553,28 +565,28 @@ class Sep_gen:
                             # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
                         
                             # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
-                            if aval in totlindict:
-                                totlindict[aval] = round(len(conlin[0]) / aval)
+                            if aval in totlinsemidict:
+                                totlinsemidict[aval] = round(len(conlin[0]) / aval)
                             else:
-                                totlindict[aval] = round(len(conlin[0]) / aval)
+                                totlinsemidict[aval] = round(len(conlin[0]) / aval)
                             if eval == 0:
                                 if aval in totevaldict:
                                     totevaldict[aval] += len(conlin[0])
                                 else:
                                     totevaldict[aval] = len(conlin[0])
                     else:
-                        x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                        x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                         r = np.sqrt(x**2+y**2)
                         # Whereever there is this value, it finds the indices of each point in the list
                         conlin = np.where(np.abs(r-r0)<=0.01)
                         # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
                         
                         # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
-                        if aval in totlindict:
-                            totlindict[aval] = round(len(conlin[0]) / aval)
+                        if aval in totlinsemidict:
+                            totlinsemidict[aval] = round(len(conlin[0]) / aval)
                         else:
-                            totlindict[aval] = round(len(conlin[0]) / aval)
-            return totlindict, xlist, ylist, totlogdict, totevaldict
+                            totlinsemidict[aval] = round(len(conlin[0]) / aval)
+            return totlindict, totlinsemidict, ylist, totlogdict, totevaldict
     @staticmethod
     def stepdata(alpha, xmin, xmax, nsamples):
         

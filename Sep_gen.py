@@ -488,7 +488,7 @@ class Sep_gen:
                         totlinsemidict[aval] += len(consemi[0])
                     else:
                         totlinsemidict[aval] = len(consemi[0])
-                gc.collect()
+                # gc.collect()
                 return totlindict, xlist, ylist, totlogdict, totlinsemidict
             else:
                 if Linear == "Log":

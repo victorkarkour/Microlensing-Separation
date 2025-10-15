@@ -652,7 +652,7 @@ class Sep_plot(Sep_gen):
                 steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep, estep = estep)
             elif inclination:
                 # i and omega marginalized
-                steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep)
+                tothistlist, _ = Sep_gen.HistGen(param)
             else:
                 # omega marginalized
                 steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = False)
@@ -699,64 +699,64 @@ class Sep_plot(Sep_gen):
                         # Shouldn't be needed, all histlist values are in individual histograms
                         # histlist.append((histlistlin, histlistlog, histlistsemi))
                         # tothistlist[j] = histlist
-            else:
-                    if len(estep_outer) != 0:
-                        # For eccentricity, inclination, and omega marginalization
-                        steplindict, x, y, steplogdict, evalcirc = steptotlist
-                        histlist = tothistlist
-                        evallist = evalcirc
-                        if which == "Log":
-                            # Log histogram
-                            totlogiter = steplogdict
-                            totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
-                            hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
-                            histlist.append((hist_log, histbins_log))
-                        elif which == "Linear":
-                            # Linear histogram
-                            totliniter = steplindict
-                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                            histlist.append((hist_lin, histbins_lin))
-                        elif which == "Linear / a":
-                            # Linear / a histogram
-                            totliniter = steplindict
-                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                            histlist.append((hist_lin, histbins_lin))  
-                        else:
-                            return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
-                        
-                        # E = 0 histogram
-                        totcirclist = [key for key, val in evallist.items() for _ in range(val)]
-                        histcirc, binscirc = np.histogram(totcirclist, bins = logbins, range=(0.5, end+0.5))
-                        evalhistlist = [(histcirc, binscirc)]
-                    else:
-                        # For inclination and omega marginalization
-                        for j in range(len(steptotlist)):
-                            steplindict, stepsemidict, y, steplogdict, blank = steptotlist[j]
-                            histlist = tothistlist[j]
-                            if which == "Log":
-                                # Log histogram
-                                totlogiter = steplogdict
-                                totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
-                                hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
-                                histlist.append((hist_log, histbins_log))
-                            elif which == "Linear":
-                                # Linear histogram
-                                totliniter = steplindict
-                                totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                                hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                                histlist.append((hist_lin, histbins_lin))
-                            elif which == "Linear_a":
-                                # Linear / a histogram
-                                totsemiiter = stepsemidict
-                                totsemilist = [key for key, val in totsemiiter.items() for _ in range(val)]
-                                hist_semi, histbins_semi = np.histogram(totsemilist,bins = logbins, range=(0.5, end+0.5))
-                                histlist.append((hist_semi, histbins_semi))  
-                            else:
-                                return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
-                            tothistlist[j] = histlist
-            gc.collect()
+            # else:
+            #     # if len(estep_outer) != 0:
+            #     #     # For eccentricity, inclination, and omega marginalization
+            #     #     steplindict, x, y, steplogdict, evalcirc = steptotlist
+            #     #     histlist = tothistlist
+            #     #     evallist = evalcirc
+            #     #     if which == "Log":
+            #     #         # Log histogram
+            #     #         totlogiter = steplogdict
+            #     #         totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+            #     #         hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+            #     #         histlist.append((hist_log, histbins_log))
+            #     #     elif which == "Linear":
+            #     #         # Linear histogram
+            #     #         totliniter = steplindict
+            #     #         totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+            #     #         hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+            #     #         histlist.append((hist_lin, histbins_lin))
+            #     #     elif which == "Linear / a":
+            #     #         # Linear / a histogram
+            #     #         totliniter = steplindict
+            #     #         totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+            #     #         hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+            #     #         histlist.append((hist_lin, histbins_lin))  
+            #     #     else:
+            #     #         return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
+                    
+            #     #     # E = 0 histogram
+            #     #     totcirclist = [key for key, val in evallist.items() for _ in range(val)]
+            #     #     histcirc, binscirc = np.histogram(totcirclist, bins = logbins, range=(0.5, end+0.5))
+            #     #     evalhistlist = [(histcirc, binscirc)]
+
+            #     # For inclination and omega marginalization
+            #     for j in range(len(steptotlist)):
+            #         steplindict, stepsemidict, y, steplogdict, blank = steptotlist[j]
+            #         histlist = tothistlist[j]
+            #         if which == "Log":
+            #             # Log histogram
+            #             totlogiter = steplogdict
+            #             totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+            #             hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+            #             histlist.append((hist_log, histbins_log))
+            #         elif which == "Linear":
+            #             # Linear histogram
+            #             totliniter = steplindict
+            #             totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+            #             hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+            #             histlist.append((hist_lin, histbins_lin))
+            #         elif which == "Linear_a":
+            #             # Linear / a histogram
+            #             totsemiiter = stepsemidict
+            #             totsemilist = [key for key, val in totsemiiter.items() for _ in range(val)]
+            #             hist_semi, histbins_semi = np.histogram(totsemilist,bins = logbins, range=(0.5, end+0.5))
+            #             histlist.append((hist_semi, histbins_semi))  
+            #         else:
+            #             return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
+            #         tothistlist[j] = histlist
+            #     gc.collect()
         
                     
         if inclination and len(estep_outer) == 0:
@@ -1018,7 +1018,7 @@ if __name__ == "__main__":
     # cli()
     numestep = 4
     numdiv = 2
-    wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     which = "Linear"
     unity = True
@@ -1031,9 +1031,9 @@ if __name__ == "__main__":
     #step, end, inclination, which, estep_outer, inum, wnum
     tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     which = "Log"
-    tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
+    # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     which = "Linear_a"
-    tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
+    # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum, unity = unity)
     
     

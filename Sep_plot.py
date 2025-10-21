@@ -7,6 +7,7 @@ import matplotlib.patches as patches
 import matplotlib
 import time
 from multiprocessing import Pool
+import pandas as pd
 import gc
 import sys
 # import math
@@ -21,12 +22,12 @@ import matplotlib.gridspec as gridspec
 matplotlib.use("Agg")
 class Sep_plot(Sep_gen):
 
-    def __init__(self, numestep = 10, numdiv = 2):# which = "Log", wnum = 10, inum = 10):
+    def __init__(self, numestep = 10, numdiv = 2, wnum = 10):# which = "Log":
         self.numestep = numestep
         self.numdiv = numdiv
         # self.which = which
-        # self.wnum = wnum
-        # self.inum = inum
+        self.wnum = wnum
+        self.inum = wnum
 
     def DataProj(self, w = 0, start = 0.5, end = 20, step = 0.5, specify = []):
         """
@@ -887,30 +888,14 @@ class Sep_plot(Sep_gen):
                 plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_{wnum}_{inum}_{which}.png')
         return tothistlist, evalhistlist
 
-    def UnityPlotHist(self, which, wnum, inum, unity = False):
+    def UnityPlotHistGen(self, which, unity = False):
         """
         """
         totlist = []
         evalcirc = []
-        
-        # Create variables for bin sizes
-        nbin = 200
-        amin = 0.5
-        amax = 21
-        # Make logbinsizes for all
-        logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
-        
-        
-        # Initialize Lists
+
         estep = np.linspace(0,0.98, self.numestep)
-        labels = ["Uniform", "Gamma", "Circular"]
-        colorlist = ["blue", "red", "black"]
-        # Gamma Portion
-        alpha = 1.35 # Shape (Alpha)
-        theta = 1/5.05 # Scale (Beta = 1 / Scale)
-        x = np.linspace(0,0.98, wnum)
-        gammastep = gamma.pdf(x, a = alpha, scale = theta)
-        
+        x = np.linspace(0,0.98, self.wnum)
         esteplist = []*self.numdiv
         param = []
         
@@ -922,7 +907,7 @@ class Sep_plot(Sep_gen):
             obj = Sep_gen()
         
             # Step, end, inclincation, which, estep
-            param.append((0.002, 20, True, which, esteplist[i], wnum, inum, repeat(obj)))
+            param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, repeat(obj)))
             
         # Processing using parallelization     
         with Pool(processes = self.numdiv) as pool:
@@ -931,7 +916,50 @@ class Sep_plot(Sep_gen):
         for j in range(len(tothistlist)):
             totlist.append(tothistlist[j][0])
             evalcirc.append(tothistlist[j][1])
+
+        unity_data = {"final list": totlist,
+                      "circular list": evalcirc}
         
+        df_unity = pd.DataFrame(unity_data)
+        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+
+        df_unity.to_csv(file_name, index = False)
+
+        print("File saved successfully")
+
+        return x
+
+    def UnityPlotHistLoad(self, which, unity = False):
+        """
+        """
+        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.txt'
+
+        with open(file_name, "r") as f:
+            for line in f.readlines():
+                if line.startswith("[["):
+                    totlist = eval(line)
+                elif line.startswith("["):
+                    evalcirc = eval(line)
+            f.close()
+
+
+        # Create variables for bin sizes
+        nbin = 200
+        amin = 0.5
+        amax = 21
+        # Make logbinsizes for all
+        logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
+        
+        
+        # Initialize Lists
+        
+        labels = ["Uniform", "Gamma", "Circular"]
+        colorlist = ["blue", "red", "black"]
+        # Gamma Portion
+        alpha = 1.35 # Shape (Alpha)
+        theta = 1/5.05 # Scale (Beta = 1 / Scale)
+        x = np.linspace(0,0.98, self.wnum)
+        gammastep = gamma.pdf(x, a = alpha, scale = theta)
 
         circhist = evalcirc[0]
         
@@ -1018,24 +1046,19 @@ if __name__ == "__main__":
     # cli()
     numestep = 4
     numdiv = 2
-    wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     which = "Linear"
-    unity = True
+    unity = False
     specify = [0., np.pi/3]
-    tothist = Sep_plot(numestep=numestep, numdiv=numdiv)
+    tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
     #step, end, inclination, which, estep_outer, inum, wnum
-    tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    which = "Log"
-    tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    which = "Linear_a"
-    tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    # tothist.UnityPlotHist(which = which, wnum = wnum, inum = inum, unity = unity)
-    
+    # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
+    folder = tothist.UnityPlotHistGen(which = which, unity = unity)
     
 
 

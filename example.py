@@ -38,115 +38,41 @@
 # # The result should be very close to zero
 # print("Verification (Kepler(Solution, M, e)):", Kepler(Solution, M, e))
 import matplotlib.pyplot as plt
-# import matplotlib.patches as patches
+import matplotlib.patches as patches
 import numpy as np
-from collections import Counter
-# # Example data (replace with your actual 'list')
-# n = 2
-# list = [
-#     (np.linspace(-1, 1, 50), np.linspace(-0.5, 0.5, 50)),
-#     (np.linspace(-0.8, 0.8, 50), np.linspace(-1.2, 1.2, 50)),
-#     (np.linspace(-1.5, 1.5, 50), np.linspace(-0.3, 0.3, 50)),
-#     (np.linspace(-0.2, 0.2, 50), np.linspace(-1.8, 1.8, 50)),
-# ]
 
-# fig, axs = plt.subplots(n, n, figsize=(7, 7), sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
-# fig.suptitle("Orbital Projection with Alterations in e, i, and $\omega$")
+# Example data (replace with your actual 'list')
+n = 2
+list = [
+    (np.linspace(-1, 1, 50), np.linspace(-0.5, 0.5, 50)),
+    (np.linspace(-0.8, 0.8, 50), np.linspace(-1.2, 1.2, 50)),
+    (np.linspace(-1.5, 1.5, 50), np.linspace(-0.3, 0.3, 50)),
+    (np.linspace(-0.2, 0.2, 50), np.linspace(-1.8, 1.8, 50)),
+]
 
-# # Initialize a variable to store the line object
-# line_handle = None
+fig, axs = plt.subplots(n, n, figsize=(7, 7), sharex=True, sharey=True, gridspec_kw=dict(hspace=0, wspace=0))
+fig.suptitle("Orbital Projection with Alterations in e, i, and $\omega$")
 
-# for j, ax in enumerate(axs.flatten()):
-#     initialx, initialy = list[j]
-#     line, = ax.plot(initialx, initialy, color="g")  # Capture the line object
-#     if j == 0:
-#         line_handle = line  # Store the line object from the first subplot
+# Initialize a variable to store the line object
+line_handle = None
 
-#     Circ1 = patches.Circle((0, 0), 0.5, ec="b", fill=False, linestyle=":", linewidth=1)
-#     Circ2 = patches.Circle((0, 0), 1, ec="purple", fill=False, linestyle=":", linewidth=1)
-#     Circ3 = patches.Circle((0, 0), 1.5, ec="r", fill=False, linestyle=":", linewidth=1)
+for j, ax in enumerate(axs.flatten()):
+    initialx, initialy = list[j]
+    line, = ax.plot(initialx, initialy, color="g")  # Capture the line object
+    if j == 0:
+        line_handle = line  # Store the line object from the first subplot
 
-#     ax.add_patch(Circ1)
-#     ax.add_patch(Circ2)
-#     ax.add_patch(Circ3)
+    Circ1 = patches.Circle((0, 0), 0.5, ec="b", fill=False, linestyle=":", linewidth=1)
+    Circ2 = patches.Circle((0, 0), 1, ec="purple", fill=False, linestyle=":", linewidth=1)
+    Circ3 = patches.Circle((0, 0), 1.5, ec="r", fill=False, linestyle=":", linewidth=1)
 
-#     ax.set_xlim(-2, 2)
-#     ax.set_ylim(-2, 2)
+    ax.add_patch(Circ1)
+    ax.add_patch(Circ2)
+    ax.add_patch(Circ3)
 
-# # Create the legend using the patch objects and the captured line object
-# fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
-# plt.show()
-# logbins = np.geomspace(0.5,20,200)
-# # print(logbins)
-# totlindict = {i: 0 for i in logbins}
-# print(totlindict)
-# arr1 = np.random.random(size= 20)
-# print(arr1)
-# val = 1
-# conloglist = np.where(np.isclose(val,arr1,atol= 0.1))
-# if np.any(conloglist[0]) == False:
-#     print(0)
-# else:
-#     print(len(conloglist[0]))
-# dict1 = {1 : 15}
-# dict2 = {}
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(-2, 2)
 
-# dict2 = Counter(dict1) + Counter(dict2)
-# print(dict(dict2))
-
-vel = np.arange(1,50,2)
-x = np.arange(1,50,2)
-y = np.zeros_like(x)
-y2 = np.ones_like(x) * -0.005
-velmin = vel.min()
-velmax = vel.max()
-num = np.subtract(np.abs(vel) , np.abs(velmin))
-denom = np.abs(velmax) - np.abs(velmin)
-ratio =  (40.0 - (np.divide(num,denom)) * 39.0)
-
-plt.figure(figsize=(10,6))
-plt.scatter(x, y, s = ratio, label = "Dot Size")
-plt.scatter(x, y2, s = vel, label = "Vel")
-plt.title("Dot Size Formula")
-plt.text(44,0.01,s = "Min Dot Size")
-plt.text(-2,0.01,s="Max Dot Size")
-plt.text(44,-0.02,s = "Max Vel")
-plt.text(-2,-0.02,s="Min Vel")
-plt.xlim(-5,55)
-plt.yticks([])
-plt.ylim(-0.1,0.1)
-plt.legend()
-plt.savefig('/College Projects/Microlensing Separation/Figures/DotSize.png')
+# Create the legend using the patch objects and the captured line object
+fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
 plt.show()
-# wstep = np.linspace(0,np.pi/2,10)
-# cosstep = np.linspace(0,1,10)
-# istep = np.arccos(cosstep)
-# print("Steps in omega: " , wstep)
-# print("Steps in i: ", istep)
-# xmin = 0.5
-# xmax = 20
-# nsamples = 10000
-# alpha = -1
-# step = np.linspace(0,1,nsamples+2)[1:-1]
-    
-# if alpha == 1.:
-#     print( xmin * (xmax/xmin) ** step)
-# else:
-#     exp = 1. - alpha
-#     print((step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp))
-
-# estep = np.linspace(0,0.9, 80)
-# estep1 = estep[0:20]
-# estep2 = estep[len(estep1):len(estep1)*2]
-
-
-# numestep = 80
-# numdiv = 4
-# slices = int(numestep / numdiv)
-# esteplist = []*numdiv
-# for i in range(numdiv):
-#     esteplist.append(estep[i*slices:(i+1)*slices])
-# # print((esteplist))
-empty = []
-print(len(empty))
-print(type(empty))

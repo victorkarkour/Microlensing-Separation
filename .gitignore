@@ -1,3 +1,5 @@
 example.py
 .venv
 .vscode/settings.json
+__pycache__
+.venv/pyvenv.cfg

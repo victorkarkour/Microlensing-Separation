@@ -1052,9 +1052,9 @@ class Sep_plot(Sep_gen):
         # Make logbinsizes for all
         logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
 
-        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-
-        df_stats = pd.read_csv(filename)
+        # filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        filename_2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        df_stats = pd.read_csv(filename_2)
         df_stats["cumulative"] = 0
         cumulative = 0
         cumul_norm = np.abs(1 / (df_stats["final list"].max()))
@@ -1071,9 +1071,9 @@ class Sep_plot(Sep_gen):
         ax.set_xscale("log")
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
-
-
+        # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        
         mean = np.log10(df_stats["final list"].mean())
         std = np.log10(df_stats["final list"].std())
 

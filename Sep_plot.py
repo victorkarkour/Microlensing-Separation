@@ -940,7 +940,10 @@ class Sep_plot(Sep_gen):
                     "circular list": ecirchist}
         
         df_unity = pd.DataFrame(unity_data)
-        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        if unity:
+            file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        else:
+            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
 
         df_unity.to_csv(file_name, index = False)
 
@@ -951,7 +954,10 @@ class Sep_plot(Sep_gen):
     def UnityPlotHistLoad(self, which, unity = False):
         """
         """
-        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        if unity:
+            file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        else:
+            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
 
         df_unity = pd.read_csv(file_name)
 
@@ -1036,7 +1042,49 @@ class Sep_plot(Sep_gen):
         plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load.png')
         # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
         return tothist
+    def statistics(self, which):
+        """
+        """
+         # Create variables for bin sizes
+        nbin = 200
+        amin = 0.5
+        amax = 21
+        # Make logbinsizes for all
+        logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
 
+        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+
+        df_stats = pd.read_csv(filename)
+        df_stats["cumulative"] = 0
+        cumulative = 0
+        cumul_norm = np.abs(1 / (df_stats["final list"].max()))
+        for i in range(len(df_stats["final list"])):
+            cumulative = cumulative + df_stats.loc[i, "final list"]
+            df_stats.loc[i, "cumulative"] = cumulative
+        c = np.cumsum(df_stats["final list"])
+        fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+        fig.suptitle(f"Cumulative Distribution Function \n ({which})")
+        ax.plot(df_stats["cumulative"]*cumul_norm, color = "black")
+        ax.plot(c*cumul_norm, color = "red", alpha = 0.5)
+        ax.set_xlim(0.5,20.5)
+        ax.set_ylim(0,1)
+        ax.set_xscale("log")
+        ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
+        ax.set_ylabel(r"CDF")
+        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+
+
+        mean = np.log10(df_stats["final list"].mean())
+        std = np.log10(df_stats["final list"].std())
+
+        upper_68 = np.abs(mean + std)
+        lower_68 = np.abs(mean - std)
+        upper_95 = np.abs(mean + 2*std)
+        lower_95 = np.abs(mean - 2*std)
+
+        stats = [mean, std, upper_68, lower_68, upper_95, lower_95]
+        print("Mean: ", mean, " Std Dev: ", std, "68% CI: [", lower_68, ", ", upper_68, "] 95% CI: [", lower_95, ", ", upper_95, "]")
+        return stats
 
 if __name__ == "__main__":
     # @click.command()
@@ -1057,15 +1105,15 @@ if __name__ == "__main__":
     #     plotter = Sep_plot(numestep=numestep, numdiv=numdiv)
     #     plotter.UnityPlotHist(which=which, wnum=wnum, inum=inum, unity=unity)
     # cli()
-    numestep = 4
-    numdiv = 4
-    wnum = 5 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    numestep = 80
+    numdiv = 80
+    wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     which = "Linear"
     unity = False
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
-    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
+    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
@@ -1073,7 +1121,7 @@ if __name__ == "__main__":
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity)
     # load = tothist.UnityPlotHistLoad(which = which, unity = unity)
-    
+    cdf = tothist.statistics(which = which)
 
 
 

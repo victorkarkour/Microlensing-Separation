@@ -1052,9 +1052,9 @@ class Sep_plot(Sep_gen):
         # Make logbinsizes for all
         logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
 
-        # filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-        filename_2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-        df_stats = pd.read_csv(filename_2)
+        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
         cumulative = 0
         cumul_norm = np.abs(1 / (df_stats["final list"].max()))
@@ -1071,8 +1071,8 @@ class Sep_plot(Sep_gen):
         ax.set_xscale("log")
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
-        plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
         
         mean = np.log10(df_stats["final list"].mean())
         std = np.log10(df_stats["final list"].std())
@@ -1086,6 +1086,30 @@ class Sep_plot(Sep_gen):
         print("Mean: ", mean, " Std Dev: ", std, "68% CI: [", lower_68, ", ", upper_68, "] 95% CI: [", lower_95, ", ", upper_95, "]")
         return stats
 
+    def stepalpha(self,which, alpha = 1):
+        """
+        """
+        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        
+        df = pd.read_csv(filename)
+        df_new = df.copy()
+        alpha_init = Sep_gen.stepdata(alpha = 0, xmin= 0.5, xmax=20, nsamples = 200)
+        alpha_new = Sep_gen.stepdata(alpha = alpha, xmin= 0.5, xmax=20, nsamples = 200)
+
+        # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
+        alpha_ratio = alpha_new / alpha_init
+        
+        
+        for i in range(len(df_new["final list"])):
+            df_new.loc[i, "final list"] = int(df_new.loc[i, "final list"] * alpha_ratio[i])
+            df_new.loc[i, "circular list"] = int(df_new.loc[i, "circular list"] * alpha_ratio[i])
+
+        file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha{alpha}.csv'
+        df_new.to_csv(file_name_new, index = False)
+        print(f"File with alpha = {alpha} saved successfully")
+        return df_new
+    
 if __name__ == "__main__":
     # @click.command()
     # @click.argument("numestep", required=False, type=int)#, help = "number of e values stepping through")
@@ -1121,7 +1145,8 @@ if __name__ == "__main__":
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity)
     # load = tothist.UnityPlotHistLoad(which = which, unity = unity)
-    cdf = tothist.statistics(which = which)
+    # cdf = tothist.statistics(which = which)
+    alpha = tothist.stepalpha(which = which, alpha = 2)
 
 
 

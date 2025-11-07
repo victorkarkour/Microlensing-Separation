@@ -957,7 +957,8 @@ class Sep_plot(Sep_gen):
         if unity:
             file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         else:
-            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            # file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
 
         df_unity = pd.read_csv(file_name)
 
@@ -1039,8 +1040,8 @@ class Sep_plot(Sep_gen):
         #     print("Did not save figure, something must be wrong....")
         #     print(os.getcwd())
         
-        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load.png')
-        # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
+        # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load.png')
+        plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
         return tothist
     def statistics(self, which):
         """
@@ -1049,41 +1050,45 @@ class Sep_plot(Sep_gen):
         nbin = 200
         amin = 0.5
         amax = 21
-        # Make logbinsizes for all
-        logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
+        # Make log bins for all
+        bins = np.geomspace(amin,amax, nbin)
 
-        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        # filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
         cumulative = 0
-        cumul_norm = np.abs(1 / (df_stats["final list"].max()))
+        cumul_norm = np.abs(1 / (sum(df_stats["final list"])))
         for i in range(len(df_stats["final list"])):
             cumulative = cumulative + df_stats.loc[i, "final list"]
             df_stats.loc[i, "cumulative"] = cumulative
         c = np.cumsum(df_stats["final list"])
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         fig.suptitle(f"Cumulative Distribution Function \n ({which})")
-        ax.plot(df_stats["cumulative"]*cumul_norm, color = "black")
-        ax.plot(c*cumul_norm, color = "red", alpha = 0.5)
-        ax.set_xlim(0.5,20.5)
+        ax.stairs(df_stats["cumulative"]*cumul_norm,bins, color = "black")
+        # ax.hist(c*cumul_norm, color = "red", alpha = 0.5)
+        ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
+        ax.hlines(0.5, xmin = 0, xmax = 200, color = "r")
+        ax.hlines(0.5+(0.6827/2), xmin = 0, xmax = 200, color = "r")
+        ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "r")
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
-        # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
         
-        mean = np.log10(df_stats["final list"].mean())
-        std = np.log10(df_stats["final list"].std())
-
-        upper_68 = np.abs(mean + std)
-        lower_68 = np.abs(mean - std)
-        upper_95 = np.abs(mean + 2*std)
-        lower_95 = np.abs(mean - 2*std)
-
-        stats = [mean, std, upper_68, lower_68, upper_95, lower_95]
-        print("Mean: ", mean, " Std Dev: ", std, "68% CI: [", lower_68, ", ", upper_68, "] 95% CI: [", lower_95, ", ", upper_95, "]")
+        mean = round(np.log10(df_stats["final list"].mean()),3)
+        std = round(np.log10(df_stats["final list"].std()),3)
+        median = round(np.log10(df_stats['final list'].median()),3)
+        # Change this to np.percentile
+        upper_68 = round(np.log10(np.percentile(df_stats['final list'], 50+(68.27/2), method = 'nearest')),3)
+        lower_68 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+        upper_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+        lower_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+        # IMPORT STATS TO HELP WITH 68% 95% VALUES
+        stats = [mean, std, median, percent_68, percent_95]
+        print("Mean: ", mean, " Std Dev: ", std, ' Median: ', median, " 68%: ", percent_68, " 95%: ", percent_95)
         return stats
 
     def stepalpha(self,which, alpha = 1):
@@ -1099,7 +1104,6 @@ class Sep_plot(Sep_gen):
 
         # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
         alpha_ratio = alpha_new / alpha_init
-        
         
         for i in range(len(df_new["final list"])):
             df_new.loc[i, "final list"] = int(df_new.loc[i, "final list"] * alpha_ratio[i])
@@ -1145,8 +1149,8 @@ if __name__ == "__main__":
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity)
     # load = tothist.UnityPlotHistLoad(which = which, unity = unity)
-    # cdf = tothist.statistics(which = which)
-    alpha = tothist.stepalpha(which = which, alpha = 2)
+    cdf = tothist.statistics(which = which)
+    # alpha = tothist.stepalpha(which = which, alpha = 2)
 
 
 

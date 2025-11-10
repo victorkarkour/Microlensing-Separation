@@ -18,6 +18,7 @@ from Sep_gen import Sep_gen
 import click
 import os
 import matplotlib.gridspec as gridspec
+import statistics as stats
 
 matplotlib.use("Agg")
 class Sep_plot(Sep_gen):
@@ -1053,8 +1054,8 @@ class Sep_plot(Sep_gen):
         # Make log bins for all
         bins = np.geomspace(amin,amax, nbin)
 
-        # filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-        filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
         cumulative = 0
@@ -1073,23 +1074,30 @@ class Sep_plot(Sep_gen):
         ax.hlines(0.5, xmin = 0, xmax = 200, color = "r")
         ax.hlines(0.5+(0.6827/2), xmin = 0, xmax = 200, color = "r")
         ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "r")
+        ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "r")
+        ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "r")
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
-        plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
         
         mean = round(np.log10(df_stats["final list"].mean()),3)
         std = round(np.log10(df_stats["final list"].std()),3)
         median = round(np.log10(df_stats['final list'].median()),3)
         # Change this to np.percentile
-        upper_68 = round(np.log10(np.percentile(df_stats['final list'], 50+(68.27/2), method = 'nearest')),3)
-        lower_68 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
-        upper_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
-        lower_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+        # upper_68 = round(np.log10(np.percentile(df_stats['final list'], 50+(68.27/2), method = 'nearest')),3)
+        # lower_68 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+        # upper_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+        # lower_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+
+        data_percent = np.log10(stats.quantiles(df_stats['final list'], n=100, method = 'exclusive'))
+
+        percent_68 = (round(data_percent[83],3), round(data_percent[14],3))
+        percent_95 = (round(data_percent[96],3), round(data_percent[2],3))
         # IMPORT STATS TO HELP WITH 68% 95% VALUES
-        stats = [mean, std, median, percent_68, percent_95]
-        print("Mean: ", mean, " Std Dev: ", std, ' Median: ', median, " 68%: ", percent_68, " 95%: ", percent_95)
-        return stats
+        statistics = [mean, std, median, percent_68, percent_95]
+        print("Mean: ", mean, " Std Dev: ", std, ' Median: ', median, " 68% Intervals: ", percent_68, " 95% Intervals: ", percent_95)
+        return statistics
 
     def stepalpha(self,which, alpha = 1):
         """

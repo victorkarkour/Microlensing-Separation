@@ -1043,7 +1043,7 @@ class Sep_plot(Sep_gen):
         
         # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load.png')
         plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
-        return tothist
+        return uniformhist
     def statistics(self, which):
         """
         """
@@ -1058,6 +1058,7 @@ class Sep_plot(Sep_gen):
         # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
+        df_stats["bins"] = bins[:-1]
         cumulative = 0
         cumul_norm = np.abs(1 / (sum(df_stats["final list"])))
         for i in range(len(df_stats["final list"])):
@@ -1081,22 +1082,29 @@ class Sep_plot(Sep_gen):
         plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
         # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
         
-        mean = round(np.log10(df_stats["final list"].mean()),3)
-        std = round(np.log10(df_stats["final list"].std()),3)
-        median = round(np.log10(df_stats['final list'].median()),3)
+        # mean = df_stats["final list"].mean()
+        # std = df_stats["final list"].std()
+        median = round(df_stats["bins"].loc[df_stats["cumulative"] == df_stats["cumulative"].median()].values[0],3)
+        
         # Change this to np.percentile
-        # upper_68 = round(np.log10(np.percentile(df_stats['final list'], 50+(68.27/2), method = 'nearest')),3)
-        # lower_68 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
-        # upper_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
-        # lower_95 = round(np.log10(np.percentile(df_stats['final list'], 50-(68.27/2), method = 'nearest')),3)
+        upper_68 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 84, method = 'nearest')].values[0]
+        lower_68 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 16, method = 'nearest')].values[0]
+        upper_95 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 97.5, method = 'nearest')].values[0]
+        lower_95 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 2.5, method = 'nearest')].values[0]
 
-        data_percent = np.log10(stats.quantiles(df_stats['final list'], n=100, method = 'exclusive'))
+        # data_percent = stats.quantiles(df_stats['cumulative'], n=100, method = 'exclusive')
 
-        percent_68 = (round(data_percent[83],3), round(data_percent[14],3))
-        percent_95 = (round(data_percent[96],3), round(data_percent[2],3))
+        # median = round(df_stats["bins"].loc[df_stats["cumulative"] == data_percent[49]].values[0],3)
+        # upper_68 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[83]].values[0]
+        # lower_68 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[14]].values[0]
+        # upper_95 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[96]].values[0]
+        # lower_95 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[2]].values[0]
+
+        percent_68 = round(lower_68,3), round(upper_68,3)
+        percent_95 = round(lower_95,3), round(upper_95,3)
         # IMPORT STATS TO HELP WITH 68% 95% VALUES
-        statistics = [mean, std, median, percent_68, percent_95]
-        print("Mean: ", mean, " Std Dev: ", std, ' Median: ', median, " 68% Intervals: ", percent_68, " 95% Intervals: ", percent_95)
+        statistics = [median, percent_68, percent_95]
+        print(' Median: ', median, " 68% Intervals: ", percent_68, " 95% Intervals: ", percent_95)
         return statistics
 
     def stepalpha(self,which, alpha = 1):

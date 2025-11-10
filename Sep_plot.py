@@ -1065,10 +1065,11 @@ class Sep_plot(Sep_gen):
             cumulative = cumulative + df_stats.loc[i, "final list"]
             df_stats.loc[i, "cumulative"] = cumulative
         c = np.cumsum(df_stats["final list"])
+        df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         fig.suptitle(f"Cumulative Distribution Function \n ({which})")
         ax.stairs(df_stats["cumulative"]*cumul_norm,bins, color = "black")
-        # ax.hist(c*cumul_norm, color = "red", alpha = 0.5)
+        ax.stairs(c*cumul_norm,bins,color = "red", alpha = 0.5)
         ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
@@ -1084,21 +1085,23 @@ class Sep_plot(Sep_gen):
         
         # mean = df_stats["final list"].mean()
         # std = df_stats["final list"].std()
-        median = round(df_stats["bins"].loc[df_stats["cumulative"] == df_stats["cumulative"].median()].values[0],3)
-        
+        median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.505)].values[0],3)
+        print(median)
+        # print(df_stats["cumul_norm"].median())
         # Change this to np.percentile
-        upper_68 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 84, method = 'nearest')].values[0]
-        lower_68 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 16, method = 'nearest')].values[0]
-        upper_95 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 97.5, method = 'nearest')].values[0]
-        lower_95 = df_stats["bins"].loc[df_stats["cumulative"] == np.percentile(df_stats['cumulative'], 2.5, method = 'nearest')].values[0]
+        method = "nearest"
+        upper_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.8385) & (df_stats["cumul_norm"] <= 0.8415)].values[0]
+        lower_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.1585) & (df_stats["cumul_norm"] <= 0.1615)].values[0]
+        upper_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.9735) & (df_stats["cumul_norm"] <= 0.9765)].values[0]
+        lower_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.0225) & (df_stats["cumul_norm"] <= 0.0265)].values[0]
+        
+        # data_percent = stats.quantiles(df_stats['cumul_norm'], n=100, method = 'exclusive')
 
-        # data_percent = stats.quantiles(df_stats['cumulative'], n=100, method = 'exclusive')
-
-        # median = round(df_stats["bins"].loc[df_stats["cumulative"] == data_percent[49]].values[0],3)
-        # upper_68 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[83]].values[0]
-        # lower_68 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[14]].values[0]
-        # upper_95 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[96]].values[0]
-        # lower_95 = df_stats["bins"].loc[df_stats["cumulative"] == data_percent[2]].values[0]
+        # median = round(df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[49]].values[0],3)
+        # upper_68 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[83]].values[0]
+        # lower_68 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[14]].values[0]
+        # upper_95 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[96]].values[0]
+        # lower_95 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[2]].values[0]
 
         percent_68 = round(lower_68,3), round(upper_68,3)
         percent_95 = round(lower_95,3), round(upper_95,3)

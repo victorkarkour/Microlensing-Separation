@@ -1051,6 +1051,14 @@ class Sep_plot(Sep_gen):
         nbin = 200
         amin = 0.5
         amax = 21
+
+        # Create gamma prior
+        alpha = 1.35 # Shape (Alpha)
+        theta = 1/5.05 # Scale (Beta = 1 / Scale)
+        x = np.linspace(0,0.98, nbin-1)
+        gammastep = gamma.pdf(x, a = alpha, scale = theta)
+
+
         # Make log bins for all
         bins = np.geomspace(amin,amax, nbin)
 
@@ -1058,7 +1066,17 @@ class Sep_plot(Sep_gen):
         # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
+        df_stats["cumul_gamma"] = 0
+        df_stats["cumul_circ"] = np.cumsum(df_stats["circular list"]) / np.abs(sum(df_stats["circular list"]))
         df_stats["bins"] = bins[:-1]
+
+
+        hist = df_stats["final list"].to_numpy()
+        # Make Gamma Calculation
+        totgammahist = gammastep * hist
+
+        df_stats["cumul_gamma"] = np.cumsum(totgammahist) / np.abs(sum(totgammahist))
+
         cumulative = 0
         cumul_norm = np.abs(1 / (sum(df_stats["final list"])))
         for i in range(len(df_stats["final list"])):
@@ -1068,8 +1086,9 @@ class Sep_plot(Sep_gen):
         df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         fig.suptitle(f"Cumulative Distribution Function \n ({which})")
-        ax.stairs(df_stats["cumulative"]*cumul_norm,bins, color = "black")
-        ax.stairs(c*cumul_norm,bins,color = "red", alpha = 0.5)
+        ax.stairs(df_stats["cumul_norm"],bins, color = "black")
+        ax.stairs(df_stats["cumul_gamma"],bins,color = "red", alpha = 0.5)
+        ax.stairs(df_stats["cumul_circ"],bins,color = "blue", alpha = 0.5)
         ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
@@ -1080,7 +1099,8 @@ class Sep_plot(Sep_gen):
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "r")
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."])
+        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_multi_{self.numestep}_0002_{which}.png')
         # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
         
         # mean = df_stats["final list"].mean()

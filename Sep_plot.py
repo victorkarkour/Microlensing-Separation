@@ -952,14 +952,15 @@ class Sep_plot(Sep_gen):
 
         return x
 
-    def UnityPlotHistLoad(self, which, unity = False):
+    def UnityPlotHistLoad(self, which, alpha_step = 1):
         """
         """
-        if unity:
-            file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        # Checks if linear or log is being used
+        if alpha_step == 1 or alpha_step == 0:
+            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         else:
-            # file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-            file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+            # file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
 
         df_unity = pd.read_csv(file_name)
 
@@ -1041,10 +1042,10 @@ class Sep_plot(Sep_gen):
         #     print("Did not save figure, something must be wrong....")
         #     print(os.getcwd())
         
-        # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load.png')
-        plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
+        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load_alpha_{alpha_step}.png')
+        # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.png")
         return uniformhist
-    def statistics(self, which):
+    def statistics(self, which, alpha_step = 1):
         """
         """
          # Create variables for bin sizes
@@ -1061,8 +1062,10 @@ class Sep_plot(Sep_gen):
 
         # Make log bins for all
         bins = np.geomspace(amin,amax, nbin)
-
-        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        if alpha_step == 1 or alpha_step == 0:
+            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        else:
+            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
         # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
@@ -1085,7 +1088,7 @@ class Sep_plot(Sep_gen):
         c = np.cumsum(df_stats["final list"])
         df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        fig.suptitle(f"Cumulative Distribution Function \n ({which})")
+        fig.suptitle(f"Cumulative Distribution Function \n alpha = {alpha_step}")
         ax.stairs(df_stats["cumul_norm"],bins, color = "black")
         ax.stairs(df_stats["cumul_gamma"],bins,color = "red", alpha = 0.5)
         ax.stairs(df_stats["cumul_circ"],bins,color = "blue", alpha = 0.5)
@@ -1100,20 +1103,19 @@ class Sep_plot(Sep_gen):
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
         ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."])
-        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_multi_{self.numestep}_0002_{which}.png')
-        # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}.png')
+        
         
         # mean = df_stats["final list"].mean()
         # std = df_stats["final list"].std()
-        median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.505)].values[0],3)
+        median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
         print(median)
         # print(df_stats["cumul_norm"].median())
         # Change this to np.percentile
         method = "nearest"
-        upper_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.8385) & (df_stats["cumul_norm"] <= 0.8415)].values[0]
-        lower_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.1585) & (df_stats["cumul_norm"] <= 0.1615)].values[0]
+        upper_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.8365) & (df_stats["cumul_norm"] <= 0.8415)].values[0]
+        lower_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.1505) & (df_stats["cumul_norm"] <= 0.1615)].values[0]
         upper_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.9735) & (df_stats["cumul_norm"] <= 0.9765)].values[0]
-        lower_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.0225) & (df_stats["cumul_norm"] <= 0.0265)].values[0]
+        lower_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.0205) & (df_stats["cumul_norm"] <= 0.0265)].values[0]
         
         # data_percent = stats.quantiles(df_stats['cumul_norm'], n=100, method = 'exclusive')
 
@@ -1123,11 +1125,22 @@ class Sep_plot(Sep_gen):
         # upper_95 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[96]].values[0]
         # lower_95 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[2]].values[0]
 
+        np.set_printoptions(legacy = "1.25")
+
         percent_68 = round(lower_68,3), round(upper_68,3)
         percent_95 = round(lower_95,3), round(upper_95,3)
         # IMPORT STATS TO HELP WITH 68% 95% VALUES
         statistics = [median, percent_68, percent_95]
+        print(f"Stats for  Uniform distribution {which} and alpha = {alpha_step}: ")
         print(' Median: ', median, " 68% Intervals: ", percent_68, " 95% Intervals: ", percent_95)
+        
+        
+        rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
+        textstr = "\n".join((f'Median: {median}', f'68% Intervals: {percent_68}', f'95% Intervals: {percent_95}'))
+        ax.text(0.65, 0.75, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
+
+        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_multi_{self.numestep}_0002_{which}_alpha_{alpha_step}.png')
+        # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}_alpha_{alpha}.png')       
         return statistics
 
     def stepalpha(self,which, alpha = 1):
@@ -1138,17 +1151,21 @@ class Sep_plot(Sep_gen):
         
         df = pd.read_csv(filename)
         df_new = df.copy()
-        alpha_init = Sep_gen.stepdata(alpha = 0, xmin= 0.5, xmax=20, nsamples = 200)
+        if which == 'Linear':
+            alpha_init_val = 0
+        elif which == "Log":
+            alpha_init_val = 1.
+
+        alpha_init = Sep_gen.stepdata(alpha = alpha_init_val, xmin= 0.5, xmax=20, nsamples = 200)
         alpha_new = Sep_gen.stepdata(alpha = alpha, xmin= 0.5, xmax=20, nsamples = 200)
 
         # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
         alpha_ratio = alpha_new / alpha_init
-        
         for i in range(len(df_new["final list"])):
             df_new.loc[i, "final list"] = int(df_new.loc[i, "final list"] * alpha_ratio[i])
             df_new.loc[i, "circular list"] = int(df_new.loc[i, "circular list"] * alpha_ratio[i])
 
-        file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha{alpha}.csv'
+        file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
         df_new.to_csv(file_name_new, index = False)
         print(f"File with alpha = {alpha} saved successfully")
         return df_new
@@ -1176,7 +1193,9 @@ if __name__ == "__main__":
     numdiv = 80
     wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
-    which = "Linear"
+    # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = 1
+    which = "Log"
+    alpha = 2
     unity = False
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
@@ -1187,9 +1206,9 @@ if __name__ == "__main__":
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity)
-    # load = tothist.UnityPlotHistLoad(which = which, unity = unity)
-    cdf = tothist.statistics(which = which)
-    # alpha = tothist.stepalpha(which = which, alpha = 2)
+    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha)
+    cdf = tothist.statistics(which = which, alpha_step = alpha)
+    # alpha = tothist.stepalpha(which = which, alpha = alpha)
 
 
 

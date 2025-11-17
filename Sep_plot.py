@@ -1064,9 +1064,10 @@ class Sep_plot(Sep_gen):
         bins = np.geomspace(amin,amax, nbin)
         if alpha_step == 1 or alpha_step == 0:
             filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         else:
             filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
-        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
         df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
         df_stats["cumul_gamma"] = 0
@@ -1104,36 +1105,48 @@ class Sep_plot(Sep_gen):
         ax.set_ylabel(r"CDF")
         ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."])
         
-        
-        # mean = df_stats["final list"].mean()
-        # std = df_stats["final list"].std()
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
-        print(median)
-        # print(df_stats["cumul_norm"].median())
-        # Change this to np.percentile
-        method = "nearest"
+        median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.515)].values[0],3)
+        median_circ = round(df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.495) & (df_stats["cumul_circ"] <= 0.515)].values[0],3)
+        
+        # Upper Lower Percentages
+        upper_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.8365) & (df_stats["cumul_gamma"] <= 0.8415)].values[0]
+        lower_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.1505) & (df_stats["cumul_gamma"] <= 0.1615)].values[0]
+        upper_95_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.9735) & (df_stats["cumul_gamma"] <= 0.9765)].values[0]
+        lower_95_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.0205) & (df_stats["cumul_gamma"] <= 0.0265)].values[0] 
+        
         upper_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.8365) & (df_stats["cumul_norm"] <= 0.8415)].values[0]
         lower_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.1505) & (df_stats["cumul_norm"] <= 0.1615)].values[0]
         upper_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.9735) & (df_stats["cumul_norm"] <= 0.9765)].values[0]
         lower_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.0205) & (df_stats["cumul_norm"] <= 0.0265)].values[0]
         
-        # data_percent = stats.quantiles(df_stats['cumul_norm'], n=100, method = 'exclusive')
-
-        # median = round(df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[49]].values[0],3)
-        # upper_68 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[83]].values[0]
-        # lower_68 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[14]].values[0]
-        # upper_95 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[96]].values[0]
-        # lower_95 = df_stats["bins"].loc[df_stats["cumul_norm"] == data_percent[2]].values[0]
+        upper_68_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.8365) & (df_stats["cumul_circ"] <= 0.8415)].values[0]
+        lower_68_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.1475) & (df_stats["cumul_circ"] <= 0.1880)].values[0]
+        upper_95_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.9735) & (df_stats["cumul_circ"] <= 0.9765)].values[0]
+        lower_95_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.0205) & (df_stats["cumul_circ"] <= 0.0395)].values[0]
 
         np.set_printoptions(legacy = "1.25")
 
+        # Roudn up percents
         percent_68 = round(lower_68,3), round(upper_68,3)
         percent_95 = round(lower_95,3), round(upper_95,3)
+        
+        percent_68_gamma = round(lower_68_gamma,3), round(upper_68_gamma,3)
+        percent_95_gamma = round(lower_95_gamma,3), round(upper_95_gamma,3)
+        
+        percent_68_circ = round(lower_68_circ,3), round(upper_68_circ,3)
+        percent_95_circ = round(lower_95_circ,3), round(upper_95_circ,3)
+        
         # IMPORT STATS TO HELP WITH 68% 95% VALUES
         statistics = [median, percent_68, percent_95]
         print(f"Stats for  Uniform distribution {which} and alpha = {alpha_step}: ")
         print(' Median: ', median, " 68% Intervals: ", percent_68, " 95% Intervals: ", percent_95)
         
+        print(f"Stats for  Gamma distribution {which} and alpha = {alpha_step}: ")
+        print(' Median: ', median_gamma, " 68% Intervals: ", percent_68_gamma, " 95% Intervals: ", percent_95_gamma)
+        
+        print(f"Stats for  Circular distribution {which} and alpha = {alpha_step}: ")
+        print(' Median: ', median_circ, " 68% Intervals: ", percent_68_circ, " 95% Intervals: ", percent_95_circ)
         
         rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
         textstr = "\n".join((f'Median: {median}', f'68% Intervals: {percent_68}', f'95% Intervals: {percent_95}'))
@@ -1194,8 +1207,8 @@ if __name__ == "__main__":
     wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = 1
-    which = "Log"
-    alpha = 2
+    which = "Linear"
+    alpha = 0
     unity = False
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)

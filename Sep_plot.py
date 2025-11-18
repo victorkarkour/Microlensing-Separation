@@ -1164,21 +1164,38 @@ class Sep_plot(Sep_gen):
         
         df = pd.read_csv(filename)
         df_new = df.copy()
-        if which == 'Linear':
-            alpha_init_val = 0
-        elif which == "Log":
-            alpha_init_val = 1.
+        if which == 'Linear' and alpha == 0:
+            mult_bins = [1 for num in range(0,199)]
+        elif which == "Log" and alpha == -1:
+            mult_bins = [1 for num in range(0,199)]
+        else:
+            nbin = 200
+            amin = 0.5
+            amax = 21
 
-        alpha_init = Sep_gen.stepdata(alpha = alpha_init_val, xmin= 0.5, xmax=20, nsamples = 200)
-        alpha_new = Sep_gen.stepdata(alpha = alpha, xmin= 0.5, xmax=20, nsamples = 200)
-
-        # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
-        alpha_ratio = alpha_new / alpha_init
+            bins = np.geomspace(amin,amax, nbin)
+            mult_bins = bins
+            # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
+            df["bins"] = bins[:-1]
+        
+        print(mult_bins)
         for i in range(len(df_new["final list"])):
-            df_new.loc[i, "final list"] = int(df_new.loc[i, "final list"] * alpha_ratio[i])
-            df_new.loc[i, "circular list"] = int(df_new.loc[i, "circular list"] * alpha_ratio[i])
+            if alpha < -1: # For (alpha -2) 
+                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**(-2))
+                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**(-2))
+            elif alpha == 1: # For (alpha 1) values
+                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
+                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
+            elif alpha > 1: # For (alpha 2) values
+                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**2)
+                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**2)
+            elif alpha == 0 or alpha == -1: # Linear (0) and Log (-1)
+                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
+                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
+                
 
         file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+        # file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
         df_new.to_csv(file_name_new, index = False)
         print(f"File with alpha = {alpha} saved successfully")
         return df_new
@@ -1207,8 +1224,8 @@ if __name__ == "__main__":
     wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = 1
-    which = "Linear"
-    alpha = 0
+    which = "Log"
+    alpha = -2
     unity = False
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
@@ -1220,8 +1237,8 @@ if __name__ == "__main__":
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha)
-    cdf = tothist.statistics(which = which, alpha_step = alpha)
-    # alpha = tothist.stepalpha(which = which, alpha = alpha)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    alpha = tothist.stepalpha(which = which, alpha = alpha)
 
 
 

@@ -952,17 +952,30 @@ class Sep_plot(Sep_gen):
 
         return x
 
-    def UnityPlotHistLoad(self, which, alpha_step = 1):
+    def UnityPlotHistLoad(self, which, alpha_step = 1, dist = ""):
         """
         """
         # Checks if linear or log is being used
         if alpha_step == 1 or alpha_step == 0:
             file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            df_unity = pd.read_csv(file_name)
+        elif dist == "circular" or "uniform" or "gamma":
+            file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Linear.csv'
+            file_name_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Log.csv'
+            file_name_3 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Linear_alpha_1.csv'
+            file_name_4 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Linear_alpha_2.csv'
+            file_name_5 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Log_alpha_-2.csv'
+
+            df_unity_1 = pd.read_csv(file_name_1)
+            df_unity_2 = pd.read_csv(file_name_2)
+            df_unity_3 = pd.read_csv(file_name_3)
+            df_unity_4 = pd.read_csv(file_name_4)
+            df_unity_5 = pd.read_csv(file_name_5)
         else:
             file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
             # file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
 
-        df_unity = pd.read_csv(file_name)
+            df_unity = pd.read_csv(file_name)
 
 
         # Create variables for bin sizes
@@ -974,7 +987,10 @@ class Sep_plot(Sep_gen):
         
         
         # Initialize Lists
-        
+        # if len(dist) != 0:
+        #     labels = [f"{dist}"]
+        #     colorlist = ["blue", "red", "black", "green", "orange"]
+        # else:
         labels = ["Uniform", "Gamma", "Circular"]
         colorlist = ["blue", "red", "black"]
         # Gamma Portion
@@ -984,39 +1000,83 @@ class Sep_plot(Sep_gen):
         gammastep = gamma.pdf(x, a = alpha, scale = theta)
         # Make bins
         bins = np.geomspace(amin,amax, nbin)
-
         
         # FIGURE FOR SEMIMAJOR AXIS
-        fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        # fig.suptitle("Detections of $R_E$ with marginalizations for e = 0.0-0.9, "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")        
+        fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))        
         # Combine Histogram Calculations
-        uniformhist = df_unity["final list"].to_numpy()
-        hist = uniformhist.copy()
-        circhist = df_unity["circular list"].to_numpy()
-        # Make Gamma Calculation
-        # for val in range(len(hist)):
-        #     # For Gamma weighting
-        #     gammanorm = gammastep[val]
-        #     gammahist = gammanorm * hist[val]
-        #     if val == 0:
-        #         totgammahist = np.zeros_like(hist)
-        #         totgammahist[val] = gammahist
-        #     elif val == len(hist)-1:
-        #         totgammahist[val] = gammahist
-        #     else:
-        #         totgammahist[val] = gammahist
-        totgammahist = gammastep * hist
+        if len(dist) != 0:
+            if dist == "circular":
+                circhist_1 = df_unity_1["circular list"].to_numpy()
+                circhist_2 = df_unity_2["circular list"].to_numpy()
+                circhist_3 = df_unity_3["circular list"].to_numpy()
+                circhist_4 = df_unity_4["circular list"].to_numpy()
+                circhist_5 = df_unity_5["circular list"].to_numpy()
+                
+                ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
+                
+                StepPatch = ax.stairs(circhist_1 * ecircnorm, bins, fill = False, label = "alpha = 0") 
+                StepPatch = ax.stairs(circhist_2 * ecircnorm, bins, fill = False, label = "alpha = -1")
+                StepPatch = ax.stairs(circhist_3 * ecircnorm, bins, fill = False, label = "alpha = 1") 
+                StepPatch = ax.stairs(circhist_4 * ecircnorm, bins, fill = False, label = "alpha = 2")
+                StepPatch = ax.stairs(circhist_5 * ecircnorm, bins, fill = False, label = "alpha = -2")
+            elif dist == "uniform":
+                uniformhist_1 = df_unity_1["final list"].to_numpy()
+                uniformhist_2 = df_unity_2["final list"].to_numpy()
+                uniformhist_3 = df_unity_3["final list"].to_numpy()
+                uniformhist_4 = df_unity_4["final list"].to_numpy()
+                uniformhist_5 = df_unity_5["final list"].to_numpy()
+                
+                norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
+                
+                StepPatch = ax.stairs(uniformhist_1 * norm, bins, fill = False, label = "alpha = 0")
+                StepPatch = ax.stairs(uniformhist_2 * norm, bins, fill = False, label = "alpha = -1")
+                StepPatch = ax.stairs(uniformhist_3 * norm, bins, fill = False, label = "alpha = 1")
+                StepPatch = ax.stairs(uniformhist_4 * norm, bins, fill = False, label = "alpha = 2")
+                StepPatch = ax.stairs(uniformhist_5 * norm, bins, fill = False, label = "alpha = -2")
+            
+            elif dist == "gamma":
+                uniformhist_1 = df_unity_1["final list"].to_numpy()
+                uniformhist_2 = df_unity_2["final list"].to_numpy()
+                uniformhist_3 = df_unity_3["final list"].to_numpy()
+                uniformhist_4 = df_unity_4["final list"].to_numpy()
+                uniformhist_5 = df_unity_5["final list"].to_numpy()
+                
+                totgammahist_1 = gammastep * uniformhist_1
+                totgammahist_2 = gammastep * uniformhist_2
+                totgammahist_3 = gammastep * uniformhist_3
+                totgammahist_4 = gammastep * uniformhist_4
+                totgammahist_5 = gammastep * uniformhist_5
+                
+                gammanorm_final_1 = np.abs(1/ (np.sum(totgammahist_1) * logbinsize))
+                gammanorm_final_2 = np.abs(1/ (np.sum(totgammahist_2) * logbinsize))
+                gammanorm_final_3 = np.abs(1/ (np.sum(totgammahist_3) * logbinsize))
+                gammanorm_final_4 = np.abs(1/ (np.sum(totgammahist_4) * logbinsize))
+                gammanorm_final_5 = np.abs(1/ (np.sum(totgammahist_5) * logbinsize))
+                
+                StepPatch = ax.stairs(totgammahist_1 * gammanorm_final_1, bins, fill = False, label = "alpha = 0")
+                StepPatch = ax.stairs(totgammahist_2 * gammanorm_final_2, bins, fill = False, label = "alpha = -1")
+                StepPatch = ax.stairs(totgammahist_3 * gammanorm_final_3, bins, fill = False, label = "alpha = 1")
+                StepPatch = ax.stairs(totgammahist_4 * gammanorm_final_4, bins, fill = False, label = "alpha = 2")
+                StepPatch = ax.stairs(totgammahist_5 * gammanorm_final_5, bins, fill = False, label = "alpha = -2")
+            
+        else:
+        
+            uniformhist = df_unity["final list"].to_numpy()
+            hist = uniformhist.copy()
+            circhist = df_unity["circular list"].to_numpy()
 
-        norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
-        ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
-        gammanorm_final = np.abs(1/ (np.sum(totgammahist) * logbinsize))
-        result = sum(uniformhist)
-        print(result, sum(totgammahist), sum(circhist))
+            totgammahist = gammastep * hist
 
-        StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
-        # May or may not need norm for gamma
-        StepPatch = ax.stairs(totgammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
-        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
+            norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
+            ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
+            gammanorm_final = np.abs(1/ (np.sum(totgammahist) * logbinsize))
+            result = sum(uniformhist)
+            print(result, sum(totgammahist), sum(circhist))
+
+            StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
+            # May or may not need norm for gamma
+            StepPatch = ax.stairs(totgammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+            StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
 
 
         ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
@@ -1025,23 +1085,14 @@ class Sep_plot(Sep_gen):
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
         ax.set_ylabel(r"Counts")
         
-        handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
-        
-        ax.legend(handles, labels)
+        if len(dist) != 0:
+            handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
+            ax.legend(handles, labels)
+        else:
+            ax.legend()
+            
         fig.tight_layout()
-        # try:
-        #     #### os.getcwd IS FOR DESKTOP, IF FOR UNITY, CHANGE TO os.get_cwd
-        #     if not unity:
-        #         plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png')
-        #         print(os.getcwd(), os.path.abspath(f"/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
-        #     else:
-        #         plt.savefig(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png")
-        #         print(os.getcwd(), os.path.abspath(f"~/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}.png"))
-        #         print("It works!")
-        # except:
-        #     print("Did not save figure, something must be wrong....")
-        #     print(os.getcwd())
-        
+            
         plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load_alpha_{alpha_step}.png')
         # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.png")
         return uniformhist
@@ -1227,6 +1278,7 @@ if __name__ == "__main__":
     which = "Log"
     alpha = -2
     unity = False
+    dist = "circular"
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
@@ -1236,9 +1288,9 @@ if __name__ == "__main__":
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity)
-    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha)
+    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
-    alpha = tothist.stepalpha(which = which, alpha = alpha)
+    # alpha = tothist.stepalpha(which = which, alpha = alpha)
 
 
 

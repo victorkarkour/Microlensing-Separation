@@ -957,7 +957,7 @@ class Sep_plot(Sep_gen):
         """
         # Checks if linear or log is being used
         if alpha_step == 1 or alpha_step == 0:
-            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_new.csv'
             df_unity = pd.read_csv(file_name)
         elif dist == "circular" or "uniform" or "gamma":
             file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Linear.csv'
@@ -987,12 +987,12 @@ class Sep_plot(Sep_gen):
         
         
         # Initialize Lists
-        # if len(dist) != 0:
+        if len(dist) == 0:
         #     labels = [f"{dist}"]
         #     colorlist = ["blue", "red", "black", "green", "orange"]
         # else:
-        labels = ["Uniform", "Gamma", "Circular"]
-        colorlist = ["blue", "red", "black"]
+            labels = ["Uniform", "Gamma", "Circular"]
+            colorlist = ["blue", "red", "black"]
         # Gamma Portion
         alpha = 1.35 # Shape (Alpha)
         theta = 1/5.05 # Scale (Beta = 1 / Scale)
@@ -1012,13 +1012,17 @@ class Sep_plot(Sep_gen):
                 circhist_4 = df_unity_4["circular list"].to_numpy()
                 circhist_5 = df_unity_5["circular list"].to_numpy()
                 
-                ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
+                ecircnorm_1 = np.abs(1 / (np.sum(circhist_1) * logbinsize))
+                ecircnorm_2 = np.abs(1 / (np.sum(circhist_2) * logbinsize))
+                ecircnorm_3 = np.abs(1 / (np.sum(circhist_3) * logbinsize))
+                ecircnorm_4 = np.abs(1 / (np.sum(circhist_4) * logbinsize))
+                ecircnorm_5 = np.abs(1 / (np.sum(circhist_5) * logbinsize))
                 
-                StepPatch = ax.stairs(circhist_1 * ecircnorm, bins, fill = False, label = "alpha = 0") 
-                StepPatch = ax.stairs(circhist_2 * ecircnorm, bins, fill = False, label = "alpha = -1")
-                StepPatch = ax.stairs(circhist_3 * ecircnorm, bins, fill = False, label = "alpha = 1") 
-                StepPatch = ax.stairs(circhist_4 * ecircnorm, bins, fill = False, label = "alpha = 2")
-                StepPatch = ax.stairs(circhist_5 * ecircnorm, bins, fill = False, label = "alpha = -2")
+                StepPatch = ax.stairs(circhist_1 * ecircnorm_1, bins, fill = False, label = "alpha = 0 ") 
+                StepPatch = ax.stairs(circhist_2 * ecircnorm_2, bins, fill = False, label = "alpha = -1")
+                StepPatch = ax.stairs(circhist_3 * ecircnorm_3, bins, fill = False, label = "alpha = 1") 
+                StepPatch = ax.stairs(circhist_4 * ecircnorm_4, bins, fill = False, label = "alpha = 2")
+                StepPatch = ax.stairs(circhist_5 * ecircnorm_5, bins, fill = False, label = "alpha = -2")
             elif dist == "uniform":
                 uniformhist_1 = df_unity_1["final list"].to_numpy()
                 uniformhist_2 = df_unity_2["final list"].to_numpy()
@@ -1026,13 +1030,17 @@ class Sep_plot(Sep_gen):
                 uniformhist_4 = df_unity_4["final list"].to_numpy()
                 uniformhist_5 = df_unity_5["final list"].to_numpy()
                 
-                norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
+                norm_1 = np.abs(1 / (np.sum(uniformhist_1) * logbinsize))
+                norm_2 = np.abs(1 / (np.sum(uniformhist_2) * logbinsize))
+                norm_3 = np.abs(1 / (np.sum(uniformhist_3) * logbinsize))
+                norm_4 = np.abs(1 / (np.sum(uniformhist_4) * logbinsize))
+                norm_5 = np.abs(1 / (np.sum(uniformhist_5) * logbinsize))
                 
-                StepPatch = ax.stairs(uniformhist_1 * norm, bins, fill = False, label = "alpha = 0")
-                StepPatch = ax.stairs(uniformhist_2 * norm, bins, fill = False, label = "alpha = -1")
-                StepPatch = ax.stairs(uniformhist_3 * norm, bins, fill = False, label = "alpha = 1")
-                StepPatch = ax.stairs(uniformhist_4 * norm, bins, fill = False, label = "alpha = 2")
-                StepPatch = ax.stairs(uniformhist_5 * norm, bins, fill = False, label = "alpha = -2")
+                StepPatch = ax.stairs(uniformhist_1 * norm_1, bins, fill = False, label = "alpha = 0")
+                StepPatch = ax.stairs(uniformhist_2 * norm_2, bins, fill = False, label = "alpha = -1")
+                StepPatch = ax.stairs(uniformhist_3 * norm_3, bins, fill = False, label = "alpha = 1")
+                StepPatch = ax.stairs(uniformhist_4 * norm_4, bins, fill = False, label = "alpha = 2")
+                StepPatch = ax.stairs(uniformhist_5 * norm_5, bins, fill = False, label = "alpha = -2")
             
             elif dist == "gamma":
                 uniformhist_1 = df_unity_1["final list"].to_numpy()
@@ -1085,17 +1093,20 @@ class Sep_plot(Sep_gen):
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
         ax.set_ylabel(r"Counts")
         
-        if len(dist) != 0:
+        if len(dist) == 0:
             handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
             ax.legend(handles, labels)
         else:
             ax.legend()
             
         fig.tight_layout()
-            
-        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_norm_load_alpha_{alpha_step}.png')
-        # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.png")
-        return uniformhist
+        if len(dist) == 0:
+            plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}_new.png')
+            # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.png")
+        else:
+            plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_{dist}.png')
+            # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_{dist}.png")
+        return bins
     def statistics(self, which, alpha_step = 1):
         """
         """
@@ -1275,10 +1286,10 @@ if __name__ == "__main__":
     wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = 1
-    which = "Log"
-    alpha = -2
+    which = "Linear"
+    alpha = 0
     unity = False
-    dist = "circular"
+    dist = ""
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)

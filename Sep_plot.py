@@ -888,7 +888,7 @@ class Sep_plot(Sep_gen):
                 plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_{wnum}_{inum}_{which}.png')
         return tothistlist, evalhistlist
 
-    def UnityPlotHistGen(self, which, unity = False):
+    def UnityPlotHistGen(self, which, unity = False, circ = False):
         """
         """
         totlist = []
@@ -901,65 +901,89 @@ class Sep_plot(Sep_gen):
         
         # Slices estep into parts for parallelization
         slices = int(self.numestep / self.numdiv)
-        for i in range(self.numdiv):
-            esteplist.append(estep[i*slices:(i+1)*slices])
+        if circ == False:
+            for i in range(self.numdiv):
+                esteplist.append(estep[i*slices:(i+1)*slices])
+                
+                obj = Sep_gen()
             
+                # Step, end, inclincation, which, estep
+                param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, repeat(obj)))
+        else:
             obj = Sep_gen()
-        
-            # Step, end, inclincation, which, estep
-            param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, repeat(obj)))
-            
-        # Processing using parallelization     
-        with Pool(processes = self.numdiv) as pool:
+            param = [0.002, 20, True, which, estep[0], self.wnum, self.inum, repeat(obj)]
+        # Processing using parallelization
+        if circ == False:     
+            with Pool(processes = self.numdiv) as pool:
                 tothistlist = pool.map(Sep_gen.HistGen, param)
+        else:
+                tothistlist = Sep_gen.CircHistGen(param)
         # print("pool finished")
         for j in range(len(tothistlist)):
-            totlist.append(tothistlist[j][0])
-            evalcirc.append(tothistlist[j][1])
-
+            totlist.append(tothistlist[j])
         # Process for CSV File
-        circhist = evalcirc[0]
-        for i in range(len(totlist)):
-            histlist = totlist[i]
-            circiter = circhist[0]
-            for val in range(len(histlist)):
-                    hist, bins = histlist[val]
-                    ecirchist, circbins = circiter
-                    if val == 0:
-                        if i == 0:
-                            tothist = np.zeros_like(hist)
-                        tothist = tothist + hist
-                    elif val == len(histlist)-1 and i == len(totlist)-1:
-                        tothist = tothist + hist
-                        total = np.sum(tothist)
-                        print("Total Number of Points: ", total)
-                    else:
-                        tothist = tothist + hist
-        # Save to CSV
-        unity_data = {
-                    "final list": tothist,
-                    "circular list": ecirchist}
-        
-        df_unity = pd.DataFrame(unity_data)
-        if unity:
-            file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        if circ == False:
+            for i in range(len(totlist)):
+                histlist = totlist[i]
+                for val in range(len(histlist)):
+                        hist, bins = histlist[val]
+                        if val == 0:
+                            if i == 0:
+                                tothist = np.zeros_like(hist)
+                            tothist = tothist + hist
+                        elif val == len(histlist)-1 and i == len(totlist)-1:
+                            tothist = tothist + hist
+                            total = np.sum(tothist)
+                            print("Total Number of Points: ", total)
+                        else:
+                            tothist = tothist + hist
+            # Save to CSV
+            unity_data = {
+                        "final list": tothist}
+            df_unity = pd.DataFrame(unity_data)
         else:
-            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-
+            for i in range(len(totlist)):
+                histlist = totlist[i]
+                for val in range(len(histlist)):
+                        hist, bins = histlist[val]
+                        if val == 0:
+                            if i == 0:
+                                tothist = np.zeros_like(hist)
+                            tothist = tothist + hist
+                        elif val == len(histlist)-1 and i == len(totlist)-1:
+                            tothist = tothist + hist
+                            total = np.sum(tothist)
+                            print("Total Number of Points: ", total)
+                        else:
+                            tothist = tothist + hist
+            # Save to CSV
+            unity_data = {
+                        "circular list": tothist}
+            df_unity = pd.DataFrame(unity_data)
+        if unity:
+            if circ == False:
+                file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            else:
+                file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
+        else:
+            if circ == False:
+                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            else:
+                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
         df_unity.to_csv(file_name, index = False)
 
         print("File saved successfully")
 
         return x
 
-    def UnityPlotHistLoad(self, which, alpha_step = 1, dist = ""):
+    def UnityPlotHistLoad(self, which, alpha_step = 1, dist = "", circ = False):
         """
         """
         # Checks if linear or log is being used
         if alpha_step == 1 or alpha_step == 0:
             file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_new.csv'
             df_unity = pd.read_csv(file_name)
-        elif dist == "circular" or "uniform" or "gamma":
+        elif dist == "circular" or dist == "uniform" or dist == "gamma":
             file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Linear.csv'
             file_name_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Log.csv'
             file_name_3 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Linear_alpha_1.csv'
@@ -972,11 +996,13 @@ class Sep_plot(Sep_gen):
             df_unity_4 = pd.read_csv(file_name_4)
             df_unity_5 = pd.read_csv(file_name_5)
         else:
-            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
-            # file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-
+            if circ == False:
+                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+                # file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            else:
+                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
+                # file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
             df_unity = pd.read_csv(file_name)
-
 
         # Create variables for bin sizes
         nbin = 200
@@ -1065,26 +1091,32 @@ class Sep_plot(Sep_gen):
                 StepPatch = ax.stairs(totgammahist_2 * gammanorm_final_2, bins, fill = False, label = "alpha = -1")
                 StepPatch = ax.stairs(totgammahist_3 * gammanorm_final_3, bins, fill = False, label = "alpha = 1")
                 StepPatch = ax.stairs(totgammahist_4 * gammanorm_final_4, bins, fill = False, label = "alpha = 2")
-                StepPatch = ax.stairs(totgammahist_5 * gammanorm_final_5, bins, fill = False, label = "alpha = -2")
-            
+                StepPatch = ax.stairs(totgammahist_5 * gammanorm_final_5, bins, fill = False, label = "alpha = -2")           
         else:
-        
-            uniformhist = df_unity["final list"].to_numpy()
-            hist = uniformhist.copy()
-            circhist = df_unity["circular list"].to_numpy()
+            if circ == False:
+                uniformhist = df_unity["final list"].to_numpy()
+                hist = uniformhist.copy()
 
-            totgammahist = gammastep * hist
+                totgammahist = gammastep * hist
 
-            norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
-            ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
-            gammanorm_final = np.abs(1/ (np.sum(totgammahist) * logbinsize))
-            result = sum(uniformhist)
-            print(result, sum(totgammahist), sum(circhist))
+                norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
+                
+                gammanorm_final = np.abs(1/ (np.sum(totgammahist) * logbinsize))
+                result = sum(uniformhist)
+                print(result, sum(totgammahist))
 
-            StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
-            # May or may not need norm for gamma
-            StepPatch = ax.stairs(totgammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
-            StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
+                StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
+                StepPatch = ax.stairs(totgammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                
+            else:
+            
+                circhist = df_unity["circular list"].to_numpy()
+
+                ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
+            
+                print(sum(circhist))
+            
+                StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
 
 
         ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
@@ -1101,12 +1133,17 @@ class Sep_plot(Sep_gen):
             
         fig.tight_layout()
         if len(dist) == 0:
-            plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}_new.png')
-            # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.png")
+            if circ == False:
+                plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}_new.png')
+                # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.png")
+            else:
+                plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.png')
+                # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.png")
         else:
             plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_{dist}.png')
             # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_{dist}.png")
         return bins
+    
     def statistics(self, which, alpha_step = 1):
         """
         """
@@ -1281,13 +1318,14 @@ if __name__ == "__main__":
     #     plotter = Sep_plot(numestep=numestep, numdiv=numdiv)
     #     plotter.UnityPlotHist(which=which, wnum=wnum, inum=inum, unity=unity)
     # cli()
-    numestep = 80
-    numdiv = 80
-    wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    numestep = 2
+    numdiv = 2
+    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = 1
     which = "Linear"
-    alpha = 0
+    alpha = -1
+    circ = True
     unity = False
     dist = ""
     specify = [0., np.pi/3]
@@ -1298,8 +1336,8 @@ if __name__ == "__main__":
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    # folder = tothist.UnityPlotHistGen(which = which, unity = unity)
-    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist)
+    folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
+    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     # alpha = tothist.stepalpha(which = which, alpha = alpha)
 

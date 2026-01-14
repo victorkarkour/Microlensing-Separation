@@ -1364,46 +1364,100 @@ class Sep_plot(Sep_gen):
     def stepalpha(self,which, alpha = 1):
         """
         """
-        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+        # NEW METHOD TO OPEN FILES?
+        try:
+            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            pd.read_csv(filename)
+        except FileNotFoundError:
+            filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
         
-        df = pd.read_csv(filename)
-        df_new = df.copy()
-        if  alpha == 0:
-            mult_bins = [1 for num in range(0,199)]
-        elif alpha == -1:
-            mult_bins = [1 for num in range(0,199)]
+        
+        try: 
+            try:
+                filename2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
+                pd.read_csv(filename2)
+            except FileNotFoundError:
+                filename2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
+            files_separated = True
+        except FileNotFoundError:
+            print("No separate circular file found, following default path")
+            files_separated = False
+        
+        
+        if not files_separated:
+            df = pd.read_csv(filename)
+            df_new = df.copy()
+            if  alpha == 0: # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1
+                mult_bins = [1 for num in range(0,199)]
+            elif alpha == -1:
+                mult_bins = [1 for num in range(0,199)]
+            else:
+                nbin = 200
+                amin = 0.5
+                amax = 21
+
+                bins = np.geomspace(amin,amax, nbin)
+                mult_bins = bins
+                # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
+                df["bins"] = bins[:-1]
+            
+            # print(mult_bins)
+            for i in range(len(df_new["final list"])):
+                if alpha < -1: # For (alpha -2) 
+                    df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**(-2))
+                    df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**(-2))
+                elif alpha == 1: # For (alpha 1) values
+                    df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
+                    df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
+                elif alpha > 1: # For (alpha 2) values
+                    df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**2)
+                    df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**2)
+                elif alpha == 0 or alpha == -1: # Linear (0) and Log (-1)
+                    df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
+                    df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
         else:
-            nbin = 200
-            amin = 0.5
-            amax = 21
+            df = pd.read_csv(filename)
+            df2 = pd.read_csv(filename2)
+            df_new = df.copy()
+            df2_new = df2.copy()
+            df_comb = pd.concat([df,df2], axis = 1, names = ["final list, circular list"])
+            
+            if  alpha == 0: # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1
+                mult_bins = [1 for num in range(0,199)]
+            elif alpha == -1:
+                mult_bins = [1 for num in range(0,199)]
+            else:
+                nbin = 200
+                amin = 0.5
+                amax = 21
 
-            bins = np.geomspace(amin,amax, nbin)
-            mult_bins = bins
-            # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
-            df["bins"] = bins[:-1]
-        
-        # print(mult_bins)
-        for i in range(len(df_new["final list"])):
-            if alpha < -1: # For (alpha -2) 
-                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**(-2))
-                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**(-2))
-            elif alpha == 1: # For (alpha 1) values
-                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
-                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
-            elif alpha > 1: # For (alpha 2) values
-                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**2)
-                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**2)
-            elif alpha == 0 or alpha == -1: # Linear (0) and Log (-1)
-                df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
-                df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
-        
+                bins = np.geomspace(amin,amax, nbin)
+                mult_bins = bins
+                # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
+                df["bins"] = bins[:-1]
+            
+            for i in range(len(df_comb["final list"])):
+                if alpha < -1: # For (alpha -2) 
+                    df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-2))
+                    df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-2))
+                elif alpha == 1: # For (alpha 1) values
+                    df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i])
+                    df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i])
+                elif alpha > 1: # For (alpha 2) values
+                    df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**2)
+                    df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**2)
+                elif alpha == 0 or alpha == -1: # Linear (0) and Log (-1)
+                    df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i])
+                    df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i])
 
         
-
-        file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha}.csv'
-        # file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
-        df_new.to_csv(file_name_new, index = False)
+        try:
+            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha}.csv'
+            df_comb.to_csv(file_name_new, index = False)
+        except OSError:
+            file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+            df_comb.to_csv(file_name_new, index = False)
+        
         print(f"File with alpha = {alpha} saved successfully")
         return df_new
     
@@ -1483,13 +1537,13 @@ if __name__ == "__main__":
     #     plotter = Sep_plot(numestep=numestep, numdiv=numdiv)
     #     plotter.UnityPlotHist(which=which, wnum=wnum, inum=inum, unity=unity)
     # cli()
-    numestep = 80
+    numestep = 100
     numdiv = 2
-    wnum = 75 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1
     which = "Linear"
-    alpha = 2
+    alpha = 0
     circ = False
     test = False
     unity = False
@@ -1504,8 +1558,8 @@ if __name__ == "__main__":
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha)
-    # alpha = tothist.stepalpha(which = which, alpha = alpha)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    alpha = tothist.stepalpha(which = which, alpha = alpha)
     # test = tothist.testalpha(alpha = alpha)
 
 

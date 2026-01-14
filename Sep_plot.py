@@ -979,47 +979,57 @@ class Sep_plot(Sep_gen):
     def UnityPlotHistLoad(self, which, alpha_step = 0, dist = "", circ = False, test = False):
         """
         """
-        # Checks if linear or log is being used
-        # if alpha_step == 1 or alpha_step == 0:
-        #     file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_new.csv'
-        #     df_unity = pd.read_csv(file_name)
         if dist == "circular" or dist == "uniform" or dist == "gamma":
             alpha_step = 0
-            file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step-2}.csv'
-            file_name_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step-1}.csv'
-            file_name_3 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step}.csv'
-            file_name_4 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step+1}.csv'
-            file_name_5 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step+2}.csv'
-
+            
+            # Reads files for all alpha values of a given step type (soon to be implemented [WAITING ON LOG TO BE DONE])
+            try:
+                
+                # FOR FUTURE TESTS, PUT BEST TYPE OF STEP (Linear, Log, [Soon to be Power]) AS THE WHICH FOR EACH FILENAME (Look at stepalpha func.)
+                
+                if test:
+                    test_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha_step}_test.csv'
+                    print("Test Flag Activated")
+                
+                file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step-2}.csv'
+                file_name_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step-1}.csv'
+                file_name_3 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step}.csv'
+                file_name_4 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step+1}.csv'
+                file_name_5 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step+2}.csv'   
+            pd.read_csv(file_name_1)
+            except FileNotFoundError:
+                
+                if test:
+                    test_1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha_step}_test.csv'
+                    print("Test Flag Activated")
+                    
+                file_name_1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step-2}.csv'
+                file_name_2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step-1}.csv'
+                file_name_3 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step}.csv'
+                file_name_4 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step-1}.csv'
+                file_name_5 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step+2}.csv'
+            
+            # Dataframe creation
+            df_unity_test = pd.read_csv(test_1)
             df_unity_1 = pd.read_csv(file_name_1)
             df_unity_2 = pd.read_csv(file_name_2)
             df_unity_3 = pd.read_csv(file_name_3)
             df_unity_4 = pd.read_csv(file_name_4)
             df_unity_5 = pd.read_csv(file_name_5)
         else:
-            if circ == False and test == False:
-                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_{which}_alpha_{alpha_step}.csv'
-                # file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_{which}.csv'
+            if circ == False
+                try:
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_{which}_alpha_{alpha_step}.csv'
+                    pd.read_csv(file_name)
+                except FileNotFoundError:
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_{which}_alpha_{alpha_step}.csv'
                 df_unity = pd.read_csv(file_name)
-            elif test == True:
-                print("Test Flag Activated")
-                if alpha_step == 0:
-                    test_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_0_test.csv'
-                    file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_80_0002_alpha_-1.csv'
-                    file_name_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_80_0002_alpha_-2.csv'
-                    df_unity_test_lin = pd.read_csv(test_1)
-                    df_unity_alpha_neg_1 = pd.read_csv(file_name_1)
-                    df_unity_alpha_neg_2 = pd.read_csv(file_name_2)
-                elif alpha_step == -1:
-                    test_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_-1_test.csv'
-                    file_name_3 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_80_0002_alpha_2.csv'
-                    df_unity_test_log = pd.read_csv(test_2)    
-                    df_untiy_alpha_pos_2 = pd.read_csv(file_name_3)
-                else:
-                    return(print("Error: Test flag only works for alpha = 0, -1"))
             else:
-                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
-                # file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
+                try:
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
+                    pd.read_csv(file_name)
+                except FileNotFoundError:
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
                 df_unity = pd.read_csv(file_name)
 
         # Create variables for bin sizes
@@ -1028,7 +1038,6 @@ class Sep_plot(Sep_gen):
         amax = 21
         # Make logbinsizes for all
         logbinsize = np.abs((np.log10(amin)-np.log10(amax))/nbin)
-        
         
         # Initialize Lists
         labels = ["Uniform", "Gamma", "Circular"]
@@ -1452,7 +1461,7 @@ class Sep_plot(Sep_gen):
 
         
         try:
-            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha}.csv'
+            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
             df_comb.to_csv(file_name_new, index = False)
         except OSError:
             file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
@@ -1463,7 +1472,7 @@ class Sep_plot(Sep_gen):
     
     def testalpha(self, alpha = 1):
         """
-        ONLY WORKS WITH ALPHA = 0 and ALPHA = -1
+        ONLY WORKS WITH ALPHA = 0 and ALPHA = -1 (Soon to be Alpha = 1 as well)
         """
         nbin = 200
         amin = 0.5
@@ -1472,71 +1481,74 @@ class Sep_plot(Sep_gen):
         bins = np.geomspace(amin,amax, nbin)
         mult_bins = bins
 
-        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha}.csv'
-        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha}.csv'
+        try:
+            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+            pd.read_csv(filename)
+        except FileNotFoundError:
+            filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+        
 
         df = pd.read_csv(filename)
-        df_new = df.copy()
+        df_new = pd.DataFrame()
         # print(mult_bins)
 
         df["bins"] = bins[:-1]
-        if alpha == 0:
-            df_new["alpha -1"] = df_new["final list"].copy()
-            df_new["alpha -1 circ"] = df_new["circular list"].copy()
-            df_new["alpha -2"] = df_new["final list"].copy()
-            df_new["alpha -2 circ"] = df_new["circular list"].copy()
-        elif alpha == -1:
-            df_new["alpha 2"] = df_new["final list"].copy()
-            df_new["alpha 2 circ"] = df_new["circular list"].copy()
-            df_new["alpha 3"] = df_new["final list"].copy()
-            df_new["alpha 3 circ"] = df_new["circular list"].copy()
+        df_new["alpha 2"] = df["final list"].copy()
+        df_new["alpha 2 circ"] = df["circular list"].copy()
+        df_new["alpha 1"] = df["final list"].copy()
+        df_new["alpha 1 circ"] = df["circular list"].copy()
+        df_new["alpha 0"] = df["final list"].copy()
+        df_new["alpha 0 circ"] = df["circular list"].copy()
+        df_new["alpha -1"] = df["final list"].copy()
+        df_new["alpha -1 circ"] = df["circular list"].copy()
+        df_new["alpha -2"] = df["final list"].copy()
+        df_new["alpha -2 circ"] = df["circular list"].copy()
+
 
         if alpha == 0 or alpha == -1:
-            for i in range(len(df_new["final list"])):
+            for i in range(len(df_new["alpha 0"])):
                 if alpha == 0:
-
-                    df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "final list"] * mult_bins[i]**(-1))
-                    df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "final list"] * mult_bins[i]**(-2))
-                    df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**(-1))
-                    df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**(-2))
+                    
+                    df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
+                    df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(2))
+                    df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
+                    df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
+                    # CENTER FOR alpha = 0 (So just the same as the normal)
+                    df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"])
+                    df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"])
+                    df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
+                    df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
+                    df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-2))
+                    df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-2))
                 
                 elif alpha == -1:
     
-                    df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "final list"] * mult_bins[i]**2)
-                    df_new.loc[i, "alpha 3"] = round(df_new.loc[i, "final list"] * mult_bins[i]**3)
-                    df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**2)
-                    df_new.loc[i, "alpha 3 circ"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**3)
+                    df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(3))
+                    df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(3))
+                    df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
+                    df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(2))
+                    df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
+                    df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
+                    # CENTER FOR alpha = -1 (So just the same as the normal)
+                    df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"])
+                    df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"])
+                    df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
+                    df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
         else:
             return(print(f"Warning: {alpha} is not a valid point. Please use (0) or (-1) as your options for alpha"))
         
-        file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_{alpha}_test.csv'
-        # file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_{alpha}_test.csv'
-        df_new.to_csv(file_name_new, index = False)
+        try:
+            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}__test.csv'
+            df_new.to_csv(file_name_new, index = False)
+        except OSError:
+            file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}_test.csv'
+            df_new.to_csv(file_name_new, index = False)
+        
         print(f"Test File with alpha = {alpha} saved successfully")
-
         
         return df_new
 
-
 if __name__ == "__main__":
-    # @click.command()
-    # @click.argument("numestep", required=False, type=int)#, help = "number of e values stepping through")
-    # @click.argument("numdiv", required=False, type=int)#, help = "divisors for e values")
-    # @click.argument("which", required=False)#, help = "type of step through (Linear, Log, Linear/a)")
-    # @click.argument("wnum", required=False, type=int,)# help = "number of omegas to step through")
-    # @click.argument("inum", required=False, type=int,)# help = "number of i's to step through")
-    # @click.option("--unity/--no-unity", default=False, show_default=True,)# help="Toggle unity output save path.")
-    # def cli(numestep, numdiv, which, wnum, inum, unity):
-    #     # Defaults if not provided positionally
-    #     if numestep is None: numestep = 10 # Usually 80
-    #     if numdiv is None: numdiv = 5 # Usually 10
-    #     if which is None: which = "Linear" # Usually Linear
-    #     if wnum is None: wnum = 3 # Usually 75
-    #     if inum is None: inum = 3 # Usually 75
-    #     which = which.capitalize() if which.lower() == "linear" else which
-    #     plotter = Sep_plot(numestep=numestep, numdiv=numdiv)
-    #     plotter.UnityPlotHist(which=which, wnum=wnum, inum=inum, unity=unity)
-    # cli()
     numestep = 100
     numdiv = 2
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
@@ -1559,8 +1571,8 @@ if __name__ == "__main__":
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
-    alpha = tothist.stepalpha(which = which, alpha = alpha)
-    # test = tothist.testalpha(alpha = alpha)
+    # alpha = tothist.stepalpha(which = which, alpha = alpha)
+    test = tothist.testalpha( alpha = alpha)
 
 
 

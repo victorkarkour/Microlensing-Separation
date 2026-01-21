@@ -375,7 +375,7 @@ class Sep_gen:
         # By making this a dictionary, it vastly improves layout of counts of semimajor axis dots
         totlindict = {}
         totlogdict = {}
-        totlinsemidict = {}
+        totpowerdict = {}
         # Coordinate Lists
         xlist = []
         ylist = []
@@ -424,6 +424,7 @@ class Sep_gen:
                                     totlindict[aval] += len(conlin[0])
                                 else:
                                     totlindict[aval] = len(conlin[0])
+                return totlindict, x, y
             else:
                 if coords:
                     totlindict = []
@@ -443,7 +444,7 @@ class Sep_gen:
                             totlindict[aval] += len(conlin[0])
                         else:
                             totlindict[aval] = len(conlin[0])
-            return totlindict, xlist, ylist, totlogdict
+                return totlindict, xlist, ylist
         elif Linear == "Log":
             if not inclination:
                 # Log Portion
@@ -471,76 +472,47 @@ class Sep_gen:
                     else:
                         totlindict[aval] = len(conlin[0])
                 # Power Law Portion
-                stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
+                stepthrough = Sep_gen.stepdata(-1, 0.5, end, 10000)
                 for aval in stepthrough:
                     x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
         
                     r = np.sqrt(x**2+y**2)
                 
-                    consemi = np.where(np.abs(r-r0)<=0.01)
-                    if aval in totlinsemidict:
-                        totlinsemidict[aval] += len(consemi[0])
+                    conpower = np.where(np.abs(r-r0)<=0.01)
+                    if aval in totpowerdict:
+                        totpowerdict[aval] += len(conpower[0])
                     else:
-                        totlinsemidict[aval] = len(consemi[0])
+                        totpowerdict[aval] = len(conpower[0])
                 gc.collect()
-                return totlindict, xlist, ylist, totlogdict
+                return totlindict, xlist, ylist, totlogdict, totpowerdict
             else:
-                if Linear == "Log":
-                    # Log Portion
-                    stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
-                    for aval in stepthrough:
-                        for ival in i:
-                            if isinstance(e, np.ndarray):
-                                for eval in e:
-                                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
-                                    r = np.sqrt(x**2+y**2)
-                            
-                                    conlog = np.where(np.abs(r-r0)<=0.01)
-                                    if aval in totlogdict:
-                                        totlogdict[aval] += len(conlog[0])
-                                    else:
-                                        totlogdict[aval] = len(conlog[0])
-                            else:
-                                x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                # Log Portion
+                stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
+                for aval in stepthrough:
+                    for ival in i:
+                        if isinstance(e, np.ndarray):
+                            for eval in e:
+                                x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                                 r = np.sqrt(x**2+y**2)
-                            
+                        
                                 conlog = np.where(np.abs(r-r0)<=0.01)
                                 if aval in totlogdict:
                                     totlogdict[aval] += len(conlog[0])
                                 else:
                                     totlogdict[aval] = len(conlog[0])
-                                    
-                    # # Linear Portion
-                    
-                    # stepthrough = np.arange(0.5, end + step, step)
-                    # for aval in stepthrough:
-                    #     for ival in i:
-                    #         x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
-                
-                    #         r = np.sqrt(x**2+y**2)
+                        else:
+                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                            r = np.sqrt(x**2+y**2)
                         
-                    #         conlin = np.where(np.abs(r-r0)<=0.01)
-                    #         if aval in totlindict:
-                    #             totlindict[aval] += len(conlin[0])
-                    #         else:
-                    #             totlindict[aval] = len(conlin[0])
-                    # Power Law Portion
-                    # stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
-                    # for aval in stepthrough:
-                    #     for ival in i:
-                    #         x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
-                
-                    #         r = np.sqrt(x**2+y**2)
-                        
-                    #         consemi = np.where(np.abs(r-r0)<=0.01)
-                    #         if aval in totlinsemidict:
-                    #             totlinsemidict[aval] += len(consemi[0])
-                    #         else:
-                    #             totlinsemidict[aval] = len(consemi[0])
-                return totlindict, totlinsemidict, ylist, totlogdict
-        elif Linear == "Linear_a":
-        # Linear / a Portion
-            stepthrough = Sep_gen.stepdata(2, 0.5, end, 10000)
+                            conlog = np.where(np.abs(r-r0)<=0.01)
+                            if aval in totlogdict:
+                                totlogdict[aval] += len(conlog[0])
+                            else:
+                                totlogdict[aval] = len(conlog[0])
+                return totlogdict, x, y
+        elif Linear == "Power":
+            # Power Portion
+            stepthrough = Sep_gen.stepdata(-1, 0.5, end, 10000)
             for aval in stepthrough:
                 for ival in i:
                     if isinstance(e, np.ndarray):
@@ -548,27 +520,23 @@ class Sep_gen:
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)
                             # Whereever there is this value, it finds the indices of each point in the list
-                            conlin = np.where(np.abs(r-r0)<=0.01)
-                            # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
-                        
-                            # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
-                            if aval in totlinsemidict:
-                                totlinsemidict[aval] = round(len(conlin[0]) / aval)
+                            conpower = np.where(np.abs(r-r0)<=0.01)
+                            # Has brackets with 0 b/c conpower is an array of length 1, to get to values u must flatten
+                            if aval in totpowerdict:
+                                totpowerdict[aval] = round(len(conpower[0]))
                             else:
-                                totlinsemidict[aval] = round(len(conlin[0]) / aval)
+                                totpowerdict[aval] = round(len(conpower[0]))
                     else:
                         x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                         r = np.sqrt(x**2+y**2)
                         # Whereever there is this value, it finds the indices of each point in the list
-                        conlin = np.where(np.abs(r-r0)<=0.01)
-                        # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
-                        
-                        # REMINDER: THIS IS FOR LINEAR / A, I JUST REMOVED THE totlinsemidict FROM THIS FOR EASIER INTERPRETATION
-                        if aval in totlinsemidict:
-                            totlinsemidict[aval] = round(len(conlin[0]) / aval)
+                        conpower = np.where(np.abs(r-r0)<=0.01)
+                        # Has brackets with 0 b/c conpower is an array of length 1, to get to values u must flatten
+                        if aval in totpowerdict:
+                            totpowerdict[aval] = round(len(conpower[0]))
                         else:
-                            totlinsemidict[aval] = round(len(conlin[0]) / aval)
-            return totlindict, totlinsemidict, ylist, totlogdict
+                            totpowerdict[aval] = round(len(conpower[0]))
+            return totpowerdict, x, y
     
     def CircRchange(param, coords = False, inclination = False):
         """
@@ -577,6 +545,7 @@ class Sep_gen:
         """
         totlindict = {}
         totlogdict = {}
+        totpowerdict = {}
         # Coordinate Lists
         xlist = []
         ylist = []
@@ -622,7 +591,19 @@ class Sep_gen:
                     else:
                         totlogdict[aval] = len(conlog[0])
             return totlogdict, x, y
-            
+        elif Linear == "Power":
+            # Power Portion
+            stepthrough = Sep_gen.stepdata(-1, 0.5, end, 10000)
+            for aval in stepthrough:
+                for ival in i:
+                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                    r = np.sqrt(x**2+y**2)
+                    conpower = np.where(np.abs(r-r0)<=0.01)
+                    if aval in totpowerdict:
+                        totpowerdict[aval] += len(conpower[0])
+                    else:
+                        totpowerdict[aval] = len(conpower[0])
+            return totpowerdict, x, y
     @staticmethod
     def stepdata(alpha, xmin, xmax, nsamples):
         
@@ -630,10 +611,12 @@ class Sep_gen:
         """
         step = np.linspace(0,1,nsamples+2)[1:-1]
         
-        if alpha == 1.:
+        if alpha == -1.:
             return xmin * (xmax/xmin) ** step
         else:
-            exp = 1. - alpha
+            # normal: alpha = 0 (Linear), alpha = 1 (Log), alpha = -1 (Power) 
+            # ALPHAS ARE SWAPPED FOR This
+            exp = (1. - alpha)* -1
             return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
     @staticmethod
     def HistGen(param):
@@ -641,22 +624,11 @@ class Sep_gen:
         """
         step, end, inclination, which, estep_outer, inum, wnum, _ = param
         
-        if inclination == False:
-            colorlist = ["black", "red"]
-            labels = ["Linear", "Log"]
-        else:
-            if which == "Log":
-                colorlist = ["red"]
-                labels = ["Log"]
-            elif which == "Linear":
-                colorlist = ["black"]
-                labels = ["Linear"]
-            else:
-                colorlist = ["blue"]
-                labels = ["Linear / a"]
         # Dictionary for storing Rchange results
         totlinlist = []
         totloglist = []
+        totpowerlist = []
+        # Checks if there is a list of esteps, if so, creates empty list, otherwise creates set of 9 nested lists 
         if len(estep_outer) == 0:
              tothistlist =[[] for _ in range(9)]
         else:
@@ -685,10 +657,8 @@ class Sep_gen:
             print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
             # Each omega calculates its own data groups
             if inclination and len(estep_outer) != 0:
-                # steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep, estep = estep)
                 param = [estep, istep, k, end, step, which, inclination]
             elif inclination:
-                # steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep)
                 param = [[], istep, k, end, step, which, inclination]
             
             start = time.perf_counter()
@@ -700,57 +670,59 @@ class Sep_gen:
             totaltime = end_time - start
             print(f"Time to Compute was {totaltime:.4f} seconds.")    
             
-            
             # Once complete, takes the data through each set
             if len(estep_outer) != 0:
-                steplindict, x, y, steplogdict = steptotlist
                 histlist = tothistlist
                 if which == "Log":
+                    steplogdict, x, y = steptotlist
                     # Log histogram
                     totlogiter = steplogdict
                     totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
                     hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
                     histlist.append((hist_log, histbins_log))
                 elif which == "Linear":
+                    steplindict, x, y = steptotlist
                     # Linear histogram
                     totliniter = steplindict
                     totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                     hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
                     histlist.append((hist_lin, histbins_lin))
-                elif which == "Linear / a":
-                    # Linear / a histogram
-                    totliniter = steplindict
-                    totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                    hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                    histlist.append((hist_lin, histbins_lin))  
+                elif which == "Power":
+                    steppowerdict, x, y = steptotlist
+                    # Power histogram
+                    totpoweriter = steppowerdict
+                    totpowerlist = [key for key, val in totpoweriter.items() for _ in range(val)]
+                    hist_power, histbins_power = np.histogram(totpowerlist,bins = logbins, range=(0.5, end+0.5))
+                    histlist.append((hist_power, histbins_power))  
                 else:
-                    return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
+                    return(print(f"Warning: {which} is not a valid point. Please use (Log), (Linear), or (Power) as your options"))
             else:
-                      for j in range(len(steptotlist)):
-                        steplindict, x, y, steplogdict, blank = steptotlist[j]
-                        
-                        histlist = tothistlist[j]
-                        if which == "Log":
-                            # Log histogram
-                            totlogiter = steplogdict
-                            totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
-                            hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
-                            histlist.append((hist_log, histbins_log))
-                        elif which == "Linear":
-                            # Linear histogram
-                            totliniter = steplindict
-                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                            histlist.append((hist_lin, histbins_lin))
-                        elif which == "Linear / a":
-                            # Linear / a histogram
-                            totliniter = steplindict
-                            totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                            hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                            histlist.append((hist_lin, histbins_lin))  
-                        else:
-                            return(print(f"Warning: {which} is not a valid point. Please use (Log) or (Linear) as your options"))
-                        tothistlist[j] = histlist
+                for j in range(len(steptotlist)):
+                    histlist = tothistlist[j]
+                    if which == "Log":
+                        steplogdict, x, y = steptotlist[j]
+                        # Log histogram
+                        totlogiter = steplogdict
+                        totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+                        hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+                        histlist.append((hist_log, histbins_log))
+                    elif which == "Linear":
+                        steplindict, x, y = steptotlist[j]
+                        # Linear histogram
+                        totliniter = steplindict
+                        totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                        hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                        histlist.append((hist_lin, histbins_lin))
+                    elif which == "Power":
+                        steplogdict, x, y = steptotlist[j]
+                        # Power histogram
+                        totpoweriter = steppowerdict
+                        totpowerlist = [key for key, val in totpoweriter.items() for _ in range(val)]
+                        hist_power, histbins_power = np.histogram(totpowerlist,bins = logbins, range=(0.5, end+0.5))
+                        histlist.append((hist_power, histbins_power)) 
+                    else:
+                        return(print(f"Warning: {which} is not a valid point. Please use (Log), (Linear), or (Power) as your options"))
+                    tothistlist[j] = histlist
             gc.collect()
         
         return tothistlist
@@ -759,20 +731,6 @@ class Sep_gen:
         """
         """
         step, end, inclination, which, e, inum, wnum, _ = param
-
-        if inclination == False:
-            colorlist = ["black", "red"]
-            labels = ["Linear", "Log"]
-        else:
-            if which == "Log":
-                colorlist = ["red"]
-                labels = ["Log"]
-            elif which == "Linear":
-                colorlist = ["black"]
-                labels = ["Linear"]
-            else:
-                colorlist = ["blue"]
-                labels = ["Linear / a"]
 
         # Create variables for bin sizes
         nbin = 200

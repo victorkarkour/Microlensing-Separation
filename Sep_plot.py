@@ -15,7 +15,7 @@ import sys
 from scipy.stats import gamma
 from itertools import repeat
 from Sep_gen import Sep_gen
-import click
+# import click
 import os
 import matplotlib.gridspec as gridspec
 import statistics as stats
@@ -967,9 +967,18 @@ class Sep_plot(Sep_gen):
                 file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
         else:
             if circ == False:
-                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+                try:
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+                    df_unity.to_csv(file_name, index = False)
+                except OSError:
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
             else:
-                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
+                try:
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
+                    df_unity.to_csv(file_name, index = False)
+                except OSError:
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
+                
         df_unity.to_csv(file_name, index = False)
 
         print("File saved successfully")
@@ -1014,7 +1023,6 @@ class Sep_plot(Sep_gen):
             
             # Reads files for all alpha values of a given step type (soon to be implemented [WAITING ON LOG TO BE DONE])
             try:
-                
                 # FOR FUTURE TESTS, PUT BEST TYPE OF STEP (Linear, Log, [Soon to be Power]) AS THE WHICH FOR EACH FILENAME (Look at stepalpha func.)
                 
                 file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{-2}.csv'
@@ -1040,12 +1048,13 @@ class Sep_plot(Sep_gen):
                         print("Test Flag Activated")
                         
             # Dataframe creation
-            df_unity_test = pd.read_csv(test_1)
-            df_unity_1 = pd.read_csv(file_name_1)
-            df_unity_2 = pd.read_csv(file_name_2)
-            df_unity_3 = pd.read_csv(file_name_3)
-            df_unity_4 = pd.read_csv(file_name_4)
-            df_unity_5 = pd.read_csv(file_name_5)
+            if test:
+                df_unity_test = pd.read_csv(test_1)
+                df_unity_1 = pd.read_csv(file_name_1)
+                df_unity_2 = pd.read_csv(file_name_2)
+                df_unity_3 = pd.read_csv(file_name_3)
+                df_unity_4 = pd.read_csv(file_name_4)
+                df_unity_5 = pd.read_csv(file_name_5)
         else:
             if not circ:
                 try:
@@ -1209,6 +1218,12 @@ class Sep_plot(Sep_gen):
                 StepPatch = ax.stairs(totgammahist_5 * gammanorm_final_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 for {which}")           
         else:
             if circ == False:
+                try:
+                    circhist = df_unity["circular list"].to_numpy()
+                    ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
+                except KeyError:
+                    print("Circular not found, continuing without it....")
+                
                 uniformhist = df_unity["final list"].to_numpy()
                 hist = uniformhist.copy()
 
@@ -1216,12 +1231,17 @@ class Sep_plot(Sep_gen):
 
                 norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
                 
+                
                 gammanorm_final = np.abs(1/ (np.sum(totgammahist) * logbinsize))
                 result = sum(uniformhist)
-                print(result, sum(totgammahist))
+                # print(result, sum(totgammahist))
 
                 StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
                 StepPatch = ax.stairs(totgammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                try:
+                    StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
+                except UnboundLocalError:
+                    print()
             else:
             
                 circhist = df_unity["circular list"].to_numpy()
@@ -1483,7 +1503,22 @@ class Sep_plot(Sep_gen):
                     elif alpha > 1: # For (alpha 2) values
                         df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (3))
                         df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (3))
-
+                elif which == "Power":
+                    if alpha < -1: # For (alpha -2) 
+                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-3))
+                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-3))
+                    elif alpha == -1: 
+                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-2))
+                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-2))
+                    elif alpha == 0: # For (alpha 0) values
+                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (-1))
+                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]** (-1))
+                    elif alpha == 1: # CENTER FOR POWER
+                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
+                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                    elif alpha > 1: # For (alpha 2) values
+                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (1))
+                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(1))
         try:
             file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
             df_comb.to_csv(file_name_new, index = False)
@@ -1529,10 +1564,9 @@ class Sep_plot(Sep_gen):
         df_new["alpha -2 circ"] = df["circular list"].copy()
 
 
-        if alpha == 0 or alpha == -1:
+        if alpha == 0 or alpha == -1 or alpha == 1:
             for i in range(len(df_new["alpha 0"])):
                 if alpha == 0:
-                    
                     df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
                     df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(2))
                     df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
@@ -1546,7 +1580,6 @@ class Sep_plot(Sep_gen):
                     df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-2))
                 
                 elif alpha == -1:
-    
                     df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(3))
                     df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(3))
                     df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
@@ -1558,6 +1591,19 @@ class Sep_plot(Sep_gen):
                     df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"])
                     df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
                     df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
+                    
+                elif alpha == 1:
+                    df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
+                    df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
+                    # CENTER FOR alpha = 1
+                    df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"])
+                    df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"])
+                    df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
+                    df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
+                    df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-2))
+                    df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-2))
+                    df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-3))
+                    df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-3))
         else:
             return(print(f"Warning: {alpha} is not a valid point. Please use (0) or (-1) as your options for alpha"))
         
@@ -1573,17 +1619,17 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 100
+    numestep = 2
     numdiv = 2
-    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
-    # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1
-    which = "Linear"
-    alpha = 0
+    # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
+    which = "Power"
+    alpha = 1
     circ = False
-    test = True
+    test = False
     unity = False
-    dist = "gamma"
+    dist = ""
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
@@ -1595,6 +1641,8 @@ if __name__ == "__main__":
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
     load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    
+    # Note: stepalpha function also combines uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha)
     # test = tothist.testalpha(alpha = alpha)
 

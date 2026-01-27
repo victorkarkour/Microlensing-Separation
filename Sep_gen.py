@@ -560,23 +560,21 @@ class Sep_gen:
 
         if Linear == "Linear":
             # Linear Portion
+            stepthrough = np.arange(0.5, end + step, step)
             # Goes through each value of a in the stepthrough
-            if isinstance(i, np.ndarray):
-                stepthrough = np.arange(0.5, end + step, step)
-                # Goes through each value of a in the stepthrough
-                for aval in stepthrough:
-                    for ival in i:
-                        x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
-                        r = np.sqrt(x**2+y**2)
-                        # Whereever there is this value, it finds the indices of each point in the list
-                        conlin = np.where(np.abs(r-r0)<=0.01)
-            
-                        if coords == False and inclination:
-                            # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
-                            if aval in totlindict:
-                                totlindict[aval] += len(conlin[0])
-                            else:
-                                totlindict[aval] = len(conlin[0])
+            for aval in stepthrough:
+                for ival in i:
+                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
+                    r = np.sqrt(x**2+y**2)
+                    # Whereever there is this value, it finds the indices of each point in the list
+                    conlin = np.where(np.abs(r-r0)<=0.01)
+        
+                    if coords == False and inclination:
+                        # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
+                        if aval in totlindict:
+                            totlindict[aval] += len(conlin[0])
+                        else:
+                            totlindict[aval] = len(conlin[0])
             return totlindict, x, y
         elif Linear == "Log":
             # Log Portion
@@ -611,12 +609,12 @@ class Sep_gen:
         """
         step = np.linspace(0,1,nsamples+2)[1:-1]
         
-        if alpha == -1.:
+        if alpha == 1.:
             return xmin * (xmax/xmin) ** step
         else:
             # normal: alpha = 0 (Linear), alpha = 1 (Log), alpha = -1 (Power) 
             # ALPHAS ARE SWAPPED FOR This
-            exp = (1. - alpha)* -1
+            exp = (1. - alpha)
             return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
     @staticmethod
     def HistGen(param):
@@ -742,20 +740,19 @@ class Sep_gen:
 
         # Dictionary for storing Rchange results
         evallist = []
-        tothistlist =[[] for _ in range(inum*wnum)]
+        tothistlist =[[] for _ in range(inum)]
         # For making the stepthrough of omega
-        wstep = np.linspace(0,np.pi/2,wnum)
         if inclination:
             # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
             cosstep = np.linspace(0,1,inum)
             istep = np.arccos(cosstep)
             # Only works if estep_outer has values in the list
-        for k in wstep:
-            print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
+        
+            print("Value of omega currently running: 0")
             # Each omega calculates its own data groups
             if inclination:
                 # steptotlist, param = Sep_plot.DataHist(w = k, step = step, end = end, which = which, inclination = inclination, istep = istep)
-                param = [0, istep, k, end, step, which, inclination]
+                param = [0, istep, 0, end, step, which, inclination]
             
             start = time.perf_counter()
             # Multi Processing

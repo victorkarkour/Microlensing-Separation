@@ -1621,12 +1621,12 @@ class Sep_plot(Sep_gen):
 if __name__ == "__main__":
     numestep = 2
     numdiv = 2
-    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 1000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Power"
     alpha = 1
-    circ = False
+    circ = True
     test = False
     unity = False
     dist = ""

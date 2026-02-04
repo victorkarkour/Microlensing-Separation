@@ -1068,7 +1068,7 @@ class Sep_plot(Sep_gen):
                     file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
                     pd.read_csv(file_name)
                 except FileNotFoundError:
-                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
                 df_unity = pd.read_csv(file_name)
 
         # Create variables for bin sizes
@@ -1276,7 +1276,7 @@ class Sep_plot(Sep_gen):
                 try:    
                     plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.wnum}_0002_circ_{which}.png')
                 except OSError:
-                    plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.png")
+                    plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.png")
         else:
             if test:
                 try:
@@ -1398,28 +1398,40 @@ class Sep_plot(Sep_gen):
         # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}_alpha_{alpha}.png')       
         return statistics
 
-    def stepalpha(self,which, alpha = 1):
+    def stepalpha(self,which, alpha = 1, circ = False):
         """
+        Combines the normal and circular dist.'s .csv files to 
+        create multiple alpha files for comparison to testalpha .csv file.
         """
         # NEW METHOD TO OPEN FILES?
-        try:
-            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-            pd.read_csv(filename)
-        except FileNotFoundError:
-            filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
-        
-        
-        try: 
+        # First detects if file is exists, if it doesn't it 
+        # will then try another file location
+        if not circ:
+            try:    
+                filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+                pd.read_csv(filename)
+            except FileNotFoundError:
+                filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
+            # Once it detects one, it will check if the circular file exists
+            # if it does, then it will flag it for combination and file creation
+            # NOTE: CHECKS USING wnum INSTEAD OF numestep
             try:
-                filename2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
+                try:
+                    filename2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
+                    pd.read_csv(filename2)
+                except FileNotFoundError:
+                    filename2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
+                files_separated = True
+            except FileNotFoundError:
+                print("No separate circular file found, following default path")
+                files_separated = False
+        else:
+            try:
+                files_separated = True
+                filename2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
                 pd.read_csv(filename2)
             except FileNotFoundError:
-                filename2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_circular_{which}.csv'
-            files_separated = True
-        except FileNotFoundError:
-            print("No separate circular file found, following default path")
-            files_separated = False
-        
+                filename2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
         
         if not files_separated:
             df = pd.read_csv(filename)
@@ -1453,12 +1465,16 @@ class Sep_plot(Sep_gen):
                     df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
                     df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
         else:
-            df = pd.read_csv(filename)
-            df2 = pd.read_csv(filename2)
-            df_new = df.copy()
-            df2_new = df2.copy()
-            df_comb = pd.concat([df,df2], axis = 1, names = ["final list, circular list"])
-            
+            if not circ:
+                df = pd.read_csv(filename)
+                df2 = pd.read_csv(filename2)
+                df_new = df.copy()
+                df2_new = df2.copy()
+                df_comb = pd.concat([df,df2], axis = 1, names = ["final list, circular list"])
+            else:
+                df = pd.read_csv(filename2)
+                df_comb = df.copy()
+                
             nbin = 200
             amin = 0.5
             amax = 21
@@ -1468,70 +1484,117 @@ class Sep_plot(Sep_gen):
             
             # THIS MIGHT BE DIFFERENT FROM WHAT IT IS SUPPOSED TO BE
             df["bins"] = bins[:-1]
-            
-            for i in range(len(df_comb["final list"])):
-                if which == "Linear":
-                    if alpha < -1: # For (alpha -2) 
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-2))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-2))
-                    elif alpha == -1: 
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-1))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
-                    elif alpha == 0: # CENTER FOR LINEAR
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
-                    elif alpha == 1: # For (alpha 1) values
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (1))
-                    elif alpha > 1: # For (alpha 2) values
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (2))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(2))
-                        
-                elif which == "Log":
-                    if alpha < -1: # For (alpha -2) 
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-1))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
-                    elif alpha == -1: # CENTER FOR LOG
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
-                    elif alpha == 0: # 
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins ** (1))
-                    elif alpha == 1: # For (alpha 1) 
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (2))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (2))
-                    elif alpha > 1: # For (alpha 2) values
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (3))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (3))
-                elif which == "Power":
-                    if alpha < -1: # For (alpha -2) 
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-3))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-3))
-                    elif alpha == -1: 
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-2))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-2))
-                    elif alpha == 0: # For (alpha 0) values
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (-1))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]** (-1))
-                    elif alpha == 1: # CENTER FOR POWER
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
-                    elif alpha > 1: # For (alpha 2) values
-                        df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (1))
-                        df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(1))
-        try:
-            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
-            df_comb.to_csv(file_name_new, index = False)
-        except OSError:
-            file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
-            df_comb.to_csv(file_name_new, index = False)
+            if not circ:
+                for i in range(len(df_comb["final list"])):
+                    if which == "Linear":
+                        if alpha < -1: # For (alpha -2) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-2))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-2))
+                        elif alpha == -1: # For (alpha -1)
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
+                        elif alpha == 0: # CENTER FOR LINEAR
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                        elif alpha == 1: # For (alpha 1) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (1))
+                        elif alpha > 1: # For (alpha 2) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (2))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(2))                    
+                    elif which == "Log":
+                        if alpha < -1: # For (alpha -2) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
+                        elif alpha == -1: # CENTER FOR LOG
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                        elif alpha == 0: # For (alpha 0) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins ** (1))
+                        elif alpha == 1: # For (alpha 1) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (2))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (2))
+                        elif alpha > 1: # For (alpha 2) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (3))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (3))
+                    elif which == "Power":
+                        if alpha < -1: # For (alpha -2) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-3))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-3))
+                        elif alpha == -1: # For (alpha -1)
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-2))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-2))
+                        elif alpha == 0: # For (alpha 0) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (-1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]** (-1))
+                        elif alpha == 1: # CENTER FOR POWER
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                        elif alpha > 1: # For (alpha 2) 
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(1))
+            else:
+                for i in range(len(df_comb["circular list"])):
+                    if which == "Linear":
+                            if alpha < -1: # For (alpha -2) 
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-2))
+                            elif alpha == -1: # For (alpha -1)
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
+                            elif alpha == 0: # CENTER FOR LINEAR
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                            elif alpha == 1: # For (alpha 1) 
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (1))
+                            elif alpha > 1: # For (alpha 2) 
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (2))
+                    elif which == "Log":
+                            if alpha < -1: # For (alpha -2) 
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
+                            elif alpha == -1: # CENTER FOR LOG
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                            elif alpha == 0: # For (alpha 0) 
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins ** (1))
+                            elif alpha == 1: # For (alpha 1) 
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (2))
+                            elif alpha > 1: # For (alpha 2) 
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (3))
+                    elif which == "Power":
+                        if alpha < -1: # For (alpha -2) 
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-3))
+                        elif alpha == -1: # For (alpha -1)
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-2))
+                        elif alpha == 0: # For (alpha 0) 
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]** (-1))
+                        elif alpha == 1: # CENTER FOR POWER
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                        elif alpha > 1: # For (alpha 2) 
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(1))
+                                
+        # Creates .csv file for comparing to testalpha main file
+        if not circ:
+            try:
+                file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+                df_comb.to_csv(file_name_new, index = False)
+            except OSError:
+                file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+                df_comb.to_csv(file_name_new, index = False)
+        else:
+            try:
+                file_name_circ = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_{which}_alpha_{alpha}_circ.csv'
+                df_comb.to_csv(file_name_circ, index = False)
+            except OSError:
+                file_name_circ = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_{which}_alpha_{alpha}_circ.csv'
+                df_comb.to_csv(file_name_circ, index = False)
         
         print(f"File with alpha = {alpha} saved successfully")
-        return df_new
+        return df_comb
     
     def testalpha(self, alpha = 1):
         """
         ONLY WORKS WITH ALPHA = 0 and ALPHA = -1 (Soon to be Alpha = 1 as well)
+        
+        Creates a foundation file which is used in UnityPlotHistLoad
+        function for comparing all of its test alpha values from stepalpha.
         """
         nbin = 200
         amin = 0.5
@@ -1608,7 +1671,7 @@ class Sep_plot(Sep_gen):
             return(print(f"Warning: {alpha} is not a valid point. Please use (0) or (-1) as your options for alpha"))
         
         try:
-            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}__test.csv'
+            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}_test.csv'
             df_new.to_csv(file_name_new, index = False)
         except OSError:
             file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}_test.csv'
@@ -1624,8 +1687,8 @@ if __name__ == "__main__":
     wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Power"
-    alpha = 1
+    which = "Linear"
+    alpha = 0
     circ = True
     test = False
     unity = False
@@ -1638,13 +1701,12 @@ if __name__ == "__main__":
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
-    
+    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
-    # Note: stepalpha function also combines uniform and circular distributions!
-    # alpha = tothist.stepalpha(which = which, alpha = alpha)
+    # Note: stepalpha function can also combine uniform and circular distributions!
+    alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)
     # test = tothist.testalpha(alpha = alpha)
 
 

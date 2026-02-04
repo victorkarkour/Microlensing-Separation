@@ -1621,7 +1621,7 @@ class Sep_plot(Sep_gen):
 if __name__ == "__main__":
     numestep = 2
     numdiv = 2
-    wnum = 1000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Power"
@@ -1638,8 +1638,9 @@ if __name__ == "__main__":
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
-    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
+    
+    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function also combines uniform and circular distributions!

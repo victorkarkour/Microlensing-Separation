@@ -1553,7 +1553,7 @@ class Sep_plot(Sep_gen):
                             elif alpha == -1: # CENTER FOR LOG
                                 df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
                             elif alpha == 0: # For (alpha 0) 
-                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins ** (1))
+                                df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i])
                             elif alpha == 1: # For (alpha 1) 
                                 df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (2))
                             elif alpha > 1: # For (alpha 2) 
@@ -1589,7 +1589,7 @@ class Sep_plot(Sep_gen):
         print(f"File with alpha = {alpha} saved successfully")
         return df_comb
     
-    def testalpha(self, alpha = 1):
+    def testalpha(self, which, circ = False):
         """
         ONLY WORKS WITH ALPHA = 0 and ALPHA = -1 (Soon to be Alpha = 1 as well)
         
@@ -1600,84 +1600,131 @@ class Sep_plot(Sep_gen):
         amin = 0.5
         amax = 21
 
+        if which == "Linear":
+            alpha = 0
+        elif which == "Log":
+            alpha = -1
+        elif which == "Power":
+            alpha = 1
+        else:
+            return(print("Cannot run, must be Linear, Log, or Power distribution."))
+        
+        
         bins = np.geomspace(amin,amax, nbin)
         mult_bins = bins
-
-        try:
-            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
-            pd.read_csv(filename)
-        except FileNotFoundError:
-            filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
-        
+        if circ:
+            print(f"Circ Flag Activated")
+            try: 
+                filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_{which}_alpha_{alpha}_circ.csv'
+                pd.read_csv(filename)
+            except FileNotFoundError:
+                filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_{which}_alpha_{alpha}_circ.csv'
+        else:
+            try:
+                filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+                pd.read_csv(filename)
+            except FileNotFoundError:
+                filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha}.csv'
+            
 
         df = pd.read_csv(filename)
         df_new = pd.DataFrame()
         # print(mult_bins)
 
         df["bins"] = bins[:-1]
-        df_new["alpha 2"] = df["final list"].copy()
-        df_new["alpha 2 circ"] = df["circular list"].copy()
-        df_new["alpha 1"] = df["final list"].copy()
-        df_new["alpha 1 circ"] = df["circular list"].copy()
-        df_new["alpha 0"] = df["final list"].copy()
-        df_new["alpha 0 circ"] = df["circular list"].copy()
-        df_new["alpha -1"] = df["final list"].copy()
-        df_new["alpha -1 circ"] = df["circular list"].copy()
-        df_new["alpha -2"] = df["final list"].copy()
-        df_new["alpha -2 circ"] = df["circular list"].copy()
-
-
-        if alpha == 0 or alpha == -1 or alpha == 1:
-            for i in range(len(df_new["alpha 0"])):
-                if alpha == 0:
-                    df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
-                    df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(2))
-                    df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
-                    df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
-                    # CENTER FOR alpha = 0 (So just the same as the normal)
-                    df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"])
-                    df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"])
-                    df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
-                    df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
-                    df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-2))
-                    df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-2))
-                
-                elif alpha == -1:
-                    df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(3))
-                    df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(3))
-                    df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
-                    df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(2))
-                    df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
-                    df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
-                    # CENTER FOR alpha = -1 (So just the same as the normal)
-                    df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"])
-                    df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"])
-                    df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
-                    df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
-                    
-                elif alpha == 1:
-                    df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
-                    df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
-                    # CENTER FOR alpha = 1
-                    df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"])
-                    df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"])
-                    df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
-                    df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
-                    df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-2))
-                    df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-2))
-                    df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-3))
-                    df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-3))
+        if circ:
+            df_new["alpha 1 circ"] = df["circular list"].copy()
+            df_new["alpha 0 circ"] = df["circular list"].copy()
+            df_new["alpha -1 circ"] = df["circular list"].copy()
+            
+            if alpha == 0 or alpha == -1 or alpha == 1:
+                for i in range(len(df_new["alpha 0 circ"])):
+                    if alpha == 0:
+                        df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
+                        # CENTER FOR alpha = 0 (So just the same as the normal)
+                        df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"])
+                        df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
+                    elif alpha == -1:
+                        df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(2))
+                        df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha -1 circ"]* mult_bins[i]**(1))
+                        # CENTER FOR alpha = -1 (So just the same as the normal)
+                        df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha -1 circ"])
+                    elif alpha == 1:
+                        # CENTER FOR alpha = 1 (So just the same as the normal)
+                        df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 1 circ"])
+                        df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 1 circ"]* mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(-2))
+            else:
+                return(print(f"Warning: {alpha} is not a valid integer. Please use (1), (0), or (-1) as your options for alpha"))
         else:
-            return(print(f"Warning: {alpha} is not a valid point. Please use (0) or (-1) as your options for alpha"))
-        
-        try:
-            file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}_test.csv'
-            df_new.to_csv(file_name_new, index = False)
-        except OSError:
-            file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}_test.csv'
-            df_new.to_csv(file_name_new, index = False)
-        
-        print(f"Test File with alpha = {alpha} saved successfully")
+            df_new["alpha 2"] = df["final list"].copy()
+            df_new["alpha 2 circ"] = df["circular list"].copy()
+            df_new["alpha 1"] = df["final list"].copy()
+            df_new["alpha 1 circ"] = df["circular list"].copy()
+            df_new["alpha 0"] = df["final list"].copy()
+            df_new["alpha 0 circ"] = df["circular list"].copy()
+            df_new["alpha -1"] = df["final list"].copy()
+            df_new["alpha -1 circ"] = df["circular list"].copy()
+            df_new["alpha -2"] = df["final list"].copy()
+            df_new["alpha -2 circ"] = df["circular list"].copy()
+
+            if alpha == 0 or alpha == -1 or alpha == 1:
+                for i in range(len(df_new["alpha 0"])):
+                    if alpha == 0:
+                        df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
+                        df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(2))
+                        df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
+                        df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
+                        # CENTER FOR alpha = 0 (So just the same as the normal)
+                        df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"])
+                        df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"])
+                        df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-2))
+                        df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-2))
+                    
+                    elif alpha == -1:
+                        df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(3))
+                        df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(3))
+                        df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(2))
+                        df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(2))
+                        df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(1))
+                        df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(1))
+                        # CENTER FOR alpha = -1 (So just the same as the normal)
+                        df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha -1"])
+                        df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha -1 circ"])
+                        df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(-1))
+                        
+                    elif alpha == 1:
+                        df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(1))
+                        df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(1))
+                        # CENTER FOR alpha = 1
+                        df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 1"])
+                        df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 1 circ"])
+                        df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(-2))
+                        df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(-2))
+                        df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(-3))
+                        df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(-3))
+            else:
+                return(print(f"Warning: {alpha} is not a valid integer. Please use (1), (0), or (-1) as your options for alpha"))
+        if circ:
+            try:
+                file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_{self.wnum}_alpha_{alpha}_test_circ.csv'
+                df_new.to_csv(file_name_new, index = False)
+            except OSError:
+                file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_{self.wnum}_alpha_{alpha}_test_circ.csv'
+                df_new.to_csv(file_name_new, index = False)
+        else:
+            try:
+                file_name_new = f'/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}_test.csv'
+                df_new.to_csv(file_name_new, index = False)
+            except OSError:
+                file_name_new = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_{self.numestep}_alpha_{alpha}_test.csv'
+                df_new.to_csv(file_name_new, index = False)    
+        print(f"Test File with {which} distribution saved successfully")
         
         return df_new
 
@@ -1687,8 +1734,8 @@ if __name__ == "__main__":
     wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Linear"
-    alpha = 0
+    which = "Power"
+    alpha = 
     circ = True
     test = False
     unity = False
@@ -1707,7 +1754,7 @@ if __name__ == "__main__":
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)
-    # test = tothist.testalpha(alpha = alpha)
+    # test = tothist.testalpha(which = which, circ = circ)
 
 
 

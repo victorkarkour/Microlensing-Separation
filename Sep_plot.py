@@ -1058,10 +1058,10 @@ class Sep_plot(Sep_gen):
         else:
             if not circ:
                 try:
-                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_{which}_alpha_{alpha_step}.csv'
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
                     pd.read_csv(file_name)
                 except FileNotFoundError:
-                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_{which}_alpha_{alpha_step}.csv'
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
                 df_unity = pd.read_csv(file_name)
             else:
                 try:
@@ -1511,7 +1511,7 @@ class Sep_plot(Sep_gen):
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
                         elif alpha == 0: # For (alpha 0) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
-                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins ** (1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (1))
                         elif alpha == 1: # For (alpha 1) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (2))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (2))
@@ -1729,17 +1729,17 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 2
+    numestep = 100
     numdiv = 2
     wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Power"
-    alpha = 
-    circ = True
-    test = False
+    which = "Log"
+    alpha = 0 # For test = True, this becomes the comparison to which
+    circ = False
+    test = True
     unity = False
-    dist = ""
+    dist = "gamma"
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
@@ -1749,11 +1749,11 @@ if __name__ == "__main__":
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
-    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
-    alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)
+    # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)
     # test = tothist.testalpha(which = which, circ = circ)
 
 

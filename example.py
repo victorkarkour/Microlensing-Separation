@@ -76,8 +76,22 @@ import numpy as np
 # # Create the legend using the patch objects and the captured line object
 # fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
 # plt.show()
-inum = 10000
-cosstep = np.linspace(0,1,inum)
-istep = np.arccos(cosstep)
-print(istep)
-print(len(istep))
+def stepdata(alpha, xmin, xmax, nsamples):
+        
+        """
+        """
+        step = np.linspace(0,1,nsamples+2)[1:-1]
+        
+        if alpha == 1.:
+            return xmin * (xmax/xmin) ** step
+        else:
+            # normal: alpha = 0 (Linear), alpha = 1 (Log), alpha = -1 (Power) 
+            # ALPHAS ARE SWAPPED FOR This
+            exp = (1. - alpha)
+            return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
+        
+step_list = stepdata(1, 0.5, 21, 10000)
+print("Length of stepdata function: ", len(step_list))
+
+stepthrough = np.arange(0.5, 20 + 0.002, 0.002)
+print("Length of np.arrange: ", len(stepthrough))

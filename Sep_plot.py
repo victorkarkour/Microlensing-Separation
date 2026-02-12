@@ -1307,8 +1307,11 @@ class Sep_plot(Sep_gen):
 
         # Make log bins for all
         bins = np.geomspace(amin,amax, nbin)
-        filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step}.csv'
-        # filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_alpha_{alpha_step}.csv'
+        try: 
+            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+            df_stats = pd.read_csv(filename)
+        except FileNotFoundError:
+            filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
 
         df_stats = pd.read_csv(filename)
         df_stats["cumulative"] = 0
@@ -1392,10 +1395,12 @@ class Sep_plot(Sep_gen):
         
         rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
         textstr = "\n".join((f'Median: {median}', f'68% Intervals: {percent_68}', f'95% Intervals: {percent_95}'))
-        ax.text(0.65, 0.75, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
-
-        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_multi_{self.numestep}_0002_alpha_{alpha_step}.png')
-        # plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_0002_{which}_alpha_{alpha}.png')       
+        # ax.text(0.65, 0.75, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
+        plt.tight_layout()
+        try:
+            plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}.png')
+        except OSError:
+            plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}.png')       
         return statistics
 
     def stepalpha(self,which, alpha = 1, circ = False):
@@ -1735,7 +1740,7 @@ if __name__ == "__main__":
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = 0 # For test = True, this becomes the comparison to which
+    alpha = 2 # For test = True, this becomes the comparison to which
     circ = False
     test = True
     unity = False
@@ -1749,8 +1754,8 @@ if __name__ == "__main__":
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
-    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

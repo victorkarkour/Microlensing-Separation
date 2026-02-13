@@ -1335,9 +1335,9 @@ class Sep_plot(Sep_gen):
         df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         fig.suptitle(f"Cumulative Distribution Function \n alpha = {alpha_step}")
-        ax.stairs(df_stats["cumul_norm"],bins, color = "black")
-        ax.stairs(df_stats["cumul_gamma"],bins,color = "red", alpha = 0.5)
-        ax.stairs(df_stats["cumul_circ"],bins,color = "blue", alpha = 0.5)
+        ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "k", marker = "o", lw = 2, markersize = 3, label = "")
+        ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "-", c = "r", marker = "o", lw = 2, markersize = 3, alpha = 0.5)
+        ax.plot(bins[:-1], df_stats["cumul_circ"], ls = "-", c = "b", marker = "o", lw = 2, markersize = 3, alpha = 0.5)
         ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
@@ -1739,7 +1739,7 @@ if __name__ == "__main__":
     wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
+    which = "Linear"
     alpha = 2 # For test = True, this becomes the comparison to which
     circ = False
     test = True

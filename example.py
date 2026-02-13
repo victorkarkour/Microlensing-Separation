@@ -1,5 +1,8 @@
 import numpy as np
-# import scipy.optimize as sc
+from scipy.stats import gamma
+import scipy.optimize as sc
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # # Assume M and e are already defined, for example:
 # M = np.array([0.5, 1.0, 1.5]) # Example numpy array for Mean Anomaly
@@ -76,22 +79,61 @@ import numpy as np
 # # Create the legend using the patch objects and the captured line object
 # fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
 # plt.show()
-def stepdata(alpha, xmin, xmax, nsamples):
-        
-        """
-        """
-        step = np.linspace(0,1,nsamples+2)[1:-1]
-        
-        if alpha == 1.:
-            return xmin * (xmax/xmin) ** step
-        else:
-            # normal: alpha = 0 (Linear), alpha = 1 (Log), alpha = -1 (Power) 
-            # ALPHAS ARE SWAPPED FOR This
-            exp = (1. - alpha)
-            return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
-        
-step_list = stepdata(1, 0.5, 21, 10000)
-print("Length of stepdata function: ", len(step_list))
+nbin = 200
+amin = 0.5
+amax = 21
 
-stepthrough = np.arange(0.5, 20 + 0.002, 0.002)
-print("Length of np.arrange: ", len(stepthrough))
+# Create gamma prior
+alpha = 1.35 # Shape (Alpha)
+theta = 1/5.05 # Scale (Beta = 1 / Scale)
+x = np.linspace(0,0.98, nbin-1)
+gammastep = gamma.pdf(x, a = alpha, scale = theta)
+
+
+# Make log bins for all
+bins = np.geomspace(amin,amax, nbin)
+try: 
+    filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_100_0002_Log_alpha_2.csv'
+    df_stats = pd.read_csv(filename)
+except FileNotFoundError:
+    filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_100_0002_Log_alpha_2.csv'
+
+df_stats = pd.read_csv(filename)
+df_stats["cumulative"] = 0
+df_stats["cumul_gamma"] = 0
+df_stats["cumul_circ"] = np.cumsum(df_stats["circular list"]) / np.abs(sum(df_stats["circular list"]))
+df_stats["bins"] = bins[:-1]
+
+
+hist = df_stats["final list"].to_numpy()
+# Make Gamma Calculation
+totgammahist = gammastep * hist
+
+df_stats["cumul_gamma"] = np.cumsum(totgammahist) / np.abs(sum(totgammahist))
+
+cumulative = 0
+cumul_norm = np.abs(1 / (sum(df_stats["final list"])))
+for i in range(len(df_stats["final list"])):
+    cumulative = cumulative + df_stats.loc[i, "final list"]
+    df_stats.loc[i, "cumulative"] = cumulative
+c = np.cumsum(df_stats["final list"])
+df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
+fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+fig.suptitle(f"Cumulative Distribution Function \n alpha = 2")
+ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "k", marker = "o", lw = 2, markersize = 3, label = "")
+ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "-", c = "r", marker = "o", lw = 2, markersize = 3, alpha = 0.5)
+ax.plot(bins[:-1], df_stats["cumul_circ"], ls = "-", c = "b", marker = "o", lw = 2, markersize = 3, alpha = 0.5)
+ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."])
+ax.set_xlim(0.5,20)
+ax.set_ylim(0,1)
+ax.set_xscale("log")
+ax.hlines(0.5, xmin = 0, xmax = 200, color = "r")
+ax.hlines(0.5+(0.6827/2), xmin = 0, xmax = 200, color = "r")
+ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "r")
+ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "r")
+ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "r")
+ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
+ax.set_ylabel(r"CDF")
+plt.tight_layout()
+plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_100_Log_alpha_2.png')
+plt.show()

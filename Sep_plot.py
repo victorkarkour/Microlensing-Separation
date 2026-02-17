@@ -21,6 +21,8 @@ import matplotlib.gridspec as gridspec
 import statistics as stats
 
 matplotlib.use("Agg")
+matplotlib.rcParams["axes.labelsize"] = 16
+matplotlib.rcParams["font.size"] = 16
 class Sep_plot(Sep_gen):
 
     def __init__(self, numestep = 10, numdiv = 2, wnum = 10):# which = "Log":
@@ -1739,7 +1741,7 @@ if __name__ == "__main__":
     wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Linear"
+    which = "Log"
     alpha = 2 # For test = True, this becomes the comparison to which
     circ = False
     test = True

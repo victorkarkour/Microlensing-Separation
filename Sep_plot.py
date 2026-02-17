@@ -890,27 +890,33 @@ class Sep_plot(Sep_gen):
                 plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_{wnum}_{inum}_{which}.png')
         return tothistlist, evalhistlist
 
-    def UnityPlotHistGen(self, which, unity = False, circ = False):
+    def UnityPlotHistGen(self, which, unity = False, circ = False, gamma_bool = False):
         """
         """
         totlist = []
         evalcirc = []
 
-        estep = np.linspace(0,0.98, self.numestep)
+        estep = np.linspace(0,0.99, self.numestep)
         x = np.linspace(0,0.98, self.wnum)
         esteplist = []*self.numdiv
         param = []
+        alpha = 1.35 # Shape (Alpha)
+        theta = 1/5.05 # Scale (Beta = 1 / Scale)
+        gammastep = gamma.pdf(estep, a = alpha, scale = theta)
+        gamma_sum = np.sum(gammastep)
+        print(gamma_sum)
         
         # Slices estep into parts for parallelization
         slices = int(self.numestep / self.numdiv)
         if circ == False:
             for i in range(self.numdiv):
                 esteplist.append(estep[i*slices:(i+1)*slices])
-                
                 obj = Sep_gen()
-            
                 # Step, end, inclincation, which, estep
-                param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, repeat(obj)))
+                if gamma_bool:
+                    param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, gammastep, repeat(obj)))
+                else:
+                    param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, repeat(obj)))
         else:
             obj = Sep_gen()
             param = [0.002, 20, True, which, estep[0], self.wnum, self.inum, repeat(obj)]
@@ -921,8 +927,11 @@ class Sep_plot(Sep_gen):
         else:
                 tothistlist = Sep_gen.CircHistGen(param)
         # print("pool finished")
-        for j in range(len(tothistlist)):
-            totlist.append(tothistlist[j])
+        if gamma_bool:
+            for j in range(len(tothistlist)):
+                totlist.append(tothistlist[j])
+            print(totlist)
+            return totlist
         # Process for CSV File
         if circ == False:
             for i in range(len(totlist)):
@@ -1736,17 +1745,18 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 100
+    numestep = 2
     numdiv = 2
-    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = 2 # For test = True, this becomes the comparison to which
+    alpha = -1 # For test = True, this becomes the comparison to which
     circ = False
-    test = True
+    gamma_bool = True
+    test = False
     unity = False
-    dist = "gamma"
+    dist = ""
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
@@ -1755,9 +1765,9 @@ if __name__ == "__main__":
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ)
+    folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

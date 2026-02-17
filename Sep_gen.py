@@ -2,6 +2,7 @@ import numpy as np
 import scipy.optimize as sc
 import gc
 import time
+from scipy.stats import gamma
 
 class Sep_gen:
     def __init__(self):
@@ -376,6 +377,7 @@ class Sep_gen:
         totlindict = {}
         totlogdict = {}
         totpowerdict = {}
+        totgammadict = {}
         # Coordinate Lists
         xlist = []
         ylist = []
@@ -386,9 +388,9 @@ class Sep_gen:
             e, i, w, end, step, start = param
             Linear = "Linear"
         else:
-            e, i, w, end, step, Linear, inclination = param
-            # if inclination:
-            #     istep = i
+            
+            e, i, w, end, step, Linear, inclination, gammastep = param
+        gamma_sum = np.sum(gammastep)
         
         # Only steps through Linear portion of points
         if Linear == "Linear":
@@ -400,7 +402,7 @@ class Sep_gen:
                 for aval in stepthrough:
                     for ival in i:
                         if isinstance(e, np.ndarray):
-                            for eval in e:    
+                            for iter_e, eval in enumerate(e):  
                                 x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                                 r = np.sqrt(x**2+y**2)
                                 # Whereever there is this value, it finds the indices of each point in the list
@@ -410,8 +412,10 @@ class Sep_gen:
                                     # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
                                     if aval in totlindict:
                                         totlindict[aval] += len(conlin[0])
+                                        totgammadict[aval] += round(len(conlin[0]) * (gammastep[iter_e]/gamma_sum))
                                     else:
                                         totlindict[aval] = len(conlin[0])
+                                        totgammadict[aval] = round(len(conlin[0]) * (gammastep[iter_e]/gamma_sum))
                         else:
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)
@@ -424,7 +428,7 @@ class Sep_gen:
                                     totlindict[aval] += len(conlin[0])
                                 else:
                                     totlindict[aval] = len(conlin[0])
-                return totlindict, x, y
+                return totlindict, x, y, totgammadict
             else:
                 if coords:
                     totlindict = []
@@ -491,15 +495,17 @@ class Sep_gen:
                 for aval in stepthrough:
                     for ival in i:
                         if isinstance(e, np.ndarray):
-                            for eval in e:
+                            for iter_e, eval in enumerate(e):
                                 x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                                 r = np.sqrt(x**2+y**2)
                         
                                 conlog = np.where(np.abs(r-r0)<=0.01)
                                 if aval in totlogdict:
                                     totlogdict[aval] += len(conlog[0])
+                                    totgammadict[aval] += round(len(conlog[0]) * (gammastep[iter_e]/gamma_sum))
                                 else:
                                     totlogdict[aval] = len(conlog[0])
+                                    totgammadict[aval] = round(len(conlog[0]) * (gammastep[iter_e]/gamma_sum))
                         else:
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)
@@ -509,23 +515,25 @@ class Sep_gen:
                                 totlogdict[aval] += len(conlog[0])
                             else:
                                 totlogdict[aval] = len(conlog[0])
-                return totlogdict, x, y
+                return totlogdict, x, y, totgammadict
         elif Linear == "Power":
             # Power Portion
             stepthrough = Sep_gen.stepdata(-1, 0.5, end, 10000)
             for aval in stepthrough:
                 for ival in i:
                     if isinstance(e, np.ndarray):
-                        for eval in e:
+                        for iter_e, eval in enumerate(e):
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)
                             # Whereever there is this value, it finds the indices of each point in the list
                             conpower = np.where(np.abs(r-r0)<=0.01)
                             # Has brackets with 0 b/c conpower is an array of length 1, to get to values u must flatten
                             if aval in totpowerdict:
-                                totpowerdict[aval] = round(len(conpower[0]))
+                                totpowerdict[aval] += round(len(conpower[0]))
+                                totgammadict[aval] += round(len(conpower[0]) * (gammastep[iter_e]/gamma_sum))
                             else:
                                 totpowerdict[aval] = round(len(conpower[0]))
+                                totgammadict[aval] = round(len(conpower[0]) * (gammastep[iter_e]/gamma_sum))
                     else:
                         x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                         r = np.sqrt(x**2+y**2)
@@ -536,7 +544,7 @@ class Sep_gen:
                             totpowerdict[aval] = round(len(conpower[0]))
                         else:
                             totpowerdict[aval] = round(len(conpower[0]))
-            return totpowerdict, x, y
+            return totpowerdict, x, y, totgammadict
     
     def CircRchange(param, coords = False, inclination = False):
         """
@@ -620,12 +628,13 @@ class Sep_gen:
     def HistGen(param):
         """
         """
-        step, end, inclination, which, estep_outer, inum, wnum, _ = param
+        step, end, inclination, which, estep_outer, inum, wnum, gammastep ,_ = param
         
         # Dictionary for storing Rchange results
         totlinlist = []
         totloglist = []
         totpowerlist = []
+        totgammalist = []
         # Checks if there is a list of esteps, if so, creates empty list, otherwise creates set of 9 nested lists 
         if len(estep_outer) == 0:
              tothistlist =[[] for _ in range(9)]
@@ -655,14 +664,14 @@ class Sep_gen:
             print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
             # Each omega calculates its own data groups
             if inclination and len(estep_outer) != 0:
-                param = [estep, istep, k, end, step, which, inclination]
+                param = [estep, istep, k, end, step, which, inclination, gammastep]
             elif inclination:
-                param = [[], istep, k, end, step, which, inclination]
+                param = [[], istep, k, end, step, which, inclination, 0]
             
             start = time.perf_counter()
             # Multi Processing
             if inclination == True and len(estep) != 0:
-                steptotlist = Sep_gen.Rchange(param = param)
+                steptotlist = Sep_gen.Rchange(param = param, )
             
             end_time = time.perf_counter()
             totaltime = end_time - start
@@ -671,29 +680,36 @@ class Sep_gen:
             # Once complete, takes the data through each set
             if len(estep_outer) != 0:
                 histlist = tothistlist
+                gammahistlist = totgammalist
                 if which == "Log":
-                    steplogdict, x, y = steptotlist
+                    steplogdict, x, y, gammadict = steptotlist
                     # Log histogram
                     totlogiter = steplogdict
                     totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
                     hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
                     histlist.append((hist_log, histbins_log))
                 elif which == "Linear":
-                    steplindict, x, y = steptotlist
+                    steplindict, x, y, gammalist = steptotlist
                     # Linear histogram
                     totliniter = steplindict
                     totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                     hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
                     histlist.append((hist_lin, histbins_lin))
                 elif which == "Power":
-                    steppowerdict, x, y = steptotlist
+                    steppowerdict, x, y, gammalist = steptotlist
                     # Power histogram
                     totpoweriter = steppowerdict
                     totpowerlist = [key for key, val in totpoweriter.items() for _ in range(val)]
                     hist_power, histbins_power = np.histogram(totpowerlist,bins = logbins, range=(0.5, end+0.5))
-                    histlist.append((hist_power, histbins_power))  
+                    histlist.append((hist_power, histbins_power)) 
                 else:
                     return(print(f"Warning: {which} is not a valid point. Please use (Log), (Linear), or (Power) as your options"))
+                # Gamma for any histogram
+                totgammaiter = gammadict
+                totgammalist = [key for key, val in totgammaiter.items() for _ in range(val)]
+                hist_gamma, histbins_gamma = np.histogram(totgammalist,bins = logbins, range=(0.5, end+0.5))
+                gammahistlist.append((hist_log, histbins_log))
+                
             else:
                 for j in range(len(steptotlist)):
                     histlist = tothistlist[j]
@@ -723,7 +739,7 @@ class Sep_gen:
                     tothistlist[j] = histlist
             gc.collect()
         
-        return tothistlist
+        return tothistlist, totgammalist
     
     def CircHistGen(param):
         """

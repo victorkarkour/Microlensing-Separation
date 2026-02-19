@@ -79,4 +79,26 @@ import matplotlib.pyplot as plt
 # # Create the legend using the patch objects and the captured line object
 # fig.legend([Circ1, Circ2, Circ3, line_handle], ["a = 0.5", "a = 1", "a = 1.5", "Observed Orbit"], loc='upper right')
 # plt.show()
-print(range(1))
+# Slices estep into integer parts for parallelization
+# Distribute any remainder by giving one extra element to the first `rem` slices.
+# This handles cases where numestep < numdiv as well.
+
+numestep = 10
+numdiv = 7
+esteplist = []*numdiv
+estep = np.linspace(0,0.99, numestep)
+base = numestep // numdiv
+rem = numestep % numdiv
+sizes = []
+# sizes[i] = number of estep entries for slice i
+for i in range(numdiv):
+    add = 1 if i < rem else 0 # DISTRIBUTES REMAINDER INTO FIRST COUPLE SLICES
+    sizes.append(base + add) # SLICES OUT OF numdiv
+
+idx = 0
+for i, sz in enumerate(sizes):
+    slice = estep[idx: idx + sz] # SLICES estep BASED ON SIZES variable
+    esteplist.append(slice) 
+    idx += sz # INCREMENTS TO WHATEVER sz WAS INITIALLY
+
+print("List:", esteplist)

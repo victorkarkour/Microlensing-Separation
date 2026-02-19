@@ -894,29 +894,35 @@ class Sep_plot(Sep_gen):
         """
         """
         totlist = []
+        gammalist = []
         evalcirc = []
-
+        # Initialize eccentricity marginalizaitons
         estep = np.linspace(0,0.99, self.numestep)
         x = np.linspace(0,0.98, self.wnum)
         esteplist = []*self.numdiv
         param = []
-        alpha = 1.35 # Shape (Alpha)
-        theta = 1/5.05 # Scale (Beta = 1 / Scale)
-        gammastep = gamma.pdf(estep, a = alpha, scale = theta)
-        gamma_sum = np.sum(gammastep)
-        print(gamma_sum)
+        
         
         # Slices estep into parts for parallelization
-        slices = int(self.numestep / self.numdiv)
+        base = self.numestep // self.numdiv
+        rem = self.numestep % self.numdiv
+        sizes = []
+        for i in range(self.numdiv):
+            add = 1 if i < rem else 0 # DISTRIBUTES REMAINDER INTO FIRST COUPLE SLICES
+            sizes.append(base + add) # SLICES OUT OF numdiv
+        idx = 0
+        for i, sz in enumerate(sizes):
+            slices = estep[idx: idx + sz] # SLICES estep BASED ON sizes variable
+            esteplist.append(slices) 
+            idx += sz # INCREMENTS TO WHATEVER sz WAS INITIALLY
         if circ == False:
             for i in range(self.numdiv):
-                esteplist.append(estep[i*slices:(i+1)*slices])
                 obj = Sep_gen()
-                # Step, end, inclincation, which, estep
+                # Step, end, inclincation, which, estep_iter, omega, incl, estep, class
                 if gamma_bool:
-                    param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, gammastep, repeat(obj)))
+                    param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, estep, repeat(obj)))
                 else:
-                    param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, repeat(obj)))
+                    param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, None, repeat(obj)))
         else:
             obj = Sep_gen()
             param = [0.002, 20, True, which, estep[0], self.wnum, self.inum, repeat(obj)]
@@ -924,33 +930,46 @@ class Sep_plot(Sep_gen):
         if circ == False:     
             with Pool(processes = self.numdiv) as pool:
                 tothistlist = pool.map(Sep_gen.HistGen, param)
+                # tothistlist = Sep_gen.HistGen(param[2])
         else:
-                tothistlist = Sep_gen.CircHistGen(param)
+            tothistlist = Sep_gen.CircHistGen(param)
         # print("pool finished")
         if gamma_bool:
             for j in range(len(tothistlist)):
+                totlist.append(tothistlist[j][0])
+                gammalist.append(tothistlist[j][1])
+        else:
+             for j in range(len(tothistlist)):
                 totlist.append(tothistlist[j])
-            print(totlist)
-            return totlist
         # Process for CSV File
         if circ == False:
             for i in range(len(totlist)):
                 histlist = totlist[i]
+                gammahistlist = gammalist[i]
                 for val in range(len(histlist)):
                         hist, bins = histlist[val]
+                        gamma_val, bins_gamma = gammahistlist[val]
                         if val == 0:
                             if i == 0:
                                 tothist = np.zeros_like(hist)
+                                totgamma = np.zeros_like(hist)
                             tothist = tothist + hist
+                            totgamma = totgamma + gamma_val
                         elif val == len(histlist)-1 and i == len(totlist)-1:
                             tothist = tothist + hist
+                            totgamma = totgamma + gamma_val
                             total = np.sum(tothist)
-                            print("Total Number of Points: ", total)
+                            tot_gamma = np.sum(totgamma)
                         else:
                             tothist = tothist + hist
+                            totgamma = totgamma + gamma_val
+            print("Total Number of Points: ", total)
+            print("Total Gamma: ", tot_gamma)
             # Save to CSV
             unity_data = {
-                        "final list": tothist}
+                        "final list": tothist,
+                        "gamma list": totgamma
+                        }
             df_unity = pd.DataFrame(unity_data)
         else:
             for i in range(len(totlist)):
@@ -1470,15 +1489,19 @@ class Sep_plot(Sep_gen):
             for i in range(len(df_new["final list"])):
                 if alpha < -1: # For (alpha -2) 
                     df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**(-2))
+                    df_new.loc[i, "gamma list"] = round(df_new.loc[i, "gamma list"] * mult_bins[i]**(-2))
                     df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**(-2))
                 elif alpha == 1: # For (alpha 1) values
                     df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
+                    df_new.loc[i, "gamma list"] = round(df_new.loc[i, "gamma list"] * mult_bins[i])
                     df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
                 elif alpha > 1: # For (alpha 2) values
                     df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i]**2)
+                    df_new.loc[i, "gamma list"] = round(df_new.loc[i, "gamma list"] * mult_bins[i]**2)
                     df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i]**2)
                 elif alpha == 0 or alpha == -1: # Linear (0) and Log (-1)
                     df_new.loc[i, "final list"] = round(df_new.loc[i, "final list"] * mult_bins[i])
+                    df_new.loc[i, "gamma list"] = round(df_new.loc[i, "gamma list"] * mult_bins[i])
                     df_new.loc[i, "circular list"] = round(df_new.loc[i, "circular list"] * mult_bins[i])
         else:
             if not circ:
@@ -1506,50 +1529,65 @@ class Sep_plot(Sep_gen):
                         if alpha < -1: # For (alpha -2) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-2))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-2))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i]**(-2))
                         elif alpha == -1: # For (alpha -1)
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-1))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i]**(-1))
                         elif alpha == 0: # CENTER FOR LINEAR
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"])
                         elif alpha == 1: # For (alpha 1) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (1))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (1))
                         elif alpha > 1: # For (alpha 2) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (2))
-                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(2))                    
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(2))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (2))                    
                     elif which == "Log":
                         if alpha < -1: # For (alpha -2) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-1))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-1))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (-1))
                         elif alpha == -1: # CENTER FOR LOG
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"])
                         elif alpha == 0: # For (alpha 0) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (1))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (1))
                         elif alpha == 1: # For (alpha 1) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (2))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (2))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (2))
                         elif alpha > 1: # For (alpha 2) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (3))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (3))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (3))
                     elif which == "Power":
                         if alpha < -1: # For (alpha -2) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]**(-3))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(-3))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (-3))
                         elif alpha == -1: # For (alpha -1)
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (-2))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (-2))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (-2))
                         elif alpha == 0: # For (alpha 0) 
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (-1))
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]** (-1))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (-1))
                         elif alpha == 1: # CENTER FOR POWER
                             df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"])
                             df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"])
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"])
                         elif alpha > 1: # For (alpha 2) 
-                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i]** (1))
-                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i]**(1))
+                            df_comb.loc[i, "final list"] = round(df_comb.loc[i, "final list"] * mult_bins[i] ** (1))
+                            df_comb.loc[i, "circular list"] = round(df_comb.loc[i, "circular list"] * mult_bins[i] ** (1))
+                            df_comb.loc[i, "gamma list"] = round(df_comb.loc[i, "gamma list"] * mult_bins[i] ** (1))
             else:
                 for i in range(len(df_comb["circular list"])):
                     if which == "Linear":
@@ -1745,8 +1783,9 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 2
-    numdiv = 2
+    numestep = 8 # The smaller numestep is, the greater the change of gamma points 
+    # there will be compared to less than half of numdiv (orders of magnitude with only increasing numestep)
+    numdiv = 6 # The closer this is to half numestep (or potentially more), the more gamma points there are
     wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1

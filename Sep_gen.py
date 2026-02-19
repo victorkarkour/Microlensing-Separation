@@ -389,7 +389,10 @@ class Sep_gen:
             Linear = "Linear"
         else:
             
-            e, i, w, end, step, Linear, inclination, gammastep = param
+            e, i, w, end, step, Linear, inclination, estep = param
+        alpha = 1.35 # Shape (Alpha)
+        theta = 1/5.05 # Scale (Beta = 1 / Scale)
+        gammastep = gamma.pdf(estep, a = alpha, scale = theta)
         gamma_sum = np.sum(gammastep)
         
         # Only steps through Linear portion of points
@@ -495,11 +498,14 @@ class Sep_gen:
                 for aval in stepthrough:
                     for ival in i:
                         if isinstance(e, np.ndarray):
-                            for iter_e, eval in enumerate(e):
+                            for eval in e:
                                 x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                                 r = np.sqrt(x**2+y**2)
                         
                                 conlog = np.where(np.abs(r-r0)<=0.01)
+
+                                iter_e = np.where(eval == estep)[0][0]
+
                                 if aval in totlogdict:
                                     totlogdict[aval] += len(conlog[0])
                                     totgammadict[aval] += round(len(conlog[0]) * (gammastep[iter_e]/gamma_sum))
@@ -515,6 +521,7 @@ class Sep_gen:
                                 totlogdict[aval] += len(conlog[0])
                             else:
                                 totlogdict[aval] = len(conlog[0])
+                print(sum(totgammadict.values()))
                 return totlogdict, x, y, totgammadict
         elif Linear == "Power":
             # Power Portion
@@ -628,13 +635,13 @@ class Sep_gen:
     def HistGen(param):
         """
         """
-        step, end, inclination, which, estep_outer, inum, wnum, gammastep ,_ = param
+        step, end, inclination, which, estep_outer, inum, wnum, esteplist ,_ = param
         
         # Dictionary for storing Rchange results
         totlinlist = []
         totloglist = []
         totpowerlist = []
-        totgammalist = []
+        totgammahistlist = []
         # Checks if there is a list of esteps, if so, creates empty list, otherwise creates set of 9 nested lists 
         if len(estep_outer) == 0:
              tothistlist =[[] for _ in range(9)]
@@ -664,7 +671,7 @@ class Sep_gen:
             print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
             # Each omega calculates its own data groups
             if inclination and len(estep_outer) != 0:
-                param = [estep, istep, k, end, step, which, inclination, gammastep]
+                param = [estep, istep, k, end, step, which, inclination, esteplist]
             elif inclination:
                 param = [[], istep, k, end, step, which, inclination, 0]
             
@@ -680,7 +687,7 @@ class Sep_gen:
             # Once complete, takes the data through each set
             if len(estep_outer) != 0:
                 histlist = tothistlist
-                gammahistlist = totgammalist
+                gammahistlist = totgammahistlist
                 if which == "Log":
                     steplogdict, x, y, gammadict = steptotlist
                     # Log histogram
@@ -708,7 +715,7 @@ class Sep_gen:
                 totgammaiter = gammadict
                 totgammalist = [key for key, val in totgammaiter.items() for _ in range(val)]
                 hist_gamma, histbins_gamma = np.histogram(totgammalist,bins = logbins, range=(0.5, end+0.5))
-                gammahistlist.append((hist_log, histbins_log))
+                gammahistlist.append((hist_gamma, histbins_gamma))
                 
             else:
                 for j in range(len(steptotlist)):
@@ -739,7 +746,7 @@ class Sep_gen:
                     tothistlist[j] = histlist
             gc.collect()
         
-        return tothistlist, totgammalist
+        return tothistlist, totgammahistlist
     
     def CircHistGen(param):
         """

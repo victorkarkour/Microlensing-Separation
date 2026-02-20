@@ -1111,11 +1111,6 @@ class Sep_plot(Sep_gen):
         # Initialize Lists
         labels = ["Uniform", "Gamma", "Circular"]
         colorlist = ["blue", "red", "black"]
-        # Gamma Portion
-        alpha = 1.35 # Shape (Alpha)
-        theta = 1/5.05 # Scale (Beta = 1 / Scale)
-        x = np.linspace(0,0.98, nbin-1)
-        gammastep = gamma.pdf(x, a = alpha, scale = theta)
         # Make bins
         bins = np.geomspace(amin,amax, nbin)
         
@@ -1198,37 +1193,25 @@ class Sep_plot(Sep_gen):
                 StepPatch = ax.stairs(uniformhist_4 * norm_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 for {which}")
                 StepPatch = ax.stairs(uniformhist_5 * norm_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 for {which}")
             elif dist == "gamma":
-                uniformhist_1 = df_unity_1["final list"].to_numpy()
-                uniformhist_2 = df_unity_2["final list"].to_numpy()
-                uniformhist_3 = df_unity_3["final list"].to_numpy()
-                uniformhist_4 = df_unity_4["final list"].to_numpy()
-                uniformhist_5 = df_unity_5["final list"].to_numpy()
+                gammahist_1 = df_unity_1["gamma list"].to_numpy()
+                gammahist_2 = df_unity_2["gamma list"].to_numpy()
+                gammahist_3 = df_unity_3["gamma list"].to_numpy()
+                gammahist_4 = df_unity_4["gamma list"].to_numpy()
+                gammahist_5 = df_unity_5["gamma list"].to_numpy()
                 
-                totgammahist_1 = gammastep * uniformhist_1
-                totgammahist_2 = gammastep * uniformhist_2
-                totgammahist_3 = gammastep * uniformhist_3
-                totgammahist_4 = gammastep * uniformhist_4
-                totgammahist_5 = gammastep * uniformhist_5
-                
-                gammanorm_final_1 = np.abs(1/ (np.sum(totgammahist_1) * logbinsize))
-                gammanorm_final_2 = np.abs(1/ (np.sum(totgammahist_2) * logbinsize))
-                gammanorm_final_3 = np.abs(1/ (np.sum(totgammahist_3) * logbinsize))
-                gammanorm_final_4 = np.abs(1/ (np.sum(totgammahist_4) * logbinsize))
-                gammanorm_final_5 = np.abs(1/ (np.sum(totgammahist_5) * logbinsize))
+                gammanorm_final_1 = np.abs(1/ (np.sum(gammahist_1) * logbinsize))
+                gammanorm_final_2 = np.abs(1/ (np.sum(gammahist_2) * logbinsize))
+                gammanorm_final_3 = np.abs(1/ (np.sum(gammahist_3) * logbinsize))
+                gammanorm_final_4 = np.abs(1/ (np.sum(gammahist_4) * logbinsize))
+                gammanorm_final_5 = np.abs(1/ (np.sum(gammahist_5) * logbinsize))
                 
                 if test:
-                    uniformhist_test_minus_2 = df_unity_test["alpha -2"].to_numpy()
-                    uniformhist_test_minus_1 = df_unity_test["alpha -1"].to_numpy()
-                    uniformhist_test_0 = df_unity_test["alpha 0"].to_numpy()
-                    uniformhist_test_plus_1 = df_unity_test["alpha 1"].to_numpy()
-                    uniformhist_test_plus_2 = df_unity_test["alpha 2"].to_numpy()
-                    
-                    gammahist_test_minus_2 = gammastep * uniformhist_test_minus_2
-                    gammahist_test_minus_1 = gammastep * uniformhist_test_minus_1
-                    gammahist_test_0 = gammastep * uniformhist_test_0
-                    gammahist_test_plus_1 = gammastep * uniformhist_test_plus_1
-                    gammahist_test_plus_2 = gammastep * uniformhist_test_plus_2
-                    
+                    gammahist_test_minus_2 = df_unity_test["alpha gamma -2"].to_numpy()
+                    gammahist_test_minus_1 = df_unity_test["alpha gamma -1"].to_numpy()
+                    gammahist_test_0 = df_unity_test["alpha gamma 0"].to_numpy()
+                    gammahist_test_plus_1 = df_unity_test["alpha gamma 1"].to_numpy()
+                    gammahist_test_plus_2 = df_unity_test["alpha gamma 2"].to_numpy()
+                                        
                     gammanorm_test_minus_2 = np.abs(1 / (np.sum(gammahist_test_minus_2) * logbinsize))
                     gammanorm_test_minus_1 = np.abs(1 / (np.sum(gammahist_test_minus_1) * logbinsize))
                     gammanorm_test_0 = np.abs(1 / (np.sum(gammahist_test_0) * logbinsize))
@@ -1241,11 +1224,11 @@ class Sep_plot(Sep_gen):
                     StepPatch = ax.stairs(gammahist_test_plus_1 * gammanorm_test_plus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = 1 from alpha = {alpha_step}")
                     StepPatch = ax.stairs(gammahist_test_plus_2 * gammanorm_test_plus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = 2 from alpha = {alpha_step}")
                 
-                StepPatch = ax.stairs(totgammahist_1 * gammanorm_final_1, bins, fill = False, lw = 0.5, label = f"alpha = -2 for {which}")
-                StepPatch = ax.stairs(totgammahist_2 * gammanorm_final_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 for {which}")
-                StepPatch = ax.stairs(totgammahist_3 * gammanorm_final_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 for {which}")
-                StepPatch = ax.stairs(totgammahist_4 * gammanorm_final_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 for {which}")
-                StepPatch = ax.stairs(totgammahist_5 * gammanorm_final_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 for {which}")           
+                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, fill = False, lw = 0.5, label = f"alpha = -2 for {which}")
+                StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 for {which}")
+                StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 for {which}")
+                StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 for {which}")
+                StepPatch = ax.stairs(gammahist_5 * gammanorm_final_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 for {which}")           
         else:
             if circ == False:
                 try:
@@ -1255,19 +1238,16 @@ class Sep_plot(Sep_gen):
                     print("Circular not found, continuing without it....")
                 
                 uniformhist = df_unity["final list"].to_numpy()
-                hist = uniformhist.copy()
-
-                totgammahist = gammastep * hist
-
+                gammahist = df_unity["gamma list"].to_numpy()
+                
                 norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
                 
-                
-                gammanorm_final = np.abs(1/ (np.sum(totgammahist) * logbinsize))
+                gammanorm_final = np.abs(1/ (np.sum(gammahist) * logbinsize))
                 result = sum(uniformhist)
-                # print(result, sum(totgammahist))
+                # print(result, sum(gammahist))
 
                 StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
-                StepPatch = ax.stairs(totgammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
                 try:
                     StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
                 except UnboundLocalError:
@@ -1783,10 +1763,9 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 8 # The smaller numestep is, the greater the change of gamma points 
-    # there will be compared to less than half of numdiv (orders of magnitude with only increasing numestep)
-    numdiv = 6 # The closer this is to half numestep (or potentially more), the more gamma points there are
-    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    numestep = 8 
+    numdiv = 4 
+    wnum = 8 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"

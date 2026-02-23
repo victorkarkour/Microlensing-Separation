@@ -21,8 +21,12 @@ import matplotlib.gridspec as gridspec
 import statistics as stats
 
 matplotlib.use("Agg")
-matplotlib.rcParams["axes.labelsize"] = 16
-matplotlib.rcParams["font.size"] = 16
+matplotlib.rcParams["axes.labelsize"] = 18
+matplotlib.rcParams["font.size"] = 18
+matplotlib.rcParams["xtick.major.size"] = 12
+matplotlib.rcParams["xtick.minor.size"] = 8
+matplotlib.rcParams["ytick.major.size"] = 12
+matplotlib.rcParams["ytick.minor.size"] = 8
 class Sep_plot(Sep_gen):
 
     def __init__(self, numestep = 10, numdiv = 2, wnum = 10):# which = "Log":
@@ -1345,17 +1349,17 @@ class Sep_plot(Sep_gen):
         df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         fig.suptitle(f"Cumulative Distribution Function \n alpha = {alpha_step}")
-        ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "k", marker = "o", lw = 2, markersize = 3, label = "")
-        ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "-", c = "r", marker = "o", lw = 2, markersize = 3, alpha = 0.5)
-        ax.plot(bins[:-1], df_stats["cumul_circ"], ls = "-", c = "b", marker = "o", lw = 2, markersize = 3, alpha = 0.5)
+        ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "k", lw = 3, alpha = 0.75) # Normal Line NORMAL DIST.
+        ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 0.75) # Dashed Line GAMMA DIST.
+        ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 0.75) # Dotted Line CIRCULAR DIST.
         ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
-        ax.hlines(0.5, xmin = 0, xmax = 200, color = "r")
-        ax.hlines(0.5+(0.6827/2), xmin = 0, xmax = 200, color = "r")
-        ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "r")
-        ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "r")
-        ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "r")
+        ax.hlines(0.5, xmin = 0, xmax = 200, color = "g", ls = (0, (5, 8)), alpha = 0.75, lw = 3) # Loosely Dashed
+        ax.hlines(0.5+(0.6827/2), xmin = 0, xmax = 200, color = "g", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # Dotted
+        ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "g", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # ^
+        ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "g", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # Dashdotted
+        ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "g", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
         ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."])
@@ -1763,9 +1767,9 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 8 
+    numestep = 100 
     numdiv = 4 
-    wnum = 8 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
@@ -1783,9 +1787,9 @@ if __name__ == "__main__":
     
     #step, end, inclination, which, estep_outer, inum, wnum
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
-    folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool)
+    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

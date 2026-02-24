@@ -207,18 +207,22 @@ class Sep_plot(Sep_gen):
         rlist = []
         totlist = []
         
+        omega = round(w)
+        
         # Gets everything ready for multiprocessing of orbital projections
         if len(specify) == 0:
             # 3 by 4 Plot
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step)
-            fig, axs = plt.subplots(3,4, figsize = (13,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = False, sharey = False)
+            fig, axs = plt.subplots(3,4, figsize = (13,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
         else:
             # 1 by 1 plot
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step, specify = specify)
-            fig, axs = plt.subplots(figsize = (9,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = False, sharey = False)
+            fig, axs = plt.subplots(figsize = (9,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
         
         rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")        
-        
+        colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
+                                    "pink", "blue", "red", "green", "cyan"]
+        linelist = ["-", "--", "-.", ":"]
         
         # fig.suptitle("Orbital Projection with Alterations in e, i, and "r"From $\omega$ 0 to $\ \frac{\pi}{2}$", x = 0.49, y = 0.99)
     
@@ -232,7 +236,7 @@ class Sep_plot(Sep_gen):
                 param = totparam[j]
                 
                 # Finds points <= 0.01 for each projection
-                rtemp, xchange, ychange, rtemp_log, temp = Sep_gen.Rchange(param, coords = True)
+                rtemp, xchange, ychange = Sep_gen.Rchange(param, coords = True)
                 
                 vel = Sep_gen.Velocity(param)
                 # Iterates through the data clump to access
@@ -241,7 +245,6 @@ class Sep_plot(Sep_gen):
                     # This contains each data set in the data clump
                     initialx, initialy = iterlist[g]
                     # Calculates the velocity of each data point in the data set
-                    
                     rlist.append(rtemp)
                     # print("Last Velocity Output: ", vel[-1])
                     velmax = np.max(vel[g])
@@ -253,8 +256,7 @@ class Sep_plot(Sep_gen):
                     
                     # Determines the colors of each data set according
                     # to its positioning
-                    colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
-                                    "pink", "blue", "red", "green", "cyan"]
+                    
                     if end == 1.25:
                         if g == 0:
                             label = "a = 0.75"
@@ -279,10 +281,11 @@ class Sep_plot(Sep_gen):
                         rangelist = np.arange(0.5,end+0.5,0.5)
                         alpha = rangelist[g]
                         label = f"a = {alpha}"
-                        color = colorlist[g % 10]   
+                        color = colorlist[g % 10]
+                        linestyle = linelist[g % 4]   
                     
                     # Plots the data set, including the dot size according to velocity        
-                    dataproj = ax.scatter(initialx, initialy, s=dot, color= color, label=label)
+                    dataproj = ax.scatter(initialx, initialy, s=dot, color= color, label=label, ls = linestyle)
                     # Also includes points at which |r-r0| <= 0.01
                     data = ax.scatter(xchange[g], ychange[g], s = 8, color = "yellow")
                     
@@ -300,29 +303,32 @@ class Sep_plot(Sep_gen):
                 #     handles, labels = ax.get_legend_handles_labels()
                     
                 # Limits
+                limit = [-2,-1, 0, 1, 2]
                 ax.set_xlim(-2,2)
                 ax.set_ylim(-2,2)
+                ax.set_xticks(limit)
+                ax.set_yticks(limit)
                     
                 textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
-                ax.text(0.80, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
+                ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 15, verticalalignment = "top", bbox = rect)
                 
-                if j == 8:
-                        ax.tick_params(axis = "both", labelbottom = True, labelleft = True, labelsize = 12)
+                if j == 0 or j == 4 or j == 8:
+                    if j == 8:
+                        ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                    else:
+                        ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
                 else:
-                    ax.tick_params(axis = "both", labelbottom = False, labelleft = False, labelsize = 12)
+                    ax.tick_params(axis = "x", labelbottom = False)
                 if j == 11:
                     handles, labels = ax.get_legend_handles_labels()
-                    # MAY HAVE TO REMOVE BELOW LINE
-                    ax.tick_params(labelsize = 12)
-
-
-                    ax.legend(handles[0:9],labels[0:9], loc = "upper left", fontsize = 12, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+                    ax.legend(handles[0:9],labels[0:9], loc = "upper right", fontsize = 10, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+                # print(ax.xaxis.get_ticklocs(minor = False))
         else:
             iterlist = list[0]
             param = totparam[0]
             
             # Finds points <= 0.01 for each projection
-            rtemp, xchange, ychange, rtemp_log, temp = Sep_gen.Rchange(param, coords = True)
+            rtemp, xchange, ychange = Sep_gen.Rchange(param, coords = True)
             
             vel = Sep_gen.Velocity(param)
             # Iterates through the data clump to access
@@ -343,17 +349,16 @@ class Sep_plot(Sep_gen):
                 
                 # Determines the colors of each data set according
                 # to its positioning
-                colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
-                                "pink", "blue", "red", "green", "cyan"]
                 rangelist = np.arange(0.5,end+0.5,0.5)
                 alpha = rangelist[g]
                 label = f"a = {alpha}"
-                color = colorlist[g % 10]   
+                color = colorlist[g % 10]
+                linestyle = linelist[g % 4]    
                 
                 # Plots the data set, including the dot size according to velocity        
-                dataproj = axs.scatter(initialx, initialy, s=dot, color= color, label=label)
+                dataproj = axs.scatter(initialx, initialy, s=dot, color= color, label=label, ls = linestyle)
                 # Also includes points at which |r-r0| <= 0.01
-                data = axs.scatter(xchange[g], ychange[g], s = 8, color = "yellow")
+                data = axs.scatter(xchange[g], ychange[g], s = 8, color = "yellow",)
                 
             # Creates the grid for each plot
             axs.grid(True,color = "grey", linestyle="--", linewidth="0.55", axis = "both", which = "both")
@@ -363,30 +368,32 @@ class Sep_plot(Sep_gen):
             
             # Adds the Circle to the plot
             axs.add_patch(Circ2)
-            
-            # # Just grabs the labels for each plot just before it iterates through again
-            # if j == 0:
-            #     handles, labels = ax.get_legend_handles_labels()
                 
             # Limits
+            limit = [-2,-1, 0, 1, 2]
             axs.set_xlim(-2,2)
             axs.set_ylim(-2,2)
+            axs.set_xticks(limit)
+            axs.set_yticks(limit)
             # Decorations    
             textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
-            axs.text(0.80, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
+            axs.text(0.05, 0.98, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
-            axs.tick_params(labelsize = 12)
-            axs.legend(handles[0:9],labels[0:9], loc = "upper left", fontsize = 12, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+            axs.legend(handles[0:9],labels[0:9], loc = "upper right", fontsize = 15, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
         fig.tight_layout()
         
         # Saves to Figure Folder
         if len(specify) == 0:
-            plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiProj_omega_0.png")
+            try:
+                plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiProj_omega_0.png")
+            except OSError:
+                plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiProj_omega_0.png')
         else:
-            plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiProj_omega_0_specified.png")
-        # plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/Multi_a05_{end}_omega_0.png")
-        # plt.show()
-        
+            try:
+                plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiProj_omega_{omega}_specified.png")
+            except OSError:
+                plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiProj_omega_{omega}_specified.png")
+            
         
         return rlist
 
@@ -1779,9 +1786,10 @@ if __name__ == "__main__":
     test = False
     unity = False
     dist = ""
+    # specify = []
     specify = [0., np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
-    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
+    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
@@ -1789,7 +1797,7 @@ if __name__ == "__main__":
     # tothist.CompletePlotHist([0.002, 20, True, which, [], inum, wnum, unity])
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

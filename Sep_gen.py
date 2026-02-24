@@ -382,6 +382,7 @@ class Sep_gen:
         xlist = []
         ylist = []
         r0 = 1 # Einstein Ring Radius
+        estep = 0
         
         # Has different parameter sets if conditions are met
         if coords == True:
@@ -392,8 +393,9 @@ class Sep_gen:
             e, i, w, end, step, Linear, inclination, estep = param
         alpha = 1.35 # Shape (Alpha)
         theta = 1/5.05 # Scale (Beta = 1 / Scale)
-        gammastep = gamma.pdf(estep, a = alpha, scale = theta)
-        gamma_sum = np.sum(gammastep)
+        if isinstance(estep, (list, np.ndarray)):
+            gammastep = gamma.pdf(estep, a = alpha, scale = theta)
+            gamma_sum = np.sum(gammastep)
         
         # Only steps through Linear portion of points
         if Linear == "Linear":
@@ -451,7 +453,7 @@ class Sep_gen:
                             totlindict[aval] += len(conlin[0])
                         else:
                             totlindict[aval] = len(conlin[0])
-                return totlindict, xlist, ylist
+                return totlindict, xlist, ylist, 
         elif Linear == "Log":
             if not inclination:
                 # Log Portion

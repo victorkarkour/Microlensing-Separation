@@ -481,7 +481,7 @@ class Sep_gen:
                     else:
                         totlindict[aval] = len(conlin[0])
                 # Power Law Portion
-                stepthrough = Sep_gen.stepdata(-1, 0.5, end, 10000)
+                stepthrough = Sep_gen.stepdata(-1, 0.5, end, 42000)
                 for aval in stepthrough:
                     x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
         
@@ -493,6 +493,7 @@ class Sep_gen:
                     else:
                         totpowerdict[aval] = len(conpower[0])
                 gc.collect()
+                print("Linear, Log, Power : ",sum(totlindict.values()), sum(totlogdict.values()), sum(totpowerdict.values()))
                 return totlindict, xlist, ylist, totlogdict, totpowerdict
             else:
                 # Log Portion
@@ -527,7 +528,7 @@ class Sep_gen:
                 return totlogdict, x, y, totgammadict
         elif Linear == "Power":
             # Power Portion
-            stepthrough = Sep_gen.stepdata(-1, 0.5, end, 10000)
+            stepthrough = Sep_gen.stepdata(-1, 0.5, end, 42000)
             for aval in stepthrough:
                 for ival in i:
                     if isinstance(e, np.ndarray):
@@ -646,7 +647,7 @@ class Sep_gen:
         totgammahistlist = []
         # Checks if there is a list of esteps, if so, creates empty list, otherwise creates set of 9 nested lists 
         if len(estep_outer) == 0:
-             tothistlist =[[] for _ in range(9)]
+             tothistlist =[[] for _ in range(12)]
         else:
             tothistlist = []
         
@@ -675,12 +676,12 @@ class Sep_gen:
             if inclination and len(estep_outer) != 0:
                 param = [estep, istep, k, end, step, which, inclination, esteplist]
             elif inclination:
-                param = [[], istep, k, end, step, which, inclination, 0]
+                param = [[], istep, k, end, step, which, inclination, 0]  
             
             start = time.perf_counter()
             # Multi Processing
             if inclination == True and len(estep) != 0:
-                steptotlist = Sep_gen.Rchange(param = param, )
+                steptotlist = Sep_gen.Rchange(param = param)
             
             end_time = time.perf_counter()
             totaltime = end_time - start
@@ -717,8 +718,7 @@ class Sep_gen:
                 totgammaiter = gammadict
                 totgammalist = [key for key, val in totgammaiter.items() for _ in range(val)]
                 hist_gamma, histbins_gamma = np.histogram(totgammalist,bins = logbins, range=(0.5, end+0.5))
-                gammahistlist.append((hist_gamma, histbins_gamma))
-                
+                gammahistlist.append((hist_gamma, histbins_gamma))  
             else:
                 for j in range(len(steptotlist)):
                     histlist = tothistlist[j]

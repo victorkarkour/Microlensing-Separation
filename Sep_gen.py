@@ -524,7 +524,8 @@ class Sep_gen:
                                 totlogdict[aval] += len(conlog[0])
                             else:
                                 totlogdict[aval] = len(conlog[0])
-                print(sum(totgammadict.values()))
+                if isinstance(e, np.ndarray):
+                    print(sum(totgammadict.values()))
                 return totlogdict, x, y, totgammadict
         elif Linear == "Power":
             # Power Portion
@@ -646,10 +647,7 @@ class Sep_gen:
         totpowerlist = []
         totgammahistlist = []
         # Checks if there is a list of esteps, if so, creates empty list, otherwise creates set of 9 nested lists 
-        if len(estep_outer) == 0:
-             tothistlist =[[] for _ in range(12)]
-        else:
-            tothistlist = []
+        tothistlist = []
         
         # Create variables for bin sizes
         nbin = 200
@@ -663,32 +661,31 @@ class Sep_gen:
         
         # For making the stepthrough of omega
         wstep = np.linspace(0,np.pi/2,wnum)
-        if inclination:
-            # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
-            cosstep = np.linspace(0,1,inum)
-            istep = np.arccos(cosstep)
-            # Only works if estep_outer has values in the list
-            if len(estep_outer) != 0:
-                estep = estep_outer
+        # REMEMBER TO REMOVE IF STATMENTS FOR LINEAR (will eventually want linear in both)
+        cosstep = np.linspace(0,1,inum)
+        istep = np.arccos(cosstep)
+        # Only works if estep_outer has values in the list
+        estep = estep_outer
         for k in wstep:
             print("Value of omega currently: ", k, " and current position in array: ", np.where(wstep == k))
             # Each omega calculates its own data groups
-            if inclination and len(estep_outer) != 0:
+            if inclination and isinstance(esteplist, (list, np.ndarray)):
                 param = [estep, istep, k, end, step, which, inclination, esteplist]
             elif inclination:
-                param = [[], istep, k, end, step, which, inclination, 0]  
+                param = [estep, istep, k, end, step, which, inclination, 0]  
             
             start = time.perf_counter()
             # Multi Processing
-            if inclination == True and len(estep) != 0:
+            if inclination == True or isinstance(esteplist, (list, np.ndarray)):
                 steptotlist = Sep_gen.Rchange(param = param)
+
             
             end_time = time.perf_counter()
             totaltime = end_time - start
             print(f"Time to Compute was {totaltime:.4f} seconds.")    
             
             # Once complete, takes the data through each set
-            if len(estep_outer) != 0:
+            if isinstance(esteplist, (list, np.ndarray)):
                 histlist = tothistlist
                 gammahistlist = totgammahistlist
                 if which == "Log":
@@ -720,32 +717,30 @@ class Sep_gen:
                 hist_gamma, histbins_gamma = np.histogram(totgammalist,bins = logbins, range=(0.5, end+0.5))
                 gammahistlist.append((hist_gamma, histbins_gamma))  
             else:
-                for j in range(len(steptotlist)):
-                    histlist = tothistlist[j]
-                    if which == "Log":
-                        steplogdict, x, y = steptotlist[j]
-                        # Log histogram
-                        totlogiter = steplogdict
-                        totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
-                        hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
-                        histlist.append((hist_log, histbins_log))
-                    elif which == "Linear":
-                        steplindict, x, y = steptotlist[j]
-                        # Linear histogram
-                        totliniter = steplindict
-                        totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
-                        hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
-                        histlist.append((hist_lin, histbins_lin))
-                    elif which == "Power":
-                        steplogdict, x, y = steptotlist[j]
-                        # Power histogram
-                        totpoweriter = steppowerdict
-                        totpowerlist = [key for key, val in totpoweriter.items() for _ in range(val)]
-                        hist_power, histbins_power = np.histogram(totpowerlist,bins = logbins, range=(0.5, end+0.5))
-                        histlist.append((hist_power, histbins_power)) 
-                    else:
-                        return(print(f"Warning: {which} is not a valid point. Please use (Log), (Linear), or (Power) as your options"))
-                    tothistlist[j] = histlist
+                histlist = tothistlist
+                if which == "Log":
+                    steplogdict, x, y, _ = steptotlist
+                    # Log histogram
+                    totlogiter = steplogdict
+                    totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+                    hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+                    histlist.append((hist_log, histbins_log))
+                elif which == "Linear":
+                    steplindict, x, y, _ = steptotlist
+                    # Linear histogram
+                    totliniter = steplindict
+                    totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                    hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                    histlist.append((hist_lin, histbins_lin))
+                elif which == "Power":
+                    steppowerdict, x, y, _ = steptotlist
+                    # Power histogram
+                    totpoweriter = steppowerdict
+                    totpowerlist = [key for key, val in totpoweriter.items() for _ in range(val)]
+                    hist_power, histbins_power = np.histogram(totpowerlist,bins = logbins, range=(0.5, end+0.5))
+                    histlist.append((hist_power, histbins_power)) 
+                else:
+                    return(print(f"Warning: {which} is not a valid point. Please use (Log), (Linear), or (Power) as your options"))
             gc.collect()
         
         return tothistlist, totgammahistlist

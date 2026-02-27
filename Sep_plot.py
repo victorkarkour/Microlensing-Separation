@@ -717,9 +717,9 @@ class Sep_plot(Sep_gen):
                             tothist_lin = tothist_lin + hist_lin
                             tothist_log = tothist_log + hist_log
                             tothist_power = tothist_power + hist_power
-                unity_data[f"final lin {eccent} {round(incl,3)} "] = tothist_lin
-                unity_data[f"final log {eccent} {round(incl,3)} "] = tothist_log
-                unity_data[f"final power {eccent} {round(incl,3)} "] = tothist_power
+                unity_data[f"final lin {eccent} {round(incl,3)}"] = tothist_lin
+                unity_data[f"final log {eccent} {round(incl,3)}"] = tothist_log
+                unity_data[f"final power {eccent} {round(incl,3)}"] = tothist_power
         print("Total Number of Linear Points: ", total_lin)
         print("Total Number of Log Points: ", total_log)
         print("Total Number of Power Points: ", total_power)
@@ -737,26 +737,34 @@ class Sep_plot(Sep_gen):
         df_unity.to_csv(file_name, index = False)
         return tothistlist, evalhistlist
 
-    def CompleteHistLoad(self, which = "Log"):
+    def CompleteHistLoad(self, which = "Log", inclination = False):
         """
         """
-        try:
-            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
-            pd.read_csv(file_name)
-        except FileNotFoundError:
-            file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
+        if inclination:
+            try:
+                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
+                pd.read_csv(file_name)
+            except FileNotFoundError:
+                file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
+        else:
+            try:
+                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
+                pd.read_csv(file_name)
+            except FileNotFoundError:
+                file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
         df = pd.read_csv(file_name)
-        multi_param = [
-            # Row 1
-            (0. , 0.,), (0., np.pi/6, ), (0., np.pi/3, ), (0., np.pi/2,),
-            # Row 2
-            (0.5, 0., ), (0.5, np.pi/6, ), (0.5, np.pi/3, ), (0.5,np.pi/2,),
-            # Row 3
-            (0.9 , 0.,), (0.9, np.pi/6,), (0.9, np.pi/3,), (0.9, np.pi/2,) 
+        if inclination:
+            eccent = np.linspace(0,0.99,12)
+        else:
+            multi_param = [
+                # Row 1
+                (0. , 0.,), (0., np.pi/6, ), (0., np.pi/3, ), (0., np.pi/2,),
+                # Row 2
+                (0.5, 0., ), (0.5, np.pi/6, ), (0.5, np.pi/3, ), (0.5,np.pi/2,),
+                # Row 3
+                (0.9 , 0.,), (0.9, np.pi/6,), (0.9, np.pi/3,), (0.9, np.pi/2,) 
             ]
-        
-        
-        
+                
         # Create variables for bin sizes
         nbin = 200
         amin = 0.5
@@ -764,26 +772,40 @@ class Sep_plot(Sep_gen):
         # Make logbinsizes for all
         logbinsize = (np.log10(amin)-np.log10(amax))/nbin
         logbins = np.geomspace(amin,amax, nbin)
-         
-        colorlist = ["black", "red", "blue", "green"]
+        if not inclination:
+            colorlist = ["green", "red", "blue", "black"]
+        else:
+            if which == "Linear":
+                colorlist = ["green", "black"]
+            elif which == "Log":
+                colorlist = ["red", "black"]
+            else:
+                colorlist = ["blue", "black"]
         fig, axs = plt.subplots(3,4, figsize = (13,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         # fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         for j, ax  in enumerate(axs.flatten()):
-            iter_param = multi_param[j]
-            hist_lin = df[f"final lin {iter_param[0]} {iter_param[1]}"]
-            hist_log = df[f"final log {iter_param[0]} {iter_param[1]}"]
-            hist_power = df[f"final power {iter_param[0]} {iter_param[1]}"]
+            if not inclination:
+                iter_param = multi_param[j]
+                hist_lin = df[f"final lin {iter_param[0]} {round(iter_param[1],3)}"]
+                hist_log = df[f"final log {iter_param[0]} {round(iter_param[1],3)}"]
+                hist_power = df[f"final power {iter_param[0]} {round(iter_param[1],3)}"]
 
-                        
-            norm_lin = np.abs(1 / (logbinsize * hist_lin.sum()))
-            norm_log = np.abs(1 / (logbinsize * hist_log.sum()))
-            norm_power = np.abs(1 / (logbinsize * hist_power.sum()))
-            StepPatch_lin = ax.stairs(hist_lin * norm_lin, logbins, edgecolor = colorlist[0], fill = False, alpha = 0.5, label = "Linear")
-            StepPatch_log = ax.stairs(hist_log * norm_log, logbins, edgecolor = colorlist[1], fill = False, alpha = 0.5, label = "Log")
-            StepPatch_power = ax.stairs(hist_power * norm_power, logbins, edgecolor = colorlist[2], fill = False, alpha = 0.5, label = "Power")
+                            
+                norm_lin = np.abs(1 / (logbinsize * hist_lin.sum()))
+                norm_log = np.abs(1 / (logbinsize * hist_log.sum()))
+                norm_power = np.abs(1 / (logbinsize * hist_power.sum()))
+                StepPatch_lin = ax.stairs(hist_lin * norm_lin, logbins, edgecolor = colorlist[0], fill = False, alpha = 0.5, label = "Linear")
+                StepPatch_log = ax.stairs(hist_log * norm_log, logbins, edgecolor = colorlist[1], fill = False, alpha = 0.5, label = "Log")
+                StepPatch_power = ax.stairs(hist_power * norm_power, logbins, edgecolor = colorlist[2], fill = False, alpha = 0.5, label = "Power")
+            else:
+                iter_param = eccent[j]
+                hist = df[f"final lin {round(iter_param,3)}"]
 
+                norm = np.abs(1 / (logbinsize * hist.sum()))
+                StepPatch = ax.stairs(hist * norm, logbins, edgecolor = colorlist[0], fill = False, alpha = 0.5, label = f"{which}")
+                
             # Limits
-            limit = [x for x in np.arange(0.5, end + 0.5 , 0.5)]
+            limit = [x for x in np.arange(0.5, 20 + 0.5 , 0.5)]
             ax.set_xlim(0.5,20.5)
             ax.set_ylim(0,10)
             ax.set_xticks(limit)
@@ -792,31 +814,46 @@ class Sep_plot(Sep_gen):
             
             # Decoration
             rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
-            textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
-            ax.text(0.63, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
+            if not inclination:
+                textstr = "\n".join((f'e = {iter_param[0]}', f'i = {round(iter_param[1],2)}'))
+                ax.vlines(1/(1-iter_param[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'black', alpha = 0.75, label = r"Expected Peak $e$")
+            else:
+                textstr = f"e = {round(iter_param,3)}"
+                ax.vlines(1/(1-iter_param), 0, 1, transform = ax.get_xaxis_transform(), colors = 'black', alpha = 0.75, label = r"Expected Peak $e$")
+            ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 15, verticalalignment = "top", bbox = rect)
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             # Lines and organizing labels to be cleaner
-            ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'green', alpha = 0.75, label = r"Expected Peak $e$")
+            
             if j == 0 or j == 4 or j == 8:
                 if j == 8:
                     ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
                 else:
                     ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
             else:
-                ax.set_yticks([])
-                ax.set_xticks([])
+                # ax.set_yticks([])
+                # ax.set_xticks([])
                 ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
             if j == 11:
                 handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-                if which == "Linear":
-                    labels = ["Linear", "Peak Eccentricity"]
+                if inclination:
+                    labels = [f"{which}", r"Expected Peak $e$"]
                 else:
                     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
-            ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 15)    
+                ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)    
 
         fig.tight_layout()
         # Saves plot
-        # plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_0002_{wnum}_LinLogSemi.png')
+        if not inclination:
+            try:
+                plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_{wnum}_LinLogPower.png')
+            except OSError:
+                plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/CompleteHist_{wnum}_LinLogPower.png")
+        else:
+            try:
+                plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_{inum}_{which}.png')
+            except OSError:
+                plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_{inum}_{which}.png")
+
 
         return df
 
@@ -831,6 +868,7 @@ class Sep_plot(Sep_gen):
         x = np.linspace(0,0.98, self.wnum)
         esteplist = []*self.numdiv
         param = []
+        unity_data = {}
         
         
         # Slices estep into parts for parallelization
@@ -851,28 +889,34 @@ class Sep_plot(Sep_gen):
                 # Step, end, inclincation, which, estep_iter, omega, incl, estep, class
                 if gamma_bool:
                     param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, estep, repeat(obj)))
-                elif inclination:
-                    param = [(0.002, 20, True, which, [], self.wnum, self.inum, None, repeat(obj))]
+            if inclination and not gamma_bool:
+                eccent = np.linspace(0,0.99,12)
+                for val in eccent:
+                    param.append((0.002, 20, True, which, val, self.wnum, self.inum, None ,repeat(obj)))
         else:
             obj = Sep_gen()
             param = [0.002, 20, True, which, estep[0], self.wnum, self.inum, repeat(obj)]
         # Processing using parallelization
-        if circ == False:     
+        if not circ and gamma_bool:     
             with Pool(processes = self.numdiv) as pool:
                 tothistlist = pool.map(Sep_gen.HistGen, param)
                 # tothistlist = Sep_gen.HistGen(param[2])
-        else:
+        elif circ:
             tothistlist = Sep_gen.CircHistGen(param)
+        elif inclination:
+            with Pool(processes = 12) as pool:
+                tothistlist = pool.map(Sep_gen.HistGen, param)
+                # tothistlist = Sep_gen.HistGen(param[0])
         # print("pool finished")
         if gamma_bool:
             for j in range(len(tothistlist)):
                 totlist.append(tothistlist[j][0])
                 gammalist.append(tothistlist[j][1])
         else:
-             for j in range(len(tothistlist)):
-                totlist.append(tothistlist[j])
+                for j in range(len(tothistlist)):
+                    totlist.append(tothistlist[j][0])
         # Process for CSV File
-        if circ == False:
+        if circ == False and gamma_bool:
             for i in range(len(totlist)):
                 histlist = totlist[i]
                 gammahistlist = gammalist[i]
@@ -900,8 +944,7 @@ class Sep_plot(Sep_gen):
                         "final list": tothist,
                         "gamma list": totgamma
                         }
-            df_unity = pd.DataFrame(unity_data)
-        else:
+        elif circ:
             for i in range(len(totlist)):
                 histlist = totlist[i]
                 for val in range(len(histlist)):
@@ -916,19 +959,39 @@ class Sep_plot(Sep_gen):
                             print("Total Number of Points: ", total)
                         else:
                             tothist = tothist + hist
-            # Save to CSV
+                # Save to CSV
             unity_data = {
-                        "circular list": tothist}
-            df_unity = pd.DataFrame(unity_data)
+                "circular list": tothist
+                }
+        else:
+            for i, k in enumerate(eccent):
+                histlist = totlist[i]
+                for j in range(len(histlist)):
+                    histlist_iter = histlist[j]
+                    for val in range(len(histlist_iter[0])):
+                            hist, bins = histlist_iter
+                            if val == 0:
+                                if i == 0:
+                                    tothist = np.zeros_like(hist)
+                                tothist = tothist + hist
+                            elif val == len(histlist_iter)-1 and i == len(totlist)-1:
+                                tothist = tothist + hist
+                                total = np.sum(tothist)
+                            else:
+                                tothist = tothist + hist
+                unity_data[f"final lin {round(k,3)}"] = tothist
+            print("Total Number of Points: ", total)
+            # Save to CSV
+        df_unity = pd.DataFrame(unity_data)
         if unity:
             if circ == False:
                 file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
             elif inclination:
-                file_name = f'/home/karkour.2/Results/UnityHist_incline_{self.inum}_{which}.csv'
+                file_name = f'/home/karkour.2/Results/UnityHist_inclines_{self.inum}_{which}.csv'
             else:
                 file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
         else:
-            if circ == False:
+            if circ == False and gamma_bool:
                 try:
                     file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
                     df_unity.to_csv(file_name, index = False)
@@ -936,10 +999,10 @@ class Sep_plot(Sep_gen):
                     file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
             elif inclination:
                 try:
-                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_incline_{self.inum}_{which}.csv'
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.inum}_{which}.csv'
                     df_unity.to_csv(file_name, index = False)
                 except OSError:
-                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_incline_{self.inum}_{which}.csv'
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.inum}_{which}.csv'
             else:
                 try:
                     file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
@@ -1708,8 +1771,9 @@ if __name__ == "__main__":
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
     alpha = -1 # For test = True, this becomes the comparison to which
+    inclination = True # KEEP IN MIND THIS VALUE
     circ = False
-    gamma_bool = True
+    gamma_bool = False
     test = False
     unity = False
     dist = ""
@@ -1720,10 +1784,12 @@ if __name__ == "__main__":
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
-   
-    tothist.CompleteHistGen(which = which, unity = unity)
-    # tothist.CompleteHistLoad(which = which)
-    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool)
+   # CompleteHistLoad includes Omega and Inclination marginalization!
+    # tothist.CompleteHistGen(which = which, unity = unity)
+    # tothist.CompleteHistLoad(which = which, inclination = inclination)
+    
+    # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
+    folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     

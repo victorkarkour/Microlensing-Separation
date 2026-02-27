@@ -83,33 +83,35 @@ import matplotlib.pyplot as plt
 # Distribute any remainder by giving one extra element to the first `rem` slices.
 # This handles cases where numestep < numdiv as well.
 
-def stepdata(alpha, xmin, xmax, nsamples):
+# def stepdata(alpha, xmin, xmax, nsamples):
         
-        """
-        """
-        step = np.linspace(0,1,nsamples+2)[1:-1]
+#         """
+#         """
+#         step = np.linspace(0,1,nsamples+2)[1:-1]
         
-        if alpha == 1.:
-            return xmin * (xmax/xmin) ** step
-        else:
-            # normal: alpha = 0 (Linear), alpha = 1 (Log), alpha = -1 (Power) 
-            # ALPHAS ARE SWAPPED FOR This
-            exp = (1. - alpha)
-            return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
-stepping = stepdata(-1, 0.5, 20, 10000)
-stepthrough = np.logspace(np.log10(0.5), np.log10(20), num=10000)
-print("Log Distribution: ", stepthrough)
-print("Power Law Distribution: ",stepping)
+#         if alpha == 1.:
+#             return xmin * (xmax/xmin) ** step
+#         else:
+#             # normal: alpha = 0 (Linear), alpha = 1 (Log), alpha = -1 (Power) 
+#             # ALPHAS ARE SWAPPED FOR This
+#             exp = (1. - alpha)
+#             return (step * (xmax**exp - xmin**exp) + xmin**exp) ** (1 / exp)
+# stepping = stepdata(-1, 0.5, 20, 10000)
+# stepthrough = np.logspace(np.log10(0.5), np.log10(20), num=10000)
+# print("Log Distribution: ", stepthrough)
+# print("Power Law Distribution: ",stepping)
 
 
-stepping_log = stepdata(1, 0.5, 20, 10000)
-print("Log Distribution: ", len(stepping_log))
-print("Power Law Distribution: ",len(stepping))
-points = np.linspace(0, 20, 10000)
-fig, axs = plt.subplots()
-axs.plot(points,stepping, label="Power Law")
-axs.plot(points, points, label="Linear")
-axs.plot(points,stepthrough, label="Logarithmic")
-axs.legend()
-# axs.set_xscale("log")
-plt.show()
+# stepping_log = stepdata(1, 0.5, 20, 10000)
+# print("Log Distribution: ", len(stepping_log))
+# print("Power Law Distribution: ",len(stepping))
+# points = np.linspace(0, 20, 10000)
+# fig, axs = plt.subplots()
+# axs.plot(points,stepping, label="Power Law")
+# axs.plot(points, points, label="Linear")
+# axs.plot(points,stepthrough, label="Logarithmic")
+# axs.legend()
+# # axs.set_xscale("log")
+# plt.show()
+points_ecc = np.linspace(0, 0.99, 12)
+print(points_ecc)

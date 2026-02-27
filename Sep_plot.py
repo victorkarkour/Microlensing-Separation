@@ -654,7 +654,7 @@ class Sep_plot(Sep_gen):
             for j in range(len(steptotlist)):
                 steplindict, x, y, steplogdict, stepsemidict = steptotlist[j]
                 iter_param = param[j]
-                incl, eccent = iter_param[0], iter_param[1]
+                eccent, incl = iter_param[0], iter_param[1]
                 histlist = tothistlist[j]
                 # Log histogram
                 totlogiter = steplogdict
@@ -717,9 +717,9 @@ class Sep_plot(Sep_gen):
                             tothist_lin = tothist_lin + hist_lin
                             tothist_log = tothist_log + hist_log
                             tothist_power = tothist_power + hist_power
-                unity_data[f"final lin {eccent} {round(incl)} "] = tothist_lin
-                unity_data[f"final log {eccent} {round(incl)} "] = tothist_log
-                unity_data[f"final power {eccent} {round(incl)} "] = tothist_power
+                unity_data[f"final lin {eccent} {round(incl,3)} "] = tothist_lin
+                unity_data[f"final log {eccent} {round(incl,3)} "] = tothist_log
+                unity_data[f"final power {eccent} {round(incl,3)} "] = tothist_power
         print("Total Number of Linear Points: ", total_lin)
         print("Total Number of Log Points: ", total_log)
         print("Total Number of Power Points: ", total_power)
@@ -741,12 +741,11 @@ class Sep_plot(Sep_gen):
         """
         """
         try:
-            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_omegas{self.wnum}_{which}.csv'
+            file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
             pd.read_csv(file_name)
         except FileNotFoundError:
-            file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_omegas{self.wnum}_{which}.csv'
+            file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
         df = pd.read_csv(file_name)
-        w = 
         multi_param = [
             # Row 1
             (0. , 0.,), (0., np.pi/6, ), (0., np.pi/3, ), (0., np.pi/2,),
@@ -1722,8 +1721,8 @@ if __name__ == "__main__":
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
    
-    # tothist.CompleteHistGen(which = which, unity = unity)
-    tothist.CompleteHistLoad(which = which)
+    tothist.CompleteHistGen(which = which, unity = unity)
+    # tothist.CompleteHistLoad(which = which)
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)

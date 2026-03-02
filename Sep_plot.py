@@ -1111,7 +1111,7 @@ class Sep_plot(Sep_gen):
         
         # Initialize Lists
         labels = ["Uniform", "Gamma", "Circular"]
-        colorlist = ["blue", "red", "black"]
+        colorlist = ["green", "red", "blue"]
         # Make bins
         bins = np.geomspace(amin,amax, nbin)
         
@@ -1354,7 +1354,7 @@ class Sep_plot(Sep_gen):
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."])
+        ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."], loc = "lower right")
         
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
         median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.405) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
@@ -1761,7 +1761,7 @@ class Sep_plot(Sep_gen):
 if __name__ == "__main__":
     numestep = 100 
     numdiv = 4 
-    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
@@ -1786,7 +1786,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

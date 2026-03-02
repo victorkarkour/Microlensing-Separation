@@ -1309,12 +1309,6 @@ class Sep_plot(Sep_gen):
         amin = 0.5
         amax = 21
 
-        # Create gamma prior
-        alpha = 1.35 # Shape (Alpha)
-        theta = 1/5.05 # Scale (Beta = 1 / Scale)
-        x = np.linspace(0,0.98, nbin-1)
-        gammastep = gamma.pdf(x, a = alpha, scale = theta)
-
 
         # Make log bins for all
         bins = np.geomspace(amin,amax, nbin)
@@ -1333,17 +1327,18 @@ class Sep_plot(Sep_gen):
 
         hist = df_stats["final list"].to_numpy()
         # Make Gamma Calculation
-        totgammahist = gammastep * hist
-
-        df_stats["cumul_gamma"] = np.cumsum(totgammahist) / np.abs(sum(totgammahist))
+        gammanorm = np.abs(1/ (np.sum(df_stats["gamma list"])))
 
         cumulative = 0
+        cumul_gamma = 0
         cumul_norm = np.abs(1 / (sum(df_stats["final list"])))
         for i in range(len(df_stats["final list"])):
             cumulative = cumulative + df_stats.loc[i, "final list"]
+            cumul_gamma = cumul_gamma + df_stats.loc[i, "gamma list"]
             df_stats.loc[i, "cumulative"] = cumulative
-        c = np.cumsum(df_stats["final list"])
+            df_stats.loc[i, "cumul_gamma"] = cumul_gamma
         df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
+        df_stats["cumul_gamma"] = df_stats["cumul_gamma"] * gammanorm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         fig.suptitle(f"Cumulative Distribution Function \n alpha = {alpha_step}")
         ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 0.75) # Normal Line NORMAL DIST.
@@ -1362,12 +1357,12 @@ class Sep_plot(Sep_gen):
         ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."])
         
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
-        median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.515)].values[0],3)
+        median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.405) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
         median_circ = round(df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.475) & (df_stats["cumul_circ"] <= 0.535)].values[0],3)
-        
+
         # Upper Lower Percentages
-        upper_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.8265) & (df_stats["cumul_gamma"] <= 0.8415)].values[0]
-        lower_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.1430) & (df_stats["cumul_gamma"] <= 0.1800)].values[0]
+        upper_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.8165) & (df_stats["cumul_gamma"] <= 0.8415)].values[0]
+        lower_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.1495) & (df_stats["cumul_gamma"] <= 0.1715)].values[0]
         upper_95_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.9535) & (df_stats["cumul_gamma"] <= 0.9865)].values[0]
         lower_95_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.0205) & (df_stats["cumul_gamma"] <= 0.0465)].values[0] 
         
@@ -1766,11 +1761,11 @@ class Sep_plot(Sep_gen):
 if __name__ == "__main__":
     numestep = 100 
     numdiv = 4 
-    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = -1 # For test = True, this becomes the comparison to which
+    alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
@@ -1789,9 +1784,9 @@ if __name__ == "__main__":
     # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
-    folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
+    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

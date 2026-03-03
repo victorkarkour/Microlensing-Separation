@@ -1780,7 +1780,7 @@ if __name__ == "__main__":
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
-    # tothist.CompleteHistGen(which = which, unity = unity)
+    tothist.CompleteHistGen(which = which, unity = unity)
     # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!

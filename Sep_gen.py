@@ -493,7 +493,7 @@ class Sep_gen:
                     else:
                         totpowerdict[aval] = len(conpower[0])
                 gc.collect()
-                print("Linear, Log, Power : ",sum(totlindict.values()), sum(totlogdict.values()), sum(totpowerdict.values()))
+                # print("Linear, Log, Power : ",sum(totlindict.values()), sum(totlogdict.values()), sum(totpowerdict.values()))
                 return totlindict, xlist, ylist, totlogdict, totpowerdict
             else:
                 # Log Portion

@@ -135,14 +135,14 @@ class Sep_plot(Sep_gen):
             ]
         else:
             # eccentricity and inclination specified
-            param = [specify[0], specify[1], w, end, step, Linear, inclination]
+            param = [specify[0], specify[1], w, end, step, Linear, inclination, 0]
         
         start = time.perf_counter()
         # Multi Processing
         if len(specify) != 0:
             totlist = Sep_gen.Rchange(param = param)
         else:
-            with Pool(processes = 9) as pool:
+            with Pool(processes = 6) as pool:
                 totlist = pool.map(Sep_gen.Rchange, param)
         end_time = time.perf_counter()
         totaltime = end_time - start
@@ -581,14 +581,14 @@ class Sep_plot(Sep_gen):
                     patch.set_edgecolor("b")
 
             limit = [x for x in np.arange(0.5, end + 0.5 , 0.5)]
-            ax.set_xlim(0.5,20.5)
-            ax.set_ylim(0,10)
-            ax.set_xticks(limit)
-            ax.set_yticks(limit)
-            ax.set_xscale("log")
+            axs.set_xlim(0.5,20.5)
+            axs.set_ylim(0,10)
+            axs.set_xticks(limit)
+            # axs.set_yticks(limit)
+            axs.set_xscale("log")
             
             textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
-            axs.text(0.63, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
+            axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             axs.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             axs.vlines(1/(1-iterparam[0]), 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', alpha = 0.75, label = r"Expected Peak $e$")
             axs.tick_params(labelsize = 12)
@@ -598,7 +598,7 @@ class Sep_plot(Sep_gen):
             else:
                 labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
                 
-            axs.legend(handles = handles, labels = labels, loc = "best", fontsize = 12)
+            axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 12)
                 
         fig.tight_layout()
 
@@ -609,9 +609,9 @@ class Sep_plot(Sep_gen):
                 plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiHist_omega_{omega}_{which}.png')
         else:
             try:
-                plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiHist_omega_{omega}_{which}_specified.png")
+                plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiHist_omega_{omega}_specified.png")
             except OSError:
-                plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiHist_omega_{omega}_{which}_specified.png")
+                plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiHist_omega_{omega}_specified.png")
             
         return rlist
 
@@ -704,7 +704,7 @@ class Sep_plot(Sep_gen):
                             tothist_lin = tothist_lin + hist_lin
                             tothist_log = tothist_log + hist_log
                             tothist_power = tothist_power + hist_power
-                        elif val == len(histlistsemi)-1: # and i == len(histlistsemi)-1:
+                        elif val == len(histlistsemi)-1 and j == len(histlistsemi)-1:
                             if total_lin == 0:
                                 total_lin = np.sum(tothist_lin)
                                 total_log = np.sum(tothist_log)
@@ -1088,12 +1088,25 @@ class Sep_plot(Sep_gen):
                 df_unity_5 = pd.read_csv(file_name_5)
         else:
             if not circ:
+                if test:
+                    print("Test flag activated")
+                    try:
+                        file_name_1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+                        file_name_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_Linear_alpha_{alpha_step}.csv'
+                        pd.read_csv(file_name_1)
+                    except FileNotFoundError:
+                        file_name_1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+                        file_name_2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_8_0002_Linear_alpha_{alpha_step}.csv'
+                    df_log = pd.read_csv(file_name_1)
+                    df_lin = pd.read_csv(file_name_2)
+                    
                 try:
                     file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
                     pd.read_csv(file_name)
+                    df_unity = pd.read_csv(file_name)
                 except FileNotFoundError:
                     file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
-                df_unity = pd.read_csv(file_name)
+                    df_unity = pd.read_csv(file_name)
             else:
                 try:
                     file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
@@ -1151,11 +1164,11 @@ class Sep_plot(Sep_gen):
                     StepPatch = ax.stairs(circhist_test_plus_1 * ecirc_test_plus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = 1 from alpha = {alpha_step}")
                     StepPatch = ax.stairs(circhist_test_plus_2 * ecirc_test_plus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = 2 from alpha = {alpha_step}")
                     
-                StepPatch = ax.stairs(circhist_1 * ecircnorm_1, bins, fill = False, lw = 0.5, label = f"alpha = -2 for {which}") 
-                StepPatch = ax.stairs(circhist_2 * ecircnorm_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 for {which}")
-                StepPatch = ax.stairs(circhist_3 * ecircnorm_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 for {which}") 
-                StepPatch = ax.stairs(circhist_4 * ecircnorm_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 for {which}")
-                StepPatch = ax.stairs(circhist_5 * ecircnorm_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 for {which}")
+                StepPatch = ax.stairs(circhist_1 * ecircnorm_1, bins, fill = False, lw = 0.5, label = f"Circular dist. for alpha = -2 ({which})") 
+                StepPatch = ax.stairs(circhist_2 * ecircnorm_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 ({which})")
+                StepPatch = ax.stairs(circhist_3 * ecircnorm_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 ({which})") 
+                StepPatch = ax.stairs(circhist_4 * ecircnorm_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 ({which})")
+                StepPatch = ax.stairs(circhist_5 * ecircnorm_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 ({which})")
             elif dist == "uniform":
                 uniformhist_1 = df_unity_1["final list"].to_numpy()
                 uniformhist_2 = df_unity_2["final list"].to_numpy()
@@ -1188,11 +1201,11 @@ class Sep_plot(Sep_gen):
                     StepPatch = ax.stairs(uniformhist_test_plus_1 * norm_test_plus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = 1 from alpha = {alpha_step}")
                     StepPatch = ax.stairs(uniformhist_test_plus_2 * norm_test_plus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = 2 from alpha = {alpha_step}")
                 
-                StepPatch = ax.stairs(uniformhist_1 * norm_1, bins, fill = False, lw = 0.5, label = f"alpha = -2 for {which}")
-                StepPatch = ax.stairs(uniformhist_2 * norm_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 for {which}")
-                StepPatch = ax.stairs(uniformhist_3 * norm_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 for {which}")
-                StepPatch = ax.stairs(uniformhist_4 * norm_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 for {which}")
-                StepPatch = ax.stairs(uniformhist_5 * norm_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 for {which}")
+                StepPatch = ax.stairs(uniformhist_1 * norm_1, bins, fill = False, lw = 0.5, label = f"Uniform dist. for alpha = -2 ({which})")
+                StepPatch = ax.stairs(uniformhist_2 * norm_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 ({which})")
+                StepPatch = ax.stairs(uniformhist_3 * norm_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 ({which})")
+                StepPatch = ax.stairs(uniformhist_4 * norm_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 ({which})")
+                StepPatch = ax.stairs(uniformhist_5 * norm_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 ({which})")
             elif dist == "gamma":
                 gammahist_1 = df_unity_1["gamma list"].to_numpy()
                 gammahist_2 = df_unity_2["gamma list"].to_numpy()
@@ -1225,36 +1238,62 @@ class Sep_plot(Sep_gen):
                     StepPatch = ax.stairs(gammahist_test_plus_1 * gammanorm_test_plus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = 1 from alpha = {alpha_step}")
                     StepPatch = ax.stairs(gammahist_test_plus_2 * gammanorm_test_plus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = 2 from alpha = {alpha_step}")
                 
-                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, fill = False, lw = 0.5, label = f"alpha = -2 for {which}")
-                StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 for {which}")
-                StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 for {which}")
-                StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 for {which}")
-                StepPatch = ax.stairs(gammahist_5 * gammanorm_final_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 for {which}")           
+                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, fill = False, lw = 0.5, label = f"Gamma dist. for alpha = -2 ({which})")
+                StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 ({which})")
+                StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 ({which})")
+                StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 ({which})")
+                StepPatch = ax.stairs(gammahist_5 * gammanorm_final_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 ({which})")           
         else:
-            if circ == False:
-                try:
-                    circhist = df_unity["circular list"].to_numpy()
-                    ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
-                except KeyError:
-                    print("Circular not found, continuing without it....")
-                
-                uniformhist = df_unity["final list"].to_numpy()
-                gammahist = df_unity["gamma list"].to_numpy()
-                
-                norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
-                
-                gammanorm_final = np.abs(1/ (np.sum(gammahist) * logbinsize))
-                result = sum(uniformhist)
-                # print(result, sum(gammahist))
+            if not circ:
+                if test:
+                    uniformhist_lin = df_lin["final list"].to_numpy()
+                    uniformhist_log = df_log["final list"].to_numpy()
+                    
+                    norm_lin = np.abs(1 / (np.sum(uniformhist_lin) * logbinsize))
+                    norm_log = np.abs(1 / (np.sum(uniformhist_log) * logbinsize))
+                    
+                    gammahist_lin = df_lin["gamma list"].to_numpy()
+                    gammahist_log = df_log["gamma list"].to_numpy()
+                    
+                    gammanorm_lin = np.abs(1/ (np.sum(gammahist_lin) * logbinsize))
+                    gammanorm_log = np.abs(1/ (np.sum(gammahist_log) * logbinsize))    
+                    
+                    circhist_lin = df_lin["circular list"].to_numpy()
+                    circhist_log = df_log["circular list"].to_numpy()
+                    
+                    circnorm_lin = np.abs(1 / (np.sum(circhist_lin) * logbinsize))
+                    circnorm_log = np.abs(1 / (np.sum(circhist_log) * logbinsize))
+                    
+                    StepPatch = ax.stairs(uniformhist_lin * norm_lin, bins, edgecolor = "g", fill = False, alpha = 0.5, label = f"Uniform Dist. (Linear @ alpha = {alpha_step})") # Uniform Dist (Linear)
+                    StepPatch = ax.stairs(gammahist_lin * gammanorm_lin, bins, edgecolor = "r", fill = False, alpha = 0.5, label = f"Gamma Dist. (Linear)") # Gamma Dist (Linear)
+                    StepPatch = ax.stairs(circhist_lin * circnorm_lin, bins, edgecolor = "b", fill = False, alpha = 0.5, label = f"Circular Dist. (Linear)") # Circ Dist (Linear)
+                    
+                    StepPatch = ax.stairs(uniformhist_log * norm_log, bins, edgecolor = "purple", fill = False, ls = "--", alpha = 1, label = f"Uniform Dist. (Log @ alpha = {alpha_step})") # Uniform Dist (Log)
+                    StepPatch = ax.stairs(gammahist_log * gammanorm_log, bins, edgecolor = "orange", fill = False, ls = "--", alpha = 1, label = f"Gamma Dist. (Log)") # Gamma Dist (Log)
+                    StepPatch = ax.stairs(circhist_log * circnorm_log, bins, edgecolor = "black", fill = False, ls = "--", alpha = 1, label = f"Circular Dist. (Log)") # Circ Dist (Log)
+                else:
+                    try:
+                        circhist = df_unity["circular list"].to_numpy()
+                        ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
+                    except KeyError:
+                        print("Circular not found, continuing without it....")
+                    
+                    uniformhist = df_unity["final list"].to_numpy()
+                    gammahist = df_unity["gamma list"].to_numpy()
+                    
+                    norm = np.abs(1 / (np.sum(uniformhist) * logbinsize))
+                    
+                    gammanorm_final = np.abs(1/ (np.sum(gammahist) * logbinsize))
+                    result = sum(uniformhist)
+                    # print(result, sum(gammahist))
 
-                StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
-                StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
-                try:
-                    StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
-                except UnboundLocalError:
-                    print()
+                    StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
+                    StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                    try:
+                        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
+                    except UnboundLocalError:
+                        print()
             else:
-            
                 circhist = df_unity["circular list"].to_numpy()
 
                 ecircnorm = np.abs(1 / (np.sum(circhist) * logbinsize))
@@ -1266,13 +1305,14 @@ class Sep_plot(Sep_gen):
 
         ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
         ax.set_xlim(0.5,20.5)
+        ax.set_ylim(0,10)
         ax.set_xscale("log")
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
         ax.set_ylabel(r"Counts")
         
         if len(dist) == 0:
-            handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
-            ax.legend(handles, labels)
+            # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
+            ax.legend()
         else:
             ax.legend()
             
@@ -1284,10 +1324,16 @@ class Sep_plot(Sep_gen):
                 except OSError:
                     plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}_new.png")
             else:
-                try:    
-                    plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.wnum}_0002_circ_{which}.png')
-                except OSError:
-                    plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.png")
+                if test:
+                    try:    
+                        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_{self.numestep}_{alpha_step}_{which}_test.png')
+                    except OSError:
+                        plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_{self.numestep}_{alpha_step}_{which}_test.png")
+                else:
+                    try:    
+                        plt.savefig(f'/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.wnum}_0002_circ_{which}.png')
+                    except OSError:
+                        plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.png")
         else:
             if test:
                 try:
@@ -1759,33 +1805,33 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 100 
+    numestep = 8
     numdiv = 4 
-    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 2 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = 2 # For test = True, this becomes the comparison to which
-    inclination = True # KEEP IN MIND THIS VALUE
+    alpha = -1 # For test = True, this becomes the comparison to which
+    inclination = False # False = all three marginalizations
     circ = False
-    gamma_bool = False
-    test = False
+    gamma_bool = False # Generates gamma list
+    test = True
     unity = False
-    dist = ""
+    dist = "" # When test = False, this makes only the dist of certain alpha param
     specify = []
-    # specify = [0., np.pi/3]
+    specify = [0.9, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
-    tothist.CompleteHistGen(which = which, unity = unity)
+    # tothist.CompleteHistGen(which = which, unity = unity)
     # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
-    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!

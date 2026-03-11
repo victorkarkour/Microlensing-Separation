@@ -209,7 +209,7 @@ class Sep_plot(Sep_gen):
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step, specify = specify)
             fig, axs = plt.subplots(figsize = (9,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
         
-        rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")        
+        rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")        
         colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
                                     "pink", "blue", "red", "green", "cyan"]
         linelist = ["-", "--", "-.", ":"]
@@ -300,19 +300,37 @@ class Sep_plot(Sep_gen):
                 ax.set_yticks(limit)
                     
                 textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
-                ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 15, verticalalignment = "top", bbox = rect)
+                ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 
-                if j == 0 or j == 4 or j == 8:
-                    if j == 8:
-                        ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                    else:
-                        ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                else:
-                    ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                if j == 11:
-                    handles, labels = ax.get_legend_handles_labels()
-                    ax.legend(handles[0:9],labels[0:9], loc = "upper right", fontsize = 10, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                # if j == 0 or j == 4 or j == 8:
+                #     if j == 8:
+                #         ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                #     else:
+                #         ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                # else:
+                #     ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                # if j == 11:
+                    # handles, labels = ax.get_legend_handles_labels()
+                    # ax.legend(handles[0:9],labels[0:9], loc = "upper right", fontsize = 10, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
                 # print(ax.xaxis.get_ticklocs(minor = False))
+            fig.tight_layout()
+            if w == 0:
+                value = "0"
+                text_string = "(a)"
+            elif w == (np.pi)/6:
+                value = "pi_6"
+                text_string = "(b)"
+            elif w == (np.pi)/3:
+                value = "pi_3"
+                text_string = "(c)"
+            elif w == (np.pi)/2:
+                value = "pi_2"
+                text_string = "(d)"
+            else:
+                return("Warning: Input correct version of pi (idk just do it right man).")
+                
+            plt.figtext(0.05, 0.05, text_string, fontsize = 20)
         else:
             iterlist = list[0]
             param = totparam[0]
@@ -370,21 +388,20 @@ class Sep_plot(Sep_gen):
             axs.text(0.05, 0.98, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
             axs.legend(handles[0:9],labels[0:9], loc = "upper right", fontsize = 15, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
-        fig.tight_layout()
+            fig.tight_layout()
         
         # Saves to Figure Folder
         if len(specify) == 0:
             try:
-                plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiProj_omega_0.png")
+                plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiProj_omega_{value}.png")
             except OSError:
-                plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiProj_omega_0.png')
+                plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiProj_omega_{value}.png')
         else:
             try:
                 plt.savefig(f"/College_Projects/Microlensing Separation/Figures/MultiProj_omega_{omega}_specified.png")
             except OSError:
                 plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/MultiProj_omega_{omega}_specified.png")
             
-        
         return rlist
 
     def MultiPlotHist(self, w = 0, step = 0.002, end = 10, which = "Log", specify = []):
@@ -402,7 +419,7 @@ class Sep_plot(Sep_gen):
         
         # Data
         rlist, param = self.DataHist(w = w, step = step, end = end, which = which, specify = specify) 
-        rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
+        rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")
         
         omega = round(w)
         # Initialize plot
@@ -496,7 +513,7 @@ class Sep_plot(Sep_gen):
                 ax.set_xscale("log")
                 
                 textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
-                ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 15, verticalalignment = "top", bbox = rect)
+                ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 # ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
                 # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
                 ax.grid(True,color = "grey", linestyle="-", linewidth="0.25", axis = "x", which = "both", alpha = 0.75)
@@ -813,14 +830,14 @@ class Sep_plot(Sep_gen):
             ax.set_xscale("log")
             
             # Decoration
-            rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
+            rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")
             if not inclination:
                 textstr = "\n".join((f'e = {iter_param[0]}', f'i = {round(iter_param[1],2)}'))
                 ax.vlines(1/(1-iter_param[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'black', alpha = 0.75, label = r"Expected Peak $e$")
             else:
                 textstr = f"e = {round(iter_param,3)}"
                 ax.vlines(1/(1-iter_param), 0, 1, transform = ax.get_xaxis_transform(), colors = 'black', alpha = 0.75, label = r"Expected Peak $e$")
-            ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 15, verticalalignment = "top", bbox = rect)
+            ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             # Lines and organizing labels to be cleaner
             
@@ -984,7 +1001,7 @@ class Sep_plot(Sep_gen):
             # Save to CSV
         df_unity = pd.DataFrame(unity_data)
         if unity:
-            if circ == False:
+            if not circ and not inclination:
                 file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
             elif inclination:
                 file_name = f'/home/karkour.2/Results/UnityHist_inclines_{self.inum}_{which}.csv'
@@ -1445,8 +1462,8 @@ class Sep_plot(Sep_gen):
         print(f"Stats for  Circular distribution and alpha = {alpha_step}: ")
         print(' Median: ', median_circ, " 68% Intervals: ", percent_68_circ, " 95% Intervals: ", percent_95_circ)
         
-        rect = dict(boxstyle = "round", alpha = 0.5, facecolor = "white")
-        textstr = "\n".join((f'Median: {median}', f'68% Intervals: {percent_68}', f'95% Intervals: {percent_95}'))
+        # rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")
+        # textstr = "\n".join((f'Median: {median}', f'68% Intervals: {percent_68}', f'95% Intervals: {percent_95}'))
         # ax.text(0.65, 0.75, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
         plt.tight_layout()
         try:
@@ -1812,16 +1829,16 @@ if __name__ == "__main__":
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
     alpha = -1 # For test = True, this becomes the comparison to which
-    inclination = False # False = all three marginalizations
+    inclination = False # False = all three marginalizations for unityhistload
     circ = False
     gamma_bool = False # Generates gamma list
     test = True
     unity = False
     dist = "" # When test = False, this makes only the dist of certain alpha param
     specify = []
-    specify = [0.9, np.pi/3]
+    # specify = [0.9, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
-    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
+    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
@@ -1831,7 +1848,7 @@ if __name__ == "__main__":
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
-    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!

@@ -135,7 +135,7 @@ class Sep_plot(Sep_gen):
             ]
         else:
             # eccentricity and inclination specified
-            param = [specify[0], specify[1], w, end, step, Linear, inclination]
+            param = [specify[0], specify[1], w, end, step, Linear, inclination, 0]
         
         start = time.perf_counter()
         # Multi Processing
@@ -369,7 +369,7 @@ class Sep_plot(Sep_gen):
             textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
             axs.text(0.05, 0.98, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
-            axs.legend(handles[0:9],labels[0:9], loc = "upper right", fontsize = 15, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+            axs.legend(handles[0:12],labels[0:12], loc = "upper right", fontsize = 15, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
         fig.tight_layout()
         
         # Saves to Figure Folder
@@ -581,17 +581,18 @@ class Sep_plot(Sep_gen):
                     patch.set_edgecolor("b")
 
             limit = [x for x in np.arange(0.5, end + 0.5 , 0.5)]
-            ax.set_xlim(0.5,20.5)
-            ax.set_ylim(0,10)
-            ax.set_xticks(limit)
-            ax.set_yticks(limit)
-            ax.set_xscale("log")
+            axs.set_xlim(0.5,20.5)
+            axs.set_ylim(0,10)
+            axs.set_xticks(limit)
+            # axs.set_yticks(limit)
+            axs.set_xscale("log")
             
+            axs.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
+            axs.set_ylabel(r"Counts")
             textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
             axs.text(0.63, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             axs.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             axs.vlines(1/(1-iterparam[0]), 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', alpha = 0.75, label = r"Expected Peak $e$")
-            axs.tick_params(labelsize = 12)
             handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
             if which == "Linear":
                 labels = ["Linear", "Peak Eccentricity"]
@@ -1357,7 +1358,7 @@ class Sep_plot(Sep_gen):
         ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."], loc = "lower right")
         
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
-        median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.405) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
+        median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
         median_circ = round(df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.475) & (df_stats["cumul_circ"] <= 0.535)].values[0],3)
 
         # Upper Lower Percentages
@@ -1761,32 +1762,32 @@ class Sep_plot(Sep_gen):
 if __name__ == "__main__":
     numestep = 100 
     numdiv = 4 
-    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
-    alpha = 2 # For test = True, this becomes the comparison to which
-    inclination = True # KEEP IN MIND THIS VALUE
+    which = "Linear"
+    alpha = 0 # For test = True, this becomes the comparison to which
+    inclination = False # KEEP IN MIND THIS VALUE
     circ = False
-    gamma_bool = False
+    gamma_bool = True
     test = False
     unity = False
     dist = ""
-    specify = []
-    # specify = [0., np.pi/3]
+    # specify = []
+    specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
-    tothist.CompleteHistGen(which = which, unity = unity)
+    # tothist.CompleteHistGen(which = which, unity = unity)
     # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

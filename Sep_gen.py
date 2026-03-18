@@ -407,12 +407,14 @@ class Sep_gen:
                 for aval in stepthrough:
                     for ival in i:
                         if isinstance(e, np.ndarray):
-                            for iter_e, eval in enumerate(e):  
+                            for eval in e:
                                 x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                                 r = np.sqrt(x**2+y**2)
-                                # Whereever there is this value, it finds the indices of each point in the list
+                        
                                 conlin = np.where(np.abs(r-r0)<=0.01)
-                    
+
+                                iter_e = np.where(eval == estep)[0][0]
+                                
                                 if coords == False and inclination:
                                     # Has brackets with 0 b/c conlin is an array of length 1, to get to values u must flatten
                                     if aval in totlindict:
@@ -533,12 +535,14 @@ class Sep_gen:
             for aval in stepthrough:
                 for ival in i:
                     if isinstance(e, np.ndarray):
-                        for iter_e, eval in enumerate(e):
+                        for eval in e:
                             x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
                             r = np.sqrt(x**2+y**2)
                             # Whereever there is this value, it finds the indices of each point in the list
                             conpower = np.where(np.abs(r-r0)<=0.01)
                             # Has brackets with 0 b/c conpower is an array of length 1, to get to values u must flatten
+                            iter_e = np.where(eval == estep)[0][0]
+                            
                             if aval in totpowerdict:
                                 totpowerdict[aval] += round(len(conpower[0]))
                                 totgammadict[aval] += round(len(conpower[0]) * (gammastep[iter_e]/gamma_sum))
@@ -696,14 +700,14 @@ class Sep_gen:
                     hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
                     histlist.append((hist_log, histbins_log))
                 elif which == "Linear":
-                    steplindict, x, y, gammalist = steptotlist
+                    steplindict, x, y, gammadict = steptotlist
                     # Linear histogram
                     totliniter = steplindict
                     totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
                     hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
                     histlist.append((hist_lin, histbins_lin))
                 elif which == "Power":
-                    steppowerdict, x, y, gammalist = steptotlist
+                    steppowerdict, x, y, gammadict = steptotlist
                     # Power histogram
                     totpoweriter = steppowerdict
                     totpowerlist = [key for key, val in totpoweriter.items() for _ in range(val)]

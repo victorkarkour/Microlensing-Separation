@@ -383,11 +383,14 @@ class Sep_plot(Sep_gen):
             axs.set_ylim(-2,2)
             axs.set_xticks(limit)
             axs.set_yticks(limit)
+            axs.set_xlabel(r"$a_{\perp,x} [R_E]$")
+            axs.set_ylabel(r"$a_{\perp,y} [R_E]$")
             # Decorations    
             textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
-            axs.text(0.05, 0.98, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
+            axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
-            axs.legend(handles[0:12],labels[0:12], loc = "upper right", fontsize = 15, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+            axs.legend(handles[0:12],labels[0:12], loc = "upper right", fontsize = 20, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+            plt.figtext(0.93, 0.01, "(a)", fontsize = 30)
             fig.tight_layout()
         
         # Saves to Figure Folder
@@ -637,8 +640,8 @@ class Sep_plot(Sep_gen):
             else:
                 labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
                 
-            axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 12)
-                
+            axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 20)
+            plt.figtext(0.93, 0.01, "(b)", fontsize = 30)
             fig.tight_layout()
 
         if len(specify) == 0:
@@ -1846,31 +1849,31 @@ class Sep_plot(Sep_gen):
 if __name__ == "__main__":
     numestep = 100
     numdiv = 4 
-    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = 2 # For test = True, this becomes the comparison to which
+    alpha = 0 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
-    test = True
+    test = False
     unity = False
     dist = ""
-    specify = []
-    # specify = [0.5, np.pi/3]
+    # specify = []
+    specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
-    # rtemp = tothist.MultiPlotHist(w = np.pi/2, step = 0.002, end = 20, which = which , specify = specify)
+    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    tothist.CompleteHistLoad(which = which, inclination = inclination)
+    # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
-    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha)
     
     # Note: stepalpha function can also combine uniform and circular distributions!

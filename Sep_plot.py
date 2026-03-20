@@ -1335,6 +1335,11 @@ class Sep_plot(Sep_gen):
                         StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
                     except UnboundLocalError:
                         print()
+
+                    if alpha_step == 0:
+                        plt.figtext(0.935, 0.01, "(b)", fontsize = 30)
+                    elif alpha_step == -1:
+                        plt.figtext(0.935, 0.01, "(a)", fontsize = 30)
             else:
                 circhist = df_unity["circular list"].to_numpy()
 
@@ -1389,24 +1394,39 @@ class Sep_plot(Sep_gen):
                     plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/UnityHist_eccent_incline_{self.numestep}_0002_{which}_{dist}.png")
         return bins
     
-    def statistics(self, which, alpha_step = 1):
+    def statistics(self, which, alpha_step = 1, test = False):
         """
         """
          # Create variables for bin sizes
         nbin = 200
         amin = 0.5
         amax = 21
-
-
         # Make log bins for all
         bins = np.geomspace(amin,amax, nbin)
+
         try: 
-            filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+            if test: # Only works for Log currently
+                print("Test flag activated")
+                filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+                filename_2 = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{"Linear"}_alpha_{alpha_step}.csv'
+            else: 
+                filename = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
             df_stats = pd.read_csv(filename)
         except FileNotFoundError:
-            filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+            if test: # Only works for Log currently
+                print("Test flag activated")
+                filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
+                filename_2 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{"Linear"}_alpha_{alpha_step}.csv'
+            else:
+                filename = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}_alpha_{alpha_step}.csv'
 
         df_stats = pd.read_csv(filename)
+        if test:
+            df_stats_2 = pd.read_csv(filename_2)
+            df_stats_2["cumul_norm"] = np.cumsum(df_stats_2["final list"]) / np.abs(sum(df_stats_2["final list"]))
+            df_stats_2["cumul_gamma"] = np.cumsum(df_stats_2["gamma list"]) / np.abs(sum(df_stats_2["gamma list"]))
+            df_stats_2["cumul_circ"] = np.cumsum(df_stats_2["circular list"]) / np.abs(sum(df_stats_2["circular list"]))
+            df_stats_2["bins"] = bins[:-1]
         df_stats["cumulative"] = 0
         df_stats["cumul_gamma"] = 0
         df_stats["cumul_circ"] = np.cumsum(df_stats["circular list"]) / np.abs(sum(df_stats["circular list"]))
@@ -1429,9 +1449,17 @@ class Sep_plot(Sep_gen):
         df_stats["cumul_gamma"] = df_stats["cumul_gamma"] * gammanorm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
         fig.suptitle(f"Cumulative Distribution Function \n alpha = {alpha_step}")
-        ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 0.75) # Normal Line NORMAL DIST.
-        ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 0.75) # Dashed Line GAMMA DIST.
-        ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 0.75) # Dotted Line CIRCULAR DIST.
+        if test:
+            ax.plot(bins[:-1], df_stats_2["cumul_norm"], ls = "-", c = "red", lw = 3, alpha = 0.5, label = f"Uniform Dist. (Linear @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
+            ax.plot(bins[:-1], df_stats_2["cumul_gamma"], ls = "--", c = "purple", lw = 3, alpha = 0.5, label = f"Gamma Dist. (Linear)") # Dashed Line GAMMA DIST.
+            ax.plot(bins[:-1], df_stats_2["cumul_circ"], ls = ":", c = "orange", lw = 3, alpha = 0.5, label = f"Circular Dist. (Linear)") # Dotted Line CIRCULAR DIST.
+            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 0.5, label = f"Uniform Dist. ({which} @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
+            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 0.5, label = f"Gamma Dist. ({which})") # Dashed Line GAMMA DIST.
+            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 0.5, label = f"Circular Dist. ({which})") # Dotted Line CIRCULAR DIST.
+        else:
+            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 0.75, label = "Uniform Dist.") # Normal Line NORMAL DIST.
+            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 0.75, label = "Gamma Dist.") # Dashed Line GAMMA DIST.
+            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 0.75, label = "Circular Dist.") # Dotted Line CIRCULAR DIST.
         ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
@@ -1442,7 +1470,7 @@ class Sep_plot(Sep_gen):
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        ax.legend(["Uniform Dist.","Gamma Dist.","Circular Dist."], loc = "lower right")
+        ax.legend(loc = "lower right")
         
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
         median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
@@ -1492,9 +1520,15 @@ class Sep_plot(Sep_gen):
         # ax.text(0.65, 0.75, textstr, transform = ax.transAxes, fontsize = 10, verticalalignment = "top", bbox = rect)
         plt.tight_layout()
         try:
-            plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}.png')
+            if test:
+                plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}_test.png')
+            else:
+                plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}.png')
         except OSError:
-            plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}.png')       
+            if test:
+                plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}_test.png')
+            else:
+                plt.savefig(f'C:/Users/victo/College_Projects/Microlensing Separation/Figures/CDF_{self.numestep}_{which}_alpha_{alpha_step}.png')       
         return statistics
 
     def stepalpha(self,which, alpha = 1, circ = False):
@@ -1874,7 +1908,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

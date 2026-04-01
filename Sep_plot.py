@@ -823,7 +823,7 @@ class Sep_plot(Sep_gen):
                 colorlist = ["red", "black"]
             else:
                 colorlist = ["blue", "black"]
-        fig, axs = plt.subplots(3,4, figsize = (13,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+        fig, axs = plt.subplots(3,4, figsize = (13,9), sharex=False,sharey=False,gridspec_kw=dict(hspace=0,wspace=0))
         # fig.suptitle("Detections of $R_E$ with marginalizations for "r"$\cos{i} = 0$ to 1 , and " r"$\omega$ = $0$ to $\frac{\pi}{2}$" f"\n ({which})")
         for j, ax  in enumerate(axs.flatten()):
             if not inclination:
@@ -851,8 +851,8 @@ class Sep_plot(Sep_gen):
             ax.set_xlim(0.5,20.5)
             ax.set_ylim(0,10)
             ax.set_xticks(limit)
-            # ax.set_yticks(limit)
             ax.set_xscale("log")
+            ax.set_yticks([0,2,4,6,8,10])
             
             # Decoration
             rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")
@@ -872,8 +872,8 @@ class Sep_plot(Sep_gen):
                 else:
                     ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
             else:
-                # ax.set_yticks([])
-                # ax.set_xticks([])
+                ax.set_yticks([])
+                ax.set_xticks([])
                 ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
             if j == 11:
                 handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
@@ -881,9 +881,9 @@ class Sep_plot(Sep_gen):
                     labels = [f"{which}", r"Expected Peak $e$"]
                 else:
                     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
-                ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)    
+                ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 15)    
 
-        fig.tight_layout()
+        fig.tight_layout(pad = 0.5)
         # Saves plot
         if not inclination:
             try:
@@ -1887,7 +1887,7 @@ if __name__ == "__main__":
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = 0 # For test = True, this becomes the comparison to which
+    alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
@@ -1907,8 +1907,8 @@ if __name__ == "__main__":
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
-    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

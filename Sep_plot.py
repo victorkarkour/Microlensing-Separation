@@ -866,11 +866,8 @@ class Sep_plot(Sep_gen):
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             # Lines and organizing labels to be cleaner
             
-            if j == 0 or j == 4 or j == 8:
-                if j == 8:
-                    ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                else:
-                    ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+            if j == 8:
+                ax.tick_params(axis = "both", labelbottom = True, labelleft = True) 
             else:
                 ax.set_yticks([])
                 ax.set_xticks([])
@@ -1883,10 +1880,10 @@ class Sep_plot(Sep_gen):
 if __name__ == "__main__":
     numestep = 100
     numdiv = 4 
-    wnum = 10000 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
+    which = "Power"
     alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
@@ -1903,12 +1900,12 @@ if __name__ == "__main__":
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    # tothist.CompleteHistLoad(which = which, inclination = inclination)
+    tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

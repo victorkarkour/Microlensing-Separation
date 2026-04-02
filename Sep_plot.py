@@ -299,7 +299,7 @@ class Sep_plot(Sep_gen):
                 ax.set_xticks(limit)
                 ax.set_yticks(limit)
                     
-                textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
+                textstr = "\n".join((f'e = {param[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
                 ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 
                 ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
@@ -386,7 +386,7 @@ class Sep_plot(Sep_gen):
             axs.set_xlabel(r"$a_{\perp,x} [R_E]$")
             axs.set_ylabel(r"$a_{\perp,y} [R_E]$")
             # Decorations    
-            textstr = "\n".join((f'e = {param[0]}', f'i = {round(param[1],2)}'))
+            textstr = "\n".join((f'e = {param[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
             axs.legend(handles[0:12],labels[0:12], loc = "upper right", fontsize = 20, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
@@ -515,7 +515,7 @@ class Sep_plot(Sep_gen):
                 # ax.set_yticks(limit)
                 ax.set_xscale("log")
                 
-                textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
+                textstr = "\n".join((f'e = {iterparam[0]}', rf'i = {round(np.degrees(iterparam[1]))}$\degree$'))
                 ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 # ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
                 # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
@@ -630,7 +630,7 @@ class Sep_plot(Sep_gen):
             
             axs.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
             axs.set_ylabel(r"Counts")
-            textstr = "\n".join((f'e = {iterparam[0]}', f'i = {round(iterparam[1],2)}'))
+            textstr = "\n".join((f'e = {iterparam[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             axs.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             axs.vlines(1/(1-iterparam[0]), 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', alpha = 0.75, label = r"Expected Peak $e$")
@@ -857,7 +857,7 @@ class Sep_plot(Sep_gen):
             # Decoration
             rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")
             if not inclination:
-                textstr = "\n".join((f'e = {iter_param[0]}', f'i = {round(iter_param[1],2)}'))
+                textstr = "\n".join((f'e = {iter_param[0]}', rf'i = {round(np.degrees(iter_param[1]))}$\degree$'))
                 ax.vlines(1/(1-iter_param[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'black', alpha = 0.75, label = r"Expected Peak $e$")
             else:
                 textstr = f"e = {round(iter_param,3)}"
@@ -1883,24 +1883,24 @@ if __name__ == "__main__":
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Power"
-    alpha = 2 # For test = True, this becomes the comparison to which
+    which = "Log"
+    alpha = 0 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
     test = False
     unity = False
     dist = ""
-    # specify = []
-    specify = [0.5, np.pi/3]
+    specify = []
+    # specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
-    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify)
+    rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    tothist.CompleteHistLoad(which = which, inclination = inclination)
+    # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)

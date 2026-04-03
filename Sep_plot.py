@@ -640,7 +640,7 @@ class Sep_plot(Sep_gen):
             else:
                 labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
                 
-            axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 20)
+            axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 25)
             plt.figtext(0.93, 0.01, "(b)", fontsize = 30)
             fig.tight_layout()
 
@@ -1891,8 +1891,8 @@ if __name__ == "__main__":
     test = False
     unity = False
     dist = ""
-    specify = []
-    # specify = [0.5, np.pi/3]
+    # specify = []
+    specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]

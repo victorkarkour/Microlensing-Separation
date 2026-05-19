@@ -1259,11 +1259,11 @@ class Sep_plot(Sep_gen):
                 gammanorm_final_5 = np.abs(1/ (np.sum(gammahist_5) * logbinsize))
                 
                 if test:
-                    gammahist_test_minus_2 = df_unity_test["alpha gamma -2"].to_numpy()
-                    gammahist_test_minus_1 = df_unity_test["alpha gamma -1"].to_numpy()
-                    gammahist_test_0 = df_unity_test["alpha gamma 0"].to_numpy()
-                    gammahist_test_plus_1 = df_unity_test["alpha gamma 1"].to_numpy()
-                    gammahist_test_plus_2 = df_unity_test["alpha gamma 2"].to_numpy()
+                    gammahist_test_minus_2 = df_unity_test["alpha -2 gamma"].to_numpy()
+                    gammahist_test_minus_1 = df_unity_test["alpha -1 gamma"].to_numpy()
+                    gammahist_test_0 = df_unity_test["alpha 0 gamma"].to_numpy()
+                    gammahist_test_plus_1 = df_unity_test["alpha 1 gamma"].to_numpy()
+                    gammahist_test_plus_2 = df_unity_test["alpha 2 gamma"].to_numpy()
                                         
                     gammanorm_test_minus_2 = np.abs(1 / (np.sum(gammahist_test_minus_2) * logbinsize))
                     gammanorm_test_minus_1 = np.abs(1 / (np.sum(gammahist_test_minus_1) * logbinsize))
@@ -1807,55 +1807,75 @@ class Sep_plot(Sep_gen):
                 return(print(f"Warning: {alpha} is not a valid integer. Please use (1), (0), or (-1) as your options for alpha"))
         else:
             df_new["alpha 2"] = df["final list"].copy()
+            df_new["alpha 2 gamma"] = df["gamma list"].copy()
             df_new["alpha 2 circ"] = df["circular list"].copy()
             df_new["alpha 1"] = df["final list"].copy()
+            df_new["alpha 1 gamma"] = df["gamma list"].copy()
             df_new["alpha 1 circ"] = df["circular list"].copy()
             df_new["alpha 0"] = df["final list"].copy()
+            df_new["alpha 0 gamma"] = df["gamma list"].copy()
             df_new["alpha 0 circ"] = df["circular list"].copy()
             df_new["alpha -1"] = df["final list"].copy()
+            df_new["alpha -1 gamma"] = df["gamma list"].copy()
             df_new["alpha -1 circ"] = df["circular list"].copy()
             df_new["alpha -2"] = df["final list"].copy()
+            df_new["alpha -2 gamma"] = df["gamma list"].copy()
             df_new["alpha -2 circ"] = df["circular list"].copy()
 
             if alpha == 0 or alpha == -1 or alpha == 1:
                 for i in range(len(df_new["alpha 0"])):
                     if alpha == 0:
                         df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(2))
+                        df_new.loc[i, "alpha 2 gamma"] = round(df_new.loc[i, "alpha 0 gamma"] * mult_bins[i]**(2))
                         df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(2))
                         df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(1))
+                        df_new.loc[i, "alpha 1 gamma"] = round(df_new.loc[i, "alpha 0 gamma"] * mult_bins[i]**(1))
                         df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(1))
                         # CENTER FOR alpha = 0 (So just the same as the normal)
                         df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 0"])
+                        df_new.loc[i, "alpha 0 gamma"] = round(df_new.loc[i, "alpha 0 gamma"])
                         df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 0 circ"])
                         df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha -1 gamma"] = round(df_new.loc[i, "alpha 0 gamma"] * mult_bins[i]**(-1))
                         df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-1))
                         df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 0"] * mult_bins[i]**(-2))
+                        df_new.loc[i, "alpha -2 gamma"] = round(df_new.loc[i, "alpha 0 gamma"] * mult_bins[i]**(-2))
                         df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 0 circ"] * mult_bins[i]**(-2))
                     
                     elif alpha == -1:
                         df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(3))
+                        df_new.loc[i, "alpha 2 gamma"] = round(df_new.loc[i, "alpha -1 gamma"] * mult_bins[i]**(3))
                         df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(3))
                         df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(2))
+                        df_new.loc[i, "alpha 1 gamma"] = round(df_new.loc[i, "alpha -1 gamma"] * mult_bins[i]**(2))
                         df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(2))
                         df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(1))
+                        df_new.loc[i, "alpha 0 gamma"] = round(df_new.loc[i, "alpha -1 gamma"] * mult_bins[i]**(1))
                         df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(1))
                         # CENTER FOR alpha = -1 (So just the same as the normal)
                         df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha -1"])
+                        df_new.loc[i, "alpha -1 gamma"] = round(df_new.loc[i, "alpha -1 gamma"])
                         df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha -1 circ"])
                         df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha -1"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha -2 gamma"] = round(df_new.loc[i, "alpha -1 gamma"] * mult_bins[i]**(-1))
                         df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha -1 circ"] * mult_bins[i]**(-1))
                         
                     elif alpha == 1:
                         df_new.loc[i, "alpha 2"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(1))
+                        df_new.loc[i, "alpha 2 gamma"] = round(df_new.loc[i, "alpha 1 gamma"] * mult_bins[i]**(1))
                         df_new.loc[i, "alpha 2 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(1))
                         # CENTER FOR alpha = 1
                         df_new.loc[i, "alpha 1"] = round(df_new.loc[i, "alpha 1"])
+                        df_new.loc[i, "alpha 1 gamma"] = round(df_new.loc[i, "alpha 1 gamma"])
                         df_new.loc[i, "alpha 1 circ"] = round(df_new.loc[i, "alpha 1 circ"])
                         df_new.loc[i, "alpha 0"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(-1))
+                        df_new.loc[i, "alpha 0 gamma"] = round(df_new.loc[i, "alpha 1 gamma"] * mult_bins[i]**(-1))
                         df_new.loc[i, "alpha 0 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(-1))
                         df_new.loc[i, "alpha -1"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(-2))
+                        df_new.loc[i, "alpha -1 gamma"] = round(df_new.loc[i, "alpha 1 gamma"] * mult_bins[i]**(-2))
                         df_new.loc[i, "alpha -1 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(-2))
                         df_new.loc[i, "alpha -2"] = round(df_new.loc[i, "alpha 1"] * mult_bins[i]**(-3))
+                        df_new.loc[i, "alpha -2 gamma"] = round(df_new.loc[i, "alpha 1 gamma"] * mult_bins[i]**(-3))
                         df_new.loc[i, "alpha -2 circ"] = round(df_new.loc[i, "alpha 1 circ"] * mult_bins[i]**(-3))
             else:
                 return(print(f"Warning: {alpha} is not a valid integer. Please use (1), (0), or (-1) as your options for alpha"))
@@ -1883,20 +1903,20 @@ if __name__ == "__main__":
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
-    alpha = 0 # For test = True, this becomes the comparison to which
+    which = "Linear"
+    alpha = -1 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
-    test = False
+    test = True
     unity = False
-    dist = ""
+    dist = "uniform"
     # specify = []
     specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
-    rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
+    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
@@ -1904,7 +1924,7 @@ if __name__ == "__main__":
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
-    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!

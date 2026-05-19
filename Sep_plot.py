@@ -319,13 +319,13 @@ class Sep_plot(Sep_gen):
                 text_string = "(a)"
             elif w == (np.pi)/6:
                 value = "pi_6"
-                text_string = "(b)"
+                text_string = ""
             elif w == (np.pi)/3:
                 value = "pi_3"
-                text_string = "(c)"
+                text_string = "(b)"
             elif w == (np.pi)/2:
                 value = "pi_2"
-                text_string = "(d)"
+                text_string = "(c)"
             else:
                 return("Warning: Input correct version of pi (idk just do it right man).")
                 
@@ -546,13 +546,13 @@ class Sep_plot(Sep_gen):
                     text_string = "(a)"
                 elif w == (np.pi)/6:
                     value = "pi_6"
-                    text_string = "(b)"
+                    text_string = ""
                 elif w == (np.pi)/3:
                     value = "pi_3"
-                    text_string = "(c)"
+                    text_string = "(b)"
                 elif w == (np.pi)/2:
                     value = "pi_2"
-                    text_string = "(d)"
+                    text_string = "(c)"
                 else:
                     return("Warning: Input correct version of pi (idk just do it right man).")
                     
@@ -1903,7 +1903,7 @@ if __name__ == "__main__":
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Linear"
+    which = "Log"
     alpha = -1 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False

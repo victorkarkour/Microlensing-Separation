@@ -1197,17 +1197,17 @@ class Sep_plot(Sep_gen):
                     ecirc_test_plus_1 = np.abs(1 / (np.sum(circhist_test_plus_1) * logbinsize))
                     ecirc_test_plus_2 = np.abs(1 / (np.sum(circhist_test_plus_2) * logbinsize))
                     
-                    StepPatch = ax.stairs(circhist_test_minus_2 * ecirc_test_minus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = -2 from alpha = {alpha_step}") 
-                    StepPatch = ax.stairs(circhist_test_minus_1 * ecirc_test_minus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = -1 from alpha = {alpha_step}")
-                    StepPatch = ax.stairs(circhist_test_0 * ecirc_test_0, bins, linestyle = "--", fill = False, label = f"projected alpha = 0 from alpha = {alpha_step}") 
-                    StepPatch = ax.stairs(circhist_test_plus_1 * ecirc_test_plus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = 1 from alpha = {alpha_step}")
-                    StepPatch = ax.stairs(circhist_test_plus_2 * ecirc_test_plus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = 2 from alpha = {alpha_step}")
+                    StepPatch = ax.stairs(circhist_test_minus_2 * ecirc_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Circular dist. for $\alpha = -2$ (Log)") 
+                    StepPatch = ax.stairs(circhist_test_minus_1 * ecirc_test_minus_1, bins, linestyle = "--", ec = "r", label = rf"Computed $\alpha = -1$ (Log)")
+                    StepPatch = ax.stairs(circhist_test_0 * ecirc_test_0, bins, linestyle = "--", ec = "g", label = rf"Transformed $\alpha = 0$ (Log)") 
+                    StepPatch = ax.stairs(circhist_test_plus_1 * ecirc_test_plus_1, bins, linestyle = "--", ec = "purple", label = rf"Transformed $\alpha = 1$ (Log)")
+                    StepPatch = ax.stairs(circhist_test_plus_2 * ecirc_test_plus_2, bins, linestyle = "--", ec = "orange", label = rf"Transformed $\alpha = 2$ (Log)")
                     
-                StepPatch = ax.stairs(circhist_1 * ecircnorm_1, bins, fill = False, lw = 0.5, label = f"Circular dist. for alpha = -2 ({which})") 
-                StepPatch = ax.stairs(circhist_2 * ecircnorm_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 ({which})")
-                StepPatch = ax.stairs(circhist_3 * ecircnorm_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 ({which})") 
-                StepPatch = ax.stairs(circhist_4 * ecircnorm_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 ({which})")
-                StepPatch = ax.stairs(circhist_5 * ecircnorm_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 ({which})")
+                StepPatch = ax.stairs(circhist_1 * ecircnorm_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Circular dist. for $\alpha = -2$ ({which})") 
+                StepPatch = ax.stairs(circhist_2 * ecircnorm_2, bins, ec = "r", lw = 0.5, label = rf"Transformed $\alpha = -1$ ({which})")
+                StepPatch = ax.stairs(circhist_3 * ecircnorm_3, bins, ec = "g", lw = 0.5, label = rf"Computed $\alpha = 0$ ({which})") 
+                StepPatch = ax.stairs(circhist_4 * ecircnorm_4, bins, ec = "purple", lw = 0.5, label = rf"Transformed $\alpha = 1$ ({which})")
+                StepPatch = ax.stairs(circhist_5 * ecircnorm_5, bins, ec = "orange", lw = 0.5, label = rf"Transformed $\alpha = 2$ ({which})")
             elif dist == "uniform":
                 uniformhist_1 = df_unity_1["final list"].to_numpy()
                 uniformhist_2 = df_unity_2["final list"].to_numpy()
@@ -1234,17 +1234,17 @@ class Sep_plot(Sep_gen):
                     norm_test_plus_1 = np.abs(1 / (np.sum(uniformhist_test_plus_1) * logbinsize))
                     norm_test_plus_2 = np.abs(1 / (np.sum(uniformhist_test_plus_2) * logbinsize))
                     
-                    StepPatch = ax.stairs(uniformhist_test_minus_2 * norm_test_minus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = -2 from alpha = {alpha_step}") 
-                    StepPatch = ax.stairs(uniformhist_test_minus_1 * norm_test_minus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = -1 from alpha = {alpha_step}")
-                    StepPatch = ax.stairs(uniformhist_test_0 * norm_test_0, bins, linestyle = "--", fill = False, label = f"projected alpha = 0 from alpha = {alpha_step}") 
-                    StepPatch = ax.stairs(uniformhist_test_plus_1 * norm_test_plus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = 1 from alpha = {alpha_step}")
-                    StepPatch = ax.stairs(uniformhist_test_plus_2 * norm_test_plus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = 2 from alpha = {alpha_step}")
+                    StepPatch = ax.stairs(uniformhist_test_minus_2 * norm_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Uniform dist. for $\alpha = -2$ (Log)") 
+                    StepPatch = ax.stairs(uniformhist_test_minus_1 * norm_test_minus_1, bins, linestyle = "--", ec = "r", label = rf"Computed $\alpha = -1$ (Log)")
+                    StepPatch = ax.stairs(uniformhist_test_0 * norm_test_0, bins, linestyle = "--", ec = "g", label = rf"Transformed $\alpha = 0$ (Log)") 
+                    StepPatch = ax.stairs(uniformhist_test_plus_1 * norm_test_plus_1, bins, linestyle = "--", ec = "purple", label = rf"Transformed $\alpha = 1$ (Log)")
+                    StepPatch = ax.stairs(uniformhist_test_plus_2 * norm_test_plus_2, bins, linestyle = "--", ec = "orange", label = rf"Transformed $\alpha = 2$ (Log)")
                 
-                StepPatch = ax.stairs(uniformhist_1 * norm_1, bins, fill = False, lw = 0.5, label = f"Uniform dist. for alpha = -2 ({which})")
-                StepPatch = ax.stairs(uniformhist_2 * norm_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 ({which})")
-                StepPatch = ax.stairs(uniformhist_3 * norm_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 ({which})")
-                StepPatch = ax.stairs(uniformhist_4 * norm_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 ({which})")
-                StepPatch = ax.stairs(uniformhist_5 * norm_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 ({which})")
+                StepPatch = ax.stairs(uniformhist_1 * norm_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Uniform dist. for $\alpha = -2$ ({which})")
+                StepPatch = ax.stairs(uniformhist_2 * norm_2, bins, ec = "r", lw = 0.5, label = rf"Transformed $\alpha = -1$ ({which})")
+                StepPatch = ax.stairs(uniformhist_3 * norm_3, bins, ec = "g", lw = 0.5, label = rf"Computed $\alpha = 0$ ({which})")
+                StepPatch = ax.stairs(uniformhist_4 * norm_4, bins, ec = "purple", lw = 0.5, label = rf"Transformed $\alpha = 1$ ({which})")
+                StepPatch = ax.stairs(uniformhist_5 * norm_5, bins, ec = "orange", lw = 0.5, label = rf"Transformed $\alpha = 2$ ({which})")
             elif dist == "gamma":
                 gammahist_1 = df_unity_1["gamma list"].to_numpy()
                 gammahist_2 = df_unity_2["gamma list"].to_numpy()
@@ -1271,17 +1271,17 @@ class Sep_plot(Sep_gen):
                     gammanorm_test_plus_1 = np.abs(1 / (np.sum(gammahist_test_plus_1) * logbinsize))
                     gammanorm_test_plus_2 = np.abs(1 / (np.sum(gammahist_test_plus_2) * logbinsize))
                     
-                    StepPatch = ax.stairs(gammahist_test_minus_2 * gammanorm_test_minus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = -2 from alpha = {alpha_step}") 
-                    StepPatch = ax.stairs(gammahist_test_minus_1 * gammanorm_test_minus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = -1 from alpha = {alpha_step}")
-                    StepPatch = ax.stairs(gammahist_test_0 * gammanorm_test_0, bins, linestyle = "--", fill = False, label = f"projected alpha = 0 from alpha = {alpha_step}") 
-                    StepPatch = ax.stairs(gammahist_test_plus_1 * gammanorm_test_plus_1, bins, linestyle = "--", fill = False, label = f"projected alpha = 1 from alpha = {alpha_step}")
-                    StepPatch = ax.stairs(gammahist_test_plus_2 * gammanorm_test_plus_2, bins, linestyle = "--", fill = False, label = f"projected alpha = 2 from alpha = {alpha_step}")
+                    StepPatch = ax.stairs(gammahist_test_minus_2 * gammanorm_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Gamma dist. for $\alpha = -2$ (Log)") 
+                    StepPatch = ax.stairs(gammahist_test_minus_1 * gammanorm_test_minus_1, bins, linestyle = "--", ec = "r", label = rf"Computed $\alpha = -1$ (Log)")
+                    StepPatch = ax.stairs(gammahist_test_0 * gammanorm_test_0, bins, linestyle = "--", ec = "g", label = rf"Transformed $\alpha = 0$ (Log)") 
+                    StepPatch = ax.stairs(gammahist_test_plus_1 * gammanorm_test_plus_1, bins, linestyle = "--", ec = "purple", label = rf"Transformed $\alpha = 1$ (Log)")
+                    StepPatch = ax.stairs(gammahist_test_plus_2 * gammanorm_test_plus_2, bins, linestyle = "--", ec = "orange", label = rf"Transformed $\alpha = 2$ (Log)")
                 
-                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, fill = False, lw = 0.5, label = f"Gamma dist. for alpha = -2 ({which})")
-                StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, fill = False, lw = 0.5, label = f"alpha = -1 ({which})")
-                StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, fill = False, lw = 0.5, label = f"alpha = 0 ({which})")
-                StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, fill = False, lw = 0.5, label = f"alpha = 1 ({which})")
-                StepPatch = ax.stairs(gammahist_5 * gammanorm_final_5, bins, fill = False, lw = 0.5, label = f"alpha = 2 ({which})")           
+                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Gamma dist. for $\alpha = -2$ ({which})")
+                StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, ec = "r", lw = 0.5, label = rf"Transformed $\alpha = -1$ ({which})")
+                StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, ec = "g", lw = 0.5, label = rf"Computed $\alpha = 0$ ({which})")
+                StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, ec = "purple", lw = 0.5, label = rf"Transfomred $\alpha = 1$ ({which})")
+                StepPatch = ax.stairs(gammahist_5 * gammanorm_final_5, bins, ec = "orange", lw = 0.5, label = rf"Transformed $\alpha = 2$ ({which})")           
         else:
             if not circ:
                 if test:
@@ -1358,7 +1358,7 @@ class Sep_plot(Sep_gen):
             # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
             ax.legend()
         else:
-            ax.legend()
+            ax.legend(fontsize = 15)
             
         fig.tight_layout()
         if len(dist) == 0:
@@ -1910,7 +1910,7 @@ if __name__ == "__main__":
     gamma_bool = False
     test = True
     unity = False
-    dist = "uniform"
+    dist = "circular"
     # specify = []
     specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)

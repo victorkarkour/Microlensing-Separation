@@ -785,9 +785,11 @@ class Sep_plot(Sep_gen):
         if inclination:
             try:
                 file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
+                file_name1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
                 pd.read_csv(file_name)
             except FileNotFoundError:
                 file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
+                file_name1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
         else:
             try:
                 file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
@@ -795,6 +797,7 @@ class Sep_plot(Sep_gen):
             except FileNotFoundError:
                 file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
         df = pd.read_csv(file_name)
+        df1 = pd.read_csv(file_name1)
         if inclination:
             eccent = np.linspace(0,0.99,12)
         else:
@@ -818,7 +821,7 @@ class Sep_plot(Sep_gen):
             colorlist = ["green", "red", "blue", "black"]
         else:
             if which == "Linear":
-                colorlist = ["green", "black"]
+                colorlist = ["green", "red", "black"]
             elif which == "Log":
                 colorlist = ["red", "black"]
             else:
@@ -841,11 +844,16 @@ class Sep_plot(Sep_gen):
                 StepPatch_power = ax.stairs(hist_power * norm_power, logbins, edgecolor = colorlist[2], fill = False, alpha = 0.5, label = "Power")
             else:
                 iter_param = eccent[j]
+                iter_param_log = eccent[j]
                 hist = df[f"final lin {round(iter_param,3)}"]
+                hist_log = df1[f"final lin {round(iter_param_log,3)}"]
 
                 norm = np.abs(1 / (logbinsize * hist.sum()))
+                norm_log = np.abs(1 / (logbinsize * hist_log.sum()))
+
                 StepPatch = ax.stairs(hist * norm, logbins, edgecolor = colorlist[0], fill = False, alpha = 0.5, label = f"{which}")
-                
+                StepPatch_log = ax.stairs(hist_log * norm_log, logbins, edgecolor = colorlist[1], fill = False, alpha = 0.5, label = "Log")
+
             # Limits
             limit = [x for x in np.arange(0.5, 20 + 0.5 , 0.5)]
             ax.set_xlim(0.5,20.5)
@@ -875,7 +883,7 @@ class Sep_plot(Sep_gen):
             if j == 11:
                 handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
                 if inclination:
-                    labels = [f"{which}", r"Expected Peak $e$"]
+                    labels = [f"{which}", "Log", r"Expected Peak $e$"]
                 else:
                     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
                 ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 15)    
@@ -1903,7 +1911,7 @@ if __name__ == "__main__":
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
+    which = "Linear"
     alpha = -1 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
@@ -1920,11 +1928,11 @@ if __name__ == "__main__":
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    # tothist.CompleteHistLoad(which = which, inclination = inclination)
+    tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
-    load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
+    # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
     # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!

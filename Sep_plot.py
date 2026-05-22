@@ -21,11 +21,11 @@ import matplotlib.gridspec as gridspec
 import statistics as stats
 
 matplotlib.use("Agg")
-matplotlib.rcParams["axes.labelsize"] = 18
-matplotlib.rcParams["font.size"] = 18
-matplotlib.rcParams["xtick.major.size"] = 12
+matplotlib.rcParams["axes.labelsize"] = 20
+matplotlib.rcParams["font.size"] = 20
+matplotlib.rcParams["xtick.major.size"] = 16
 matplotlib.rcParams["xtick.minor.size"] = 8
-matplotlib.rcParams["ytick.major.size"] = 12
+matplotlib.rcParams["ytick.major.size"] = 16
 matplotlib.rcParams["ytick.minor.size"] = 8
 class Sep_plot(Sep_gen):
 
@@ -638,9 +638,9 @@ class Sep_plot(Sep_gen):
             if which == "Linear":
                 labels = ["Linear", "Peak Eccentricity"]
             else:
-                labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
+                labels = ["Linear", "Log", r"Power Law: $\alpha = 1$", r"Expected Peak $e$"]
                 
-            axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 25)
+            axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 20)
             plt.figtext(0.93, 0.01, "(b)", fontsize = 30)
             fig.tight_layout()
 
@@ -1911,7 +1911,7 @@ if __name__ == "__main__":
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Linear"
+    which = "Log"
     alpha = -1 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
@@ -1922,13 +1922,13 @@ if __name__ == "__main__":
     # specify = []
     specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
-    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
+    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    tothist.CompleteHistLoad(which = which, inclination = inclination)
+    # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)

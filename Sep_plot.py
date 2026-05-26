@@ -1906,12 +1906,12 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 100
+    numestep = 1
     numdiv = 4 
-    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 10 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
+    which = "Linear"
     alpha = -1 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
@@ -1922,13 +1922,13 @@ if __name__ == "__main__":
     # specify = []
     specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
-    rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
+    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    # tothist.CompleteHistLoad(which = which, inclination = inclination)
+    tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)

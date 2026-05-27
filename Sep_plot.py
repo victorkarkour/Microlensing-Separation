@@ -21,11 +21,11 @@ import matplotlib.gridspec as gridspec
 import statistics as stats
 
 matplotlib.use("Agg")
-matplotlib.rcParams["axes.labelsize"] = 20
-matplotlib.rcParams["font.size"] = 20
+matplotlib.rcParams["axes.labelsize"] = 25
+matplotlib.rcParams["font.size"] = 25
 matplotlib.rcParams["xtick.major.size"] = 16
-matplotlib.rcParams["xtick.minor.size"] = 8
 matplotlib.rcParams["ytick.major.size"] = 16
+matplotlib.rcParams["xtick.minor.size"] = 8
 matplotlib.rcParams["ytick.minor.size"] = 8
 class Sep_plot(Sep_gen):
 
@@ -383,8 +383,8 @@ class Sep_plot(Sep_gen):
             axs.set_ylim(-2,2)
             axs.set_xticks(limit)
             axs.set_yticks(limit)
-            axs.set_xlabel(r"$a_{\perp,x} [R_E]$")
-            axs.set_ylabel(r"$a_{\perp,y} [R_E]$")
+            axs.set_xlabel(r"$a_{\perp,x} [R_E]$", fontsize = 25)
+            axs.set_ylabel(r"$a_{\perp,y} [R_E]$", fontsize = 25)
             # Decorations    
             textstr = "\n".join((f'e = {param[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
@@ -628,8 +628,8 @@ class Sep_plot(Sep_gen):
             # axs.set_yticks(limit)
             axs.set_xscale("log")
             
-            axs.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
-            axs.set_ylabel(r"Counts")
+            axs.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]", fontsize = 25)    
+            axs.set_ylabel(r"Counts", fontsize = 25)
             textstr = "\n".join((f'e = {iterparam[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             axs.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
@@ -1453,7 +1453,11 @@ class Sep_plot(Sep_gen):
         df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
         df_stats["cumul_gamma"] = df_stats["cumul_gamma"] * gammanorm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        fig.suptitle(f"Cumulative Distribution Function \n alpha = {alpha_step}")
+        if alpha_step == -2:
+            nl = "\n"
+            fig.suptitle(fr"Cumulative Distribution Function {nl} $\alpha$ = {alpha_step}")
+        else:
+            fig.suptitle(fr"$\alpha$ = {alpha_step}")
         if test:
             ax.plot(bins[:-1], df_stats_2["cumul_norm"], ls = "-", c = "red", lw = 3, alpha = 0.5, label = f"Uniform Dist. (Linear @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
             ax.plot(bins[:-1], df_stats_2["cumul_gamma"], ls = "--", c = "purple", lw = 3, alpha = 0.5, label = f"Gamma Dist. (Linear)") # Dashed Line GAMMA DIST.
@@ -1475,7 +1479,7 @@ class Sep_plot(Sep_gen):
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
         ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
         ax.set_ylabel(r"CDF")
-        ax.legend(loc = "lower right")
+        ax.legend(loc = "best")
         
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
         median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
@@ -1906,19 +1910,19 @@ class Sep_plot(Sep_gen):
         return df_new
 
 if __name__ == "__main__":
-    numestep = 1
+    numestep = 100
     numdiv = 4 
-    wnum = 10 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
+    wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Linear"
-    alpha = -1 # For test = True, this becomes the comparison to which
+    which = "Log"
+    alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
-    test = True
+    test = False
     unity = False
-    dist = "circular"
+    dist = "gamma"
     # specify = []
     specify = [0.5, np.pi/3]
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
@@ -1928,12 +1932,12 @@ if __name__ == "__main__":
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    tothist.CompleteHistLoad(which = which, inclination = inclination)
+    # tothist.CompleteHistLoad(which = which, inclination = inclination)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

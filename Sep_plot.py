@@ -277,13 +277,13 @@ class Sep_plot(Sep_gen):
                     # Plots the data set, including the dot size according to velocity        
                     dataproj = ax.scatter(initialx, initialy, s=dot, color= color, label=label, ls = linestyle)
                     # Also includes points at which |r-r0| <= 0.01
-                    data = ax.scatter(xchange[g], ychange[g], s = 8, color = "yellow")
+                    data = ax.scatter(xchange[g], ychange[g], s = 35, color = "k", zorder = 3)
                     
                 # Creates the grid for each plot
                 ax.grid(True,color = "grey", linestyle="--", linewidth="0.55", axis = "both", which = "both")
                     
                 # Plots an Einstein Ring Radius of 1 around each plot
-                Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
+                Circ2 = patches.Circle((0,0), 1, ec="grey", fill=False, linestyle = ":", linewidth = 3)
                 
                 # Adds the Circle to the plot
                 ax.add_patch(Circ2)
@@ -303,11 +303,13 @@ class Sep_plot(Sep_gen):
                 ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 
                 ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                # if j == 0 or j == 4 or j == 8:
-                #     if j == 8:
-                #         ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                #     else:
-                #         ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                if j == 0 or j == 4 or j == 8:
+                    if j == 8:
+                        ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                        ax.set_xlabel(r"$a_x/R_E$", fontsize = 25)
+                        ax.set_ylabel(r"$a_y/R_E$", fontsize = 25)
+                    else:
+                        ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
                 # else:
                 #     ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
                 # if j == 11:
@@ -366,13 +368,13 @@ class Sep_plot(Sep_gen):
                 # Plots the data set, including the dot size according to velocity        
                 dataproj = axs.scatter(initialx, initialy, s=dot, color= color, label=label, ls = linestyle)
                 # Also includes points at which |r-r0| <= 0.01
-                data = axs.scatter(xchange[g], ychange[g], s = 8, color = "yellow",)
+                data = axs.scatter(xchange[g], ychange[g], s = 35, color = "k", zorder = 3)
                 
             # Creates the grid for each plot
             axs.grid(True,color = "grey", linestyle="--", linewidth="0.55", axis = "both", which = "both")
                 
             # Plots an Einstein Ring Radius of 1 around each plot
-            Circ2 = patches.Circle((0,0), 1, ec="k", fill=False, linestyle = ":", linewidth = 1)
+            Circ2 = patches.Circle((0,0), 1, ec="grey", fill=False, linestyle = ":", linewidth = 3)
             
             # Adds the Circle to the plot
             axs.add_patch(Circ2)
@@ -383,11 +385,12 @@ class Sep_plot(Sep_gen):
             axs.set_ylim(-2,2)
             axs.set_xticks(limit)
             axs.set_yticks(limit)
-            axs.set_xlabel(r"$a_{\perp,x} [R_E]$", fontsize = 25)
-            axs.set_ylabel(r"$a_{\perp,y} [R_E]$", fontsize = 25)
+            axs.tick_params(axis = "both", labelsize = 34)
+            axs.set_xlabel(r"$a_x/R_E$", fontsize = 30)
+            axs.set_ylabel(r"$a_y/R_E$", fontsize = 30)
             # Decorations    
             textstr = "\n".join((f'e = {param[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
-            axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
+            axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 25, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
             axs.legend(handles[0:12],labels[0:12], loc = "upper right", fontsize = 20, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
             plt.figtext(0.93, 0.01, "(a)", fontsize = 30)
@@ -418,7 +421,7 @@ class Sep_plot(Sep_gen):
         if which == "Linear":
             colorlist = ["green", "black"]
         else:
-            colorlist = ["green", "red", "blue", "black"]
+            colorlist = ["green", "red", "blue"]
         
         # Data
         rlist, param = self.DataHist(w = w, step = step, end = end, which = which, specify = specify) 
@@ -428,7 +431,7 @@ class Sep_plot(Sep_gen):
         # Initialize plot
         if len(specify) == 0:
             # 3 by 4 Plot
-            fig, axs = plt.subplots(3,4, figsize = (13,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
+            fig, axs = plt.subplots(3,4, figsize = (13,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = False, sharey = False)
         else:
             # 1 by 1 plot
             fig, axs = plt.subplots(figsize = (9,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
@@ -483,17 +486,17 @@ class Sep_plot(Sep_gen):
                 else:
                     datahist_lin, bins, patches_lin = ax.hist(
                         totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+                        stacked=True, histtype="step", lw = 2, edgecolor = "black",
                         weights=weights_lin, fc = "none", label = "Linear"
                     )
                     datahist_log, bins, patches_log = ax.hist(
                         totloglist, bins=logbins_log, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                        stacked=True, histtype="step", lw = 2, edgecolor = "red",
                         weights=weights_log, fc = "none", label = "Log"
                     )
                     datahist_linsemi , bins, patches_linsemi = ax.hist(
                         totlinsemilist, bins=logbins_lin, range=(0.5, end+0.5),
-                        stacked=True, histtype="step", alpha = 0.40, edgecolor = "blue",
+                        stacked=True, histtype="step", lw = 2, edgecolor = "blue",
                         weights=weights_linsemi, fc = "none", label = "Linear / a"
                     )
                 if which == "Linear":
@@ -508,38 +511,39 @@ class Sep_plot(Sep_gen):
                         patch.set_edgecolor("b")
 
                 limit = [x for x in np.arange(0.5, end + 0.5 , 0.5)]
-                
+                limit_y = [y for y in np.arange(0, 12, 2)]
                 ax.set_xlim(0.5,20.5)
                 ax.set_ylim(0,10)
                 ax.set_xticks(limit)
-                # ax.set_yticks(limit)
+                ax.set_yticks(limit_y)
                 ax.set_xscale("log")
-                
+                ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+
                 textstr = "\n".join((f'e = {iterparam[0]}', rf'i = {round(np.degrees(iterparam[1]))}$\degree$'))
                 ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 # ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
                 # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
                 ax.grid(True,color = "grey", linestyle="-", linewidth="0.25", axis = "x", which = "both", alpha = 0.75)
-                ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', alpha = 0.5, label = r"Expected Peak $e$")
-                # if j == 0 or j == 4 or j == 8:
-                #     if j == 8:
-                #         ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                #     else:
-                #         ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                # else:
-                #     ax.set_yticks([])
-                #     ax.set_xticks([])
-                #     ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                # if j == 11:
-                #     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
-                #     if which == "Linear":
-                #         labels = ["Linear", "Peak Eccentricity"]
-                #     else:
-                #         labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
+                # ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', alpha = 0.5, label = r"Expected Peak $e$")
+                if j == 0 or j == 4 or j == 8:
+                    if j == 8:
+                        ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                        ax.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 25)    
+                        ax.set_ylabel(r"Probability Density", fontsize = 25)
+                    else:
+                        ax.tick_params(axis = "both", labelbottom = True, labelleft = False)
+                else:
+                    ax.set_yticks([])
+                    ax.set_xticks([])
+                    ax.tick_params(axis = "x", labelbottom = False)
+                if j == 11:
+                    handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
+                    if which == "Linear":
+                        labels = ["Linear"]
+                    else:
+                        labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power Law)"]
                         
-                #     ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)
-
-                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                    ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)
 
                 if w == 0:
                     value = "0"
@@ -557,7 +561,7 @@ class Sep_plot(Sep_gen):
                     return("Warning: Input correct version of pi (idk just do it right man).")
                     
                 plt.figtext(0.94, 0.01, text_string, fontsize = 40)
-                fig.tight_layout(pad = 2.0)
+                fig.tight_layout()
 
         else:
             steplindict, x, y, steplogdict, steplinsemidict = rlist
@@ -597,18 +601,18 @@ class Sep_plot(Sep_gen):
             else:
                 datahist_lin, bins, patches_lin = axs.hist(
                     totlinlist, bins=logbins_lin, range=(0.5, end+0.5),
-                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "black",
+                    stacked=True, histtype="step", lw = 2, edgecolor = "black",
                     weights=weights_lin, fc = "none", label = "Linear"
                 )
                 datahist_log, bins, patches_log = axs.hist(
                     totloglist, bins=logbins_log, range=(0.5, end+0.5),
-                    stacked=True, histtype="step", alpha = 0.75, edgecolor = "red",
+                    stacked=True, histtype="step", lw = 2, edgecolor = "red",
                     weights=weights_log, fc = "none", label = "Log"
                 )
                 datahist_linsemi , bins, patches_linsemi = axs.hist(
                     totlinsemilist, bins=logbins_lin, range=(0.5, end+0.5),
-                    stacked=True, histtype="step", alpha = 0.40, edgecolor = "blue",
-                    weights=weights_linsemi, fc = "none", label = "Linear / a"
+                    stacked=True, histtype="step", lw = 2, edgecolor = "blue",
+                    weights=weights_linsemi, fc = "none", label = "Linear / a",
                 )
             if which == "Linear":
                 for patch in patches_lin:
@@ -626,19 +630,21 @@ class Sep_plot(Sep_gen):
             axs.set_ylim(0,10)
             axs.set_xticks(limit)
             # axs.set_yticks(limit)
+            axs.tick_params(axis = "both", labelsize = 34)
             axs.set_xscale("log")
+            axs.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
             
-            axs.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]", fontsize = 25)    
-            axs.set_ylabel(r"Counts", fontsize = 25)
+            axs.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 30)    
+            axs.set_ylabel(r"Probability Density", fontsize = 30)
             textstr = "\n".join((f'e = {iterparam[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
-            axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
+            axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 25, verticalalignment = "top", bbox = rect)
             axs.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
-            axs.vlines(1/(1-iterparam[0]), 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', alpha = 0.75, label = r"Expected Peak $e$")
+            # axs.vlines(1/(1-iterparam[0]), 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', alpha = 0.75, label = r"Expected Peak $e$")
             handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
             if which == "Linear":
-                labels = ["Linear", "Peak Eccentricity"]
+                labels = ["Linear"]
             else:
-                labels = ["Linear", "Log", r"Power Law: $\alpha = 1$", r"Expected Peak $e$"]
+                labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power Law)"]
                 
             axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 20)
             plt.figtext(0.93, 0.01, "(b)", fontsize = 30)
@@ -821,7 +827,7 @@ class Sep_plot(Sep_gen):
             colorlist = ["green", "red", "blue", "black"]
         else:
             if which == "Linear":
-                colorlist = ["green", "red", "black"]
+                colorlist = ["green", "red"]
             elif which == "Log":
                 colorlist = ["red", "black"]
             else:
@@ -860,6 +866,7 @@ class Sep_plot(Sep_gen):
             ax.set_ylim(0,10)
             ax.set_xticks(limit)
             ax.set_xscale("log")
+            ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
             ax.set_yticks([0,2,4,6,8,10])
             
             # Decoration
@@ -869,7 +876,6 @@ class Sep_plot(Sep_gen):
                 ax.vlines(1/(1-iter_param[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'black', alpha = 0.75, label = r"Expected Peak $e$")
             else:
                 textstr = f"e = {round(iter_param,3)}"
-                ax.vlines(1/(1-iter_param), 0, 1, transform = ax.get_xaxis_transform(), colors = 'black', alpha = 0.75, label = r"Expected Peak $e$")
             ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
             ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             # Lines and organizing labels to be cleaner
@@ -883,9 +889,9 @@ class Sep_plot(Sep_gen):
             if j == 11:
                 handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
                 if inclination:
-                    labels = [f"{which}", "Log", r"Expected Peak $e$"]
+                    labels = [f"{which}", "Log"]
                 else:
-                    labels = ["Linear", "Log", r"Power Law: $\alpha = 2$", r"Expected Peak $e$"]
+                    labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
                 ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 15)    
 
         fig.tight_layout(pad = 0.5)
@@ -1205,13 +1211,13 @@ class Sep_plot(Sep_gen):
                     ecirc_test_plus_1 = np.abs(1 / (np.sum(circhist_test_plus_1) * logbinsize))
                     ecirc_test_plus_2 = np.abs(1 / (np.sum(circhist_test_plus_2) * logbinsize))
                     
-                    StepPatch = ax.stairs(circhist_test_minus_2 * ecirc_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Circular dist. for $\alpha = -2$ (Log)") 
+                    StepPatch = ax.stairs(circhist_test_minus_2 * ecirc_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Circular for $\alpha = -2$ (Log)") 
                     StepPatch = ax.stairs(circhist_test_minus_1 * ecirc_test_minus_1, bins, linestyle = "--", ec = "r", label = rf"Computed $\alpha = -1$ (Log)")
                     StepPatch = ax.stairs(circhist_test_0 * ecirc_test_0, bins, linestyle = "--", ec = "g", label = rf"Transformed $\alpha = 0$ (Log)") 
                     StepPatch = ax.stairs(circhist_test_plus_1 * ecirc_test_plus_1, bins, linestyle = "--", ec = "purple", label = rf"Transformed $\alpha = 1$ (Log)")
                     StepPatch = ax.stairs(circhist_test_plus_2 * ecirc_test_plus_2, bins, linestyle = "--", ec = "orange", label = rf"Transformed $\alpha = 2$ (Log)")
                     
-                StepPatch = ax.stairs(circhist_1 * ecircnorm_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Circular dist. for $\alpha = -2$ ({which})") 
+                StepPatch = ax.stairs(circhist_1 * ecircnorm_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Circular for $\alpha = -2$ ({which})") 
                 StepPatch = ax.stairs(circhist_2 * ecircnorm_2, bins, ec = "r", lw = 0.5, label = rf"Transformed $\alpha = -1$ ({which})")
                 StepPatch = ax.stairs(circhist_3 * ecircnorm_3, bins, ec = "g", lw = 0.5, label = rf"Computed $\alpha = 0$ ({which})") 
                 StepPatch = ax.stairs(circhist_4 * ecircnorm_4, bins, ec = "purple", lw = 0.5, label = rf"Transformed $\alpha = 1$ ({which})")
@@ -1242,13 +1248,13 @@ class Sep_plot(Sep_gen):
                     norm_test_plus_1 = np.abs(1 / (np.sum(uniformhist_test_plus_1) * logbinsize))
                     norm_test_plus_2 = np.abs(1 / (np.sum(uniformhist_test_plus_2) * logbinsize))
                     
-                    StepPatch = ax.stairs(uniformhist_test_minus_2 * norm_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Uniform dist. for $\alpha = -2$ (Log)") 
+                    StepPatch = ax.stairs(uniformhist_test_minus_2 * norm_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Uniform for $\alpha = -2$ (Log)") 
                     StepPatch = ax.stairs(uniformhist_test_minus_1 * norm_test_minus_1, bins, linestyle = "--", ec = "r", label = rf"Computed $\alpha = -1$ (Log)")
                     StepPatch = ax.stairs(uniformhist_test_0 * norm_test_0, bins, linestyle = "--", ec = "g", label = rf"Transformed $\alpha = 0$ (Log)") 
                     StepPatch = ax.stairs(uniformhist_test_plus_1 * norm_test_plus_1, bins, linestyle = "--", ec = "purple", label = rf"Transformed $\alpha = 1$ (Log)")
                     StepPatch = ax.stairs(uniformhist_test_plus_2 * norm_test_plus_2, bins, linestyle = "--", ec = "orange", label = rf"Transformed $\alpha = 2$ (Log)")
                 
-                StepPatch = ax.stairs(uniformhist_1 * norm_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Uniform dist. for $\alpha = -2$ ({which})")
+                StepPatch = ax.stairs(uniformhist_1 * norm_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Uniform for $\alpha = -2$ ({which})")
                 StepPatch = ax.stairs(uniformhist_2 * norm_2, bins, ec = "r", lw = 0.5, label = rf"Transformed $\alpha = -1$ ({which})")
                 StepPatch = ax.stairs(uniformhist_3 * norm_3, bins, ec = "g", lw = 0.5, label = rf"Computed $\alpha = 0$ ({which})")
                 StepPatch = ax.stairs(uniformhist_4 * norm_4, bins, ec = "purple", lw = 0.5, label = rf"Transformed $\alpha = 1$ ({which})")
@@ -1279,13 +1285,13 @@ class Sep_plot(Sep_gen):
                     gammanorm_test_plus_1 = np.abs(1 / (np.sum(gammahist_test_plus_1) * logbinsize))
                     gammanorm_test_plus_2 = np.abs(1 / (np.sum(gammahist_test_plus_2) * logbinsize))
                     
-                    StepPatch = ax.stairs(gammahist_test_minus_2 * gammanorm_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Gamma dist. for $\alpha = -2$ (Log)") 
+                    StepPatch = ax.stairs(gammahist_test_minus_2 * gammanorm_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Gamma for $\alpha = -2$ (Log)") 
                     StepPatch = ax.stairs(gammahist_test_minus_1 * gammanorm_test_minus_1, bins, linestyle = "--", ec = "r", label = rf"Computed $\alpha = -1$ (Log)")
                     StepPatch = ax.stairs(gammahist_test_0 * gammanorm_test_0, bins, linestyle = "--", ec = "g", label = rf"Transformed $\alpha = 0$ (Log)") 
                     StepPatch = ax.stairs(gammahist_test_plus_1 * gammanorm_test_plus_1, bins, linestyle = "--", ec = "purple", label = rf"Transformed $\alpha = 1$ (Log)")
                     StepPatch = ax.stairs(gammahist_test_plus_2 * gammanorm_test_plus_2, bins, linestyle = "--", ec = "orange", label = rf"Transformed $\alpha = 2$ (Log)")
                 
-                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Gamma dist. for $\alpha = -2$ ({which})")
+                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Gamma for $\alpha = -2$ ({which})")
                 StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, ec = "r", lw = 0.5, label = rf"Transformed $\alpha = -1$ ({which})")
                 StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, ec = "g", lw = 0.5, label = rf"Computed $\alpha = 0$ ({which})")
                 StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, ec = "purple", lw = 0.5, label = rf"Transfomred $\alpha = 1$ ({which})")
@@ -1334,10 +1340,10 @@ class Sep_plot(Sep_gen):
                     result = sum(uniformhist)
                     # print(result, sum(gammahist))
 
-                    StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform Dist.") # Uniform Dist
-                    StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma Dist.") # Gamma Dist
+                    StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform") # Uniform Dist
+                    StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma") # Gamma Dist
                     try:
-                        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
+                        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular") # Circular Dist
                     except UnboundLocalError:
                         print()
 
@@ -1916,19 +1922,21 @@ if __name__ == "__main__":
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = 2 # For test = True, this becomes the comparison to which
+    alpha = -1 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
     test = False
     unity = False
-    dist = "gamma"
-    # specify = []
-    specify = [0.5, np.pi/3]
+    dist = ""
+    specify = []
+    # specify = [0.5, np.pi/3]
+    w_int = 0
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
-    # rlist = tothist.MultiPlotProj(w = 0, start = 0.5, end = 20, step = 0.5, specify = specify)
+    for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):
+        rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
-    # rtemp = tothist.MultiPlotHist(w = 0, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
+        rtemp = tothist.MultiPlotHist(w = w_int, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
@@ -1937,7 +1945,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

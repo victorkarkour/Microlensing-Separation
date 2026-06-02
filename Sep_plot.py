@@ -944,7 +944,7 @@ class Sep_plot(Sep_gen):
             for i in range(self.numdiv):
                 obj = Sep_gen()
                 # Step, end, inclincation, which, estep_iter, omega, incl, estep, class
-                if gamma_bool:
+                if gamma_bool: # Used only when we create marginalizations for all 3
                     param.append((0.002, 20, True, which, esteplist[i], self.wnum, self.inum, estep, repeat(obj)))
             if inclination and not gamma_bool:
                 eccent = np.linspace(0,0.99,12)

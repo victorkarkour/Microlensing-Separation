@@ -541,7 +541,7 @@ class Sep_plot(Sep_gen):
                     if which == "Linear":
                         labels = ["Linear"]
                     else:
-                        labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power Law)"]
+                        labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power)"]
                         
                     ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)
 
@@ -644,7 +644,7 @@ class Sep_plot(Sep_gen):
             if which == "Linear":
                 labels = ["Linear"]
             else:
-                labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power Law)"]
+                labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power)"]
                 
             axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 20)
             plt.figtext(0.93, 0.01, "(b)", fontsize = 30)
@@ -857,8 +857,8 @@ class Sep_plot(Sep_gen):
                 norm = np.abs(1 / (logbinsize * hist.sum()))
                 norm_log = np.abs(1 / (logbinsize * hist_log.sum()))
 
-                StepPatch = ax.stairs(hist * norm, logbins, edgecolor = colorlist[0], fill = False, alpha = 0.5, label = f"{which}")
-                StepPatch_log = ax.stairs(hist_log * norm_log, logbins, edgecolor = colorlist[1], fill = False, alpha = 0.5, label = "Log")
+                StepPatch = ax.stairs(hist * norm, logbins, edgecolor = colorlist[0], fill = False, lw = 2, label = f"{which}")
+                StepPatch_log = ax.stairs(hist_log * norm_log, logbins, edgecolor = colorlist[1], fill = False, lw = 2, label = "Log")
 
             # Limits
             limit = [x for x in np.arange(0.5, 20 + 0.5 , 0.5)]
@@ -868,7 +868,9 @@ class Sep_plot(Sep_gen):
             ax.set_xscale("log")
             ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
             ax.set_yticks([0,2,4,6,8,10])
-            
+            ax.tick_params(axis = "both", labelsize = 27)
+
+
             # Decoration
             rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")
             if not inclination:
@@ -881,7 +883,9 @@ class Sep_plot(Sep_gen):
             # Lines and organizing labels to be cleaner
             
             if j == 8:
-                ax.tick_params(axis = "both", labelbottom = True, labelleft = True) 
+                ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                ax.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 26)    
+                ax.set_ylabel(r"Probability Density", fontsize = 26) 
             else:
                 ax.set_yticks([])
                 ax.set_xticks([])
@@ -889,10 +893,10 @@ class Sep_plot(Sep_gen):
             if j == 11:
                 handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
                 if inclination:
-                    labels = [f"{which}", "Log"]
+                    labels = [fr"$\alpha$ = 0 ({which})", r"$\alpha$ = -1 (Log)"]
                 else:
                     labels = ["Linear", "Log", r"Power Law: $\alpha = 2$"]
-                ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 15)    
+                ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)    
 
         fig.tight_layout(pad = 0.5)
         # Saves plot
@@ -1340,10 +1344,10 @@ class Sep_plot(Sep_gen):
                     result = sum(uniformhist)
                     # print(result, sum(gammahist))
 
-                    StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, label = "Uniform") # Uniform Dist
-                    StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, label = "Gamma") # Gamma Dist
+                    StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, lw = 2, label = "Uniform") # Uniform Dist
+                    StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, lw = 2, label = "Gamma") # Gamma Dist
                     try:
-                        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular") # Circular Dist
+                        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, lw = 2, label = "Circular") # Circular Dist
                     except UnboundLocalError:
                         print()
 
@@ -1361,12 +1365,14 @@ class Sep_plot(Sep_gen):
                 StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
 
 
-        ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
+        ax.grid(True,color = "grey", linestyle="--", linewidth="0.5", axis = "x", which = "both")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,10)
         ax.set_xscale("log")
-        ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")    
-        ax.set_ylabel(r"Counts")
+        ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+        ax.set_xlabel(r"Semimajor Axis [$a/R_e$]", fontsize = 35)    
+        ax.set_ylabel(r"Probability Density", fontsize = 35)
+        ax.tick_params(axis = "both", labelsize = 35)
         
         if len(dist) == 0:
             # handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]    
@@ -1459,34 +1465,58 @@ class Sep_plot(Sep_gen):
         df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
         df_stats["cumul_gamma"] = df_stats["cumul_gamma"] * gammanorm
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
-        if alpha_step == -2:
-            nl = "\n"
-            fig.suptitle(fr"Cumulative Distribution Function {nl} $\alpha$ = {alpha_step}")
-        else:
-            fig.suptitle(fr"$\alpha$ = {alpha_step}")
         if test:
-            ax.plot(bins[:-1], df_stats_2["cumul_norm"], ls = "-", c = "red", lw = 3, alpha = 0.5, label = f"Uniform Dist. (Linear @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
-            ax.plot(bins[:-1], df_stats_2["cumul_gamma"], ls = "--", c = "purple", lw = 3, alpha = 0.5, label = f"Gamma Dist. (Linear)") # Dashed Line GAMMA DIST.
-            ax.plot(bins[:-1], df_stats_2["cumul_circ"], ls = ":", c = "orange", lw = 3, alpha = 0.5, label = f"Circular Dist. (Linear)") # Dotted Line CIRCULAR DIST.
-            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 0.5, label = f"Uniform Dist. ({which} @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
-            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 0.5, label = f"Gamma Dist. ({which})") # Dashed Line GAMMA DIST.
-            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 0.5, label = f"Circular Dist. ({which})") # Dotted Line CIRCULAR DIST.
+            ax.plot(bins[:-1], df_stats_2["cumul_norm"], ls = "-", c = "red", lw = 3, alpha = 1, label = f"Uniform (Linear @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
+            ax.plot(bins[:-1], df_stats_2["cumul_gamma"], ls = "--", c = "purple", lw = 3, alpha = 1, label = f"Gamma (Linear)") # Dashed Line GAMMA DIST.
+            ax.plot(bins[:-1], df_stats_2["cumul_circ"], ls = ":", c = "orange", lw = 3, alpha = 1, label = f"Circular (Linear)") # Dotted Line CIRCULAR DIST.
+            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 1, label = f"Uniform ({which} @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
+            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 1, label = f"Gamma ({which})") # Dashed Line GAMMA DIST.
+            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 1, label = f"Circular ({which})") # Dotted Line CIRCULAR DIST.
         else:
-            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 0.75, label = "Uniform Dist.") # Normal Line NORMAL DIST.
-            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 0.75, label = "Gamma Dist.") # Dashed Line GAMMA DIST.
-            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 0.75, label = "Circular Dist.") # Dotted Line CIRCULAR DIST.
+            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 1, label = "Uniform") # Normal Line NORMAL DIST.
+            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 1, label = "Gamma") # Dashed Line GAMMA DIST.
+            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 1, label = "Circular") # Dotted Line CIRCULAR DIST.
         ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
+        ax.tick_params(axis = "both", labelsize = 45)
+        ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
         ax.hlines(0.5, xmin = 0, xmax = 200, color = "k", ls = (0, (5, 8)), alpha = 0.75, lw = 3) # Loosely Dashed
         ax.hlines(0.5+(0.6827/2), xmin = 0, xmax = 200, color = "k", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # Dotted
         ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "k", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # ^
         ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # Dashdotted
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
-        ax.set_xlabel(r"Semimajor Axis [$\log{a/R_e}$]")
-        ax.set_ylabel(r"CDF")
-        ax.legend(loc = "best")
-        
+        ax.set_xlabel(r"Semimajor Axis [$a/R_e$]", fontsize = 45)    
+        ax.set_ylabel(r" Cumulative Density", fontsize = 45)
+        if alpha_step == -2:
+            ax.legend(loc = "lower right")
+        else:
+            ax.legend(loc = "best")
+        if alpha_step == 0:
+            value = "0"
+            text_string = r"$\alpha = 0$"
+        elif alpha_step == -1:
+            value = "-1"
+            text_string = r"$\alpha = -1$"
+        elif alpha_step == -2:
+            value = "-2"
+            text_string = r"$\alpha = -2$"
+        elif alpha_step == 1:
+            value = "1"
+            text_string = r"$\alpha = 1$"
+        elif alpha_step == 2:
+            value = "2"
+            text_string = r"$\alpha = 2$"
+        else:
+            return("Warning: Input correct version of alpha_step (idk just do it right man).")
+        if (alpha_step != 2 and alpha_step != 1) and (alpha_step != 0):
+            plt.figtext(0.705, 0.455, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
+        elif alpha_step == 0:
+            plt.figtext(0.73, 0.455, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
+        else:
+            plt.figtext(0.35, 0.66, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
+
+
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
         median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
         median_circ = round(df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.475) & (df_stats["cumul_circ"] <= 0.535)].values[0],3)
@@ -1922,7 +1952,7 @@ if __name__ == "__main__":
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = -1 # For test = True, this becomes the comparison to which
+    alpha = -2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
@@ -1933,10 +1963,10 @@ if __name__ == "__main__":
     # specify = [0.5, np.pi/3]
     w_int = 0
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
-    for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):
-        rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
+    # for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):
+    # rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
-        rtemp = tothist.MultiPlotHist(w = w_int, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
+    # rtemp = tothist.MultiPlotHist(w = w_int, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
@@ -1945,7 +1975,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

@@ -207,7 +207,7 @@ class Sep_plot(Sep_gen):
         else:
             # 1 by 1 plot
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step, specify = specify)
-            fig, axs = plt.subplots(figsize = (9,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
+            fig, axs = plt.subplots(figsize = (12,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
         
         rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")        
         colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
@@ -394,7 +394,7 @@ class Sep_plot(Sep_gen):
             textstr = "\n".join((f'e = {param[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 25, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
-            axs.legend(handles[0:12],labels[0:12], loc = "upper right", fontsize = 20, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+            axs.legend(handles[0:12],labels[0:12], loc = "upper left", bbox_to_anchor = (1.03,1), fontsize = 20, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
             plt.figtext(0.93, 0.01, "(a)", fontsize = 30)
             fig.tight_layout()
         
@@ -525,12 +525,12 @@ class Sep_plot(Sep_gen):
                 ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 # ax.text(3e0, 8.5, f"$e = {iterparam[0]}$") 
                 # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
-                ax.grid(True,color = "grey", linestyle="-", linewidth="0.25", axis = "x", which = "both", alpha = 0.75)
+                # ax.grid(False,color = "grey", linestyle="-", linewidth="0.25", axis = "x", which = "both", alpha = 0.75)
                 # ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', alpha = 0.5, label = r"Expected Peak $e$")
                 # if j == 0 or j == 4 or j == 8:
                 if j == 8:
                     ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                    ax.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 25)    
+                    ax.set_xlabel(r"Semimajor Axis ${a/R_E}$", fontsize = 25)    
                     ax.set_ylabel(r"Probability Density", fontsize = 25)
                     # else:
                     #     ax.tick_params(axis = "both", labelbottom = True, labelleft = False)
@@ -543,7 +543,7 @@ class Sep_plot(Sep_gen):
                     if which == "Linear":
                         labels = ["Linear"]
                     else:
-                        labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power)"]
+                        labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$"]
                         
                     ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)
 
@@ -636,17 +636,17 @@ class Sep_plot(Sep_gen):
             axs.set_xscale("log")
             axs.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
             
-            axs.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 30)    
+            axs.set_xlabel(r"Semimajor Axis, ${a/R_E}$", fontsize = 30)    
             axs.set_ylabel(r"Probability Density", fontsize = 30)
             textstr = "\n".join((f'e = {iterparam[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 25, verticalalignment = "top", bbox = rect)
-            axs.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
+            # axs.grid(False,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             # axs.vlines(1/(1-iterparam[0]), 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', alpha = 0.75, label = r"Expected Peak $e$")
             handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
             if which == "Linear":
                 labels = ["Linear"]
             else:
-                labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$ (Power)"]
+                labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$"]
                 
             axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 20)
             plt.figtext(0.93, 0.01, "(b)", fontsize = 30)
@@ -797,7 +797,7 @@ class Sep_plot(Sep_gen):
                 pd.read_csv(file_name)
             except FileNotFoundError:
                 file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
-                file_name1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
+                file_name1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
         else:
             try:
                 file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
@@ -881,12 +881,12 @@ class Sep_plot(Sep_gen):
             else:
                 textstr = f"e = {round(iter_param,3)}"
             ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
-            ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
+            # ax.grid(True,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
             # Lines and organizing labels to be cleaner
             
             if j == 8:
                 ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                ax.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 26)    
+                ax.set_xlabel(r"Semimajor Axis, ${a/R_E}$", fontsize = 26)    
                 ax.set_ylabel(r"Probability Density", fontsize = 26) 
             else:
                 ax.set_yticks([])
@@ -1346,10 +1346,10 @@ class Sep_plot(Sep_gen):
                     result = sum(uniformhist)
                     # print(result, sum(gammahist))
 
-                    StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, lw = 2, label = "Uniform") # Uniform Dist
-                    StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, lw = 2, label = "Gamma") # Gamma Dist
+                    StepPatch = ax.stairs(uniformhist * norm, bins, edgecolor = colorlist[0], fill = False, lw = 3, label = "Uniform") # Uniform Dist
+                    StepPatch = ax.stairs(gammahist * gammanorm_final, bins, edgecolor = colorlist[1], fill = False, lw = 3, label = "Gamma") # Gamma Dist
                     try:
-                        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, lw = 2, label = "Circular") # Circular Dist
+                        StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, lw = 3, label = "Circular") # Circular Dist
                     except UnboundLocalError:
                         print()
 
@@ -1367,12 +1367,12 @@ class Sep_plot(Sep_gen):
                 StepPatch = ax.stairs(circhist * ecircnorm, bins, edgecolor = colorlist[2], fill = False, label = "Circular Dist.") # Circular Dist
 
 
-        ax.grid(True,color = "grey", linestyle="--", linewidth="0.5", axis = "x", which = "both")
+        # ax.grid(True,color = "grey", linestyle="--", linewidth="0.5", axis = "x", which = "both")
         ax.set_xlim(0.5,20.5)
         ax.set_ylim(0,10)
         ax.set_xscale("log")
         ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
-        ax.set_xlabel(r"Semimajor Axis [$a/R_e$]", fontsize = 35)    
+        ax.set_xlabel(r"Semimajor Axis, $a/R_E$", fontsize = 35)    
         ax.set_ylabel(r"Probability Density", fontsize = 35)
         ax.tick_params(axis = "both", labelsize = 35)
         
@@ -1475,9 +1475,9 @@ class Sep_plot(Sep_gen):
             ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 1, label = f"Gamma ({which})") # Dashed Line GAMMA DIST.
             ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 1, label = f"Circular ({which})") # Dotted Line CIRCULAR DIST.
         else:
-            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 3, alpha = 1, label = "Uniform") # Normal Line NORMAL DIST.
-            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 3, alpha = 1, label = "Gamma") # Dashed Line GAMMA DIST.
-            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 3, alpha = 1, label = "Circular") # Dotted Line CIRCULAR DIST.
+            ax.plot(bins[:-1], df_stats["cumul_norm"], ls = "-", c = "g", lw = 6, alpha = 1, label = "Uniform") # Normal Line NORMAL DIST.
+            ax.plot(bins[:-1], df_stats["cumul_gamma"], ls = "--", c = "r", lw = 6, alpha = 1, label = "Gamma") # Dashed Line GAMMA DIST.
+            ax.plot(bins[:-1], df_stats["cumul_circ"], ls = ":", c = "b", lw = 6, alpha = 1, label = "Circular") # Dotted Line CIRCULAR DIST.
         ax.set_xlim(0.5,20)
         ax.set_ylim(0,1)
         ax.set_xscale("log")
@@ -1488,8 +1488,6 @@ class Sep_plot(Sep_gen):
         ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "k", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # ^
         ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # Dashdotted
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
-        ax.set_xlabel(r"Semimajor Axis [$a/R_e$]", fontsize = 45)    
-        ax.set_ylabel(r" Cumulative Density", fontsize = 45)
         if alpha_step == -2:
             ax.legend(loc = "lower right")
         else:
@@ -1506,18 +1504,21 @@ class Sep_plot(Sep_gen):
         elif alpha_step == 1:
             value = "1"
             text_string = r"$\alpha = 1$"
+            ax.set_xlabel(r"Semimajor Axis, $a/R_e$", fontsize = 45)    
+            ax.set_ylabel(r" Cumulative Density", fontsize = 45)
         elif alpha_step == 2:
             value = "2"
             text_string = r"$\alpha = 2$"
         else:
             return("Warning: Input correct version of alpha_step (idk just do it right man).")
         if (alpha_step != 2 and alpha_step != 1) and (alpha_step != 0):
-            plt.figtext(0.705, 0.455, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
+            plt.figtext(0.705, 0.4, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
         elif alpha_step == 0:
-            plt.figtext(0.73, 0.455, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
-        else:
+            plt.figtext(0.73, 0.4, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
+        elif alpha_step == 1:
             plt.figtext(0.35, 0.66, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
-
+        else:
+            plt.figtext(0.28, 0.66, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
 
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
         median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
@@ -1954,19 +1955,19 @@ if __name__ == "__main__":
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Log"
-    alpha = -2 # For test = True, this becomes the comparison to which
+    alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     circ = False
     gamma_bool = False
     test = False
     unity = False
     dist = ""
-    specify = []
-    # specify = [0.5, np.pi/3]
+    # specify = []
+    specify = [0.5, np.pi/3]
     w_int = 0
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):
-    rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
+    # rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = w_int, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
@@ -1977,7 +1978,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

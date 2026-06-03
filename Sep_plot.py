@@ -203,7 +203,7 @@ class Sep_plot(Sep_gen):
         if len(specify) == 0:
             # 3 by 4 Plot
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step)
-            fig, axs = plt.subplots(3,4, figsize = (13,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
+            fig, axs = plt.subplots(3,4, figsize = (13,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = False, sharey = False)
         else:
             # 1 by 1 plot
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step, specify = specify)
@@ -302,14 +302,16 @@ class Sep_plot(Sep_gen):
                 textstr = "\n".join((f'e = {param[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
                 ax.text(0.05, 0.95, textstr, transform = ax.transAxes, fontsize = 20, verticalalignment = "top", bbox = rect)
                 
-                ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                if j == 0 or j == 4 or j == 8:
-                    if j == 8:
-                        ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                        ax.set_xlabel(r"$a_x/R_E$", fontsize = 25)
-                        ax.set_ylabel(r"$a_y/R_E$", fontsize = 25)
-                    else:
-                        ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                # ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
+                # if j == 0 or j == 4 or j == 8:
+                if j == 8:
+                    ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                    ax.set_xlabel(r"$a_x/R_E$", fontsize = 25)
+                    ax.set_ylabel(r"$a_y/R_E$", fontsize = 25)
+                else:
+                    # ax.set_xticks([])
+                    # ax.set_yticks([])
+                    ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
                 # else:
                 #     ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
                 # if j == 11:
@@ -525,17 +527,17 @@ class Sep_plot(Sep_gen):
                 # ax.text(3e0, 7.5, f"$i = {round(iterparam[1],2)}$")
                 ax.grid(True,color = "grey", linestyle="-", linewidth="0.25", axis = "x", which = "both", alpha = 0.75)
                 # ax.vlines(1/(1-iterparam[0]), 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', alpha = 0.5, label = r"Expected Peak $e$")
-                if j == 0 or j == 4 or j == 8:
-                    if j == 8:
-                        ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                        ax.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 25)    
-                        ax.set_ylabel(r"Probability Density", fontsize = 25)
-                    else:
-                        ax.tick_params(axis = "both", labelbottom = True, labelleft = False)
+                # if j == 0 or j == 4 or j == 8:
+                if j == 8:
+                    ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
+                    ax.set_xlabel(r"Semimajor Axis [${a/R_e}$]", fontsize = 25)    
+                    ax.set_ylabel(r"Probability Density", fontsize = 25)
+                    # else:
+                    #     ax.tick_params(axis = "both", labelbottom = True, labelleft = False)
                 else:
                     ax.set_yticks([])
                     ax.set_xticks([])
-                    ax.tick_params(axis = "x", labelbottom = False)
+                    ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
                 if j == 11:
                     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
                     if which == "Linear":
@@ -1964,7 +1966,7 @@ if __name__ == "__main__":
     w_int = 0
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
     # for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):
-    # rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
+    rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]
     # rtemp = tothist.MultiPlotHist(w = w_int, step = 0.002, end = 20, which = which , specify = specify) # Only works for Log (has all 3)
     
@@ -1975,7 +1977,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

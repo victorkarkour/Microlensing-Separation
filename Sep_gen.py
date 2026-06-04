@@ -3,6 +3,7 @@ import scipy.optimize as sc
 import gc
 import time
 from scipy.stats import gamma
+import random
 
 class Sep_gen:
     def __init__(self):
@@ -455,7 +456,7 @@ class Sep_gen:
                             totlindict[aval] += len(conlin[0])
                         else:
                             totlindict[aval] = len(conlin[0])
-                return totlindict, xlist, ylist, 
+                return totlindict, xlist, ylist, totgammadict 
         elif Linear == "Log":
             if not inclination:
                 # Log Portion
@@ -501,31 +502,41 @@ class Sep_gen:
                 # Log Portion
                 stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
                 for aval in stepthrough:
-                    for ival in i:
-                        if isinstance(e, np.ndarray):
-                            for eval in e:
-                                x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                    if isinstance(i, np.ndarray):
+                        for ival in i:
+                            if isinstance(e, np.ndarray):
+                                for eval in e:
+                                    x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = eval, i = ival ,w = w)
+                                    r = np.sqrt(x**2+y**2)
+                            
+                                    conlog = np.where(np.abs(r-r0)<=0.01)
+
+                                    iter_e = np.where(eval == estep)[0][0]
+
+                                    if aval in totlogdict:
+                                        totlogdict[aval] += len(conlog[0])
+                                        totgammadict[aval] += round(len(conlog[0]) * (gammastep[iter_e]/gamma_sum))
+                                    else:
+                                        totlogdict[aval] = len(conlog[0])
+                                        totgammadict[aval] = round(len(conlog[0]) * (gammastep[iter_e]/gamma_sum))
+                            else:
+                                x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
                                 r = np.sqrt(x**2+y**2)
-                        
+                            
                                 conlog = np.where(np.abs(r-r0)<=0.01)
-
-                                iter_e = np.where(eval == estep)[0][0]
-
                                 if aval in totlogdict:
                                     totlogdict[aval] += len(conlog[0])
-                                    totgammadict[aval] += round(len(conlog[0]) * (gammastep[iter_e]/gamma_sum))
                                 else:
                                     totlogdict[aval] = len(conlog[0])
-                                    totgammadict[aval] = round(len(conlog[0]) * (gammastep[iter_e]/gamma_sum))
+                    else:
+                        x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
+                        r = np.sqrt(x**2+y**2)
+                    
+                        conlog = np.where(np.abs(r-r0)<=0.01)
+                        if aval in totlogdict:
+                            totlogdict[aval] += len(conlog[0])
                         else:
-                            x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = ival ,w = w)
-                            r = np.sqrt(x**2+y**2)
-                        
-                            conlog = np.where(np.abs(r-r0)<=0.01)
-                            if aval in totlogdict:
-                                totlogdict[aval] += len(conlog[0])
-                            else:
-                                totlogdict[aval] = len(conlog[0])
+                            totlogdict[aval] = len(conlog[0])
                 if isinstance(e, np.ndarray):
                     print(sum(totgammadict.values()))
                 return totlogdict, x, y, totgammadict
@@ -749,6 +760,85 @@ class Sep_gen:
         
         return tothistlist, totgammahistlist
     
+    def RandGen(param):
+        """
+        """
+        step, end, inclination, which, estep_outer, inum, wnum, esteplist ,_ = param
+        
+        # Dictionary for storing Rchange results
+        totlinlist = []
+        totloglist = []
+        totpowerlist = []
+        totgammahistlist = []
+        # Checks if there is a list of esteps, if so, creates empty list, otherwise creates set of 9 nested lists 
+        tothistlist = []
+        
+        # Create variables for bin sizes
+        nbin = 200
+        amin = 0.5
+        amax = 21
+        # Make logbinsizes for all
+        logbinsize = (np.log10(amin)-np.log10(amax))/nbin
+        logbins = np.geomspace(amin,amax, nbin)
+        
+        rng = np.random.default_rng()
+
+        print(f"start time {time.time()}, {estep_outer}")
+        start = time.perf_counter()
+        
+        # Only works if estep_outer has values in the list
+        estep = estep_outer
+        for point in np.arange(20):
+            
+            # Initialize randomness
+            wstep = random.uniform(0,np.pi/2)
+            
+            cosstep = random.uniform(0,1)
+            istep = np.arccos(cosstep)
+            
+            # Each omega calculates its own data groups
+            param = [estep, istep, wstep, end, step, which, inclination, 0]  
+            
+
+            # Multi Processing
+            steptotlist = Sep_gen.Rchange(param = param)
+            
+            # Once complete, takes the data through each set
+            histlist = tothistlist
+            if which == "Log":
+                steplogdict, x, y, _ = steptotlist
+                # Log histogram
+                totlogiter = steplogdict
+                totloglist = [key for key, val in totlogiter.items() for _ in range(val)]
+                hist_log, histbins_log = np.histogram(totloglist,bins = logbins, range=(0.5, end+0.5))
+                histlist.append((hist_log, histbins_log))
+            elif which == "Linear":
+                steplindict, x, y, _ = steptotlist
+                # Linear histogram
+                totliniter = steplindict
+                totlinlist = [key for key, val in totliniter.items() for _ in range(val)]
+                hist_lin, histbins_lin = np.histogram(totlinlist,bins = logbins, range=(0.5, end+0.5))
+                histlist.append((hist_lin, histbins_lin))
+            elif which == "Power":
+                steppowerdict, x, y, _ = steptotlist
+                # Power histogram
+                totpoweriter = steppowerdict
+                totpowerlist = [key for key, val in totpoweriter.items() for _ in range(val)]
+                hist_power, histbins_power = np.histogram(totpowerlist,bins = logbins, range=(0.5, end+0.5))
+                histlist.append((hist_power, histbins_power)) 
+            else:
+                return(print(f"Warning: {which} is not a valid point. Please use (Log), (Linear), or (Power) as your options"))
+            gc.collect()
+            
+        end_time = time.perf_counter()
+        totaltime = end_time - start
+        print(f"end time: {totaltime:.4f} seconds, {estep_outer}")
+
+        return tothistlist, totgammahistlist
+
+
+
+
     def CircHistGen(param):
         """
         """

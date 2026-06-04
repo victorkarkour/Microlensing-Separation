@@ -207,7 +207,7 @@ class Sep_plot(Sep_gen):
         else:
             # 1 by 1 plot
             list, totparam, listt = self.DataProj(w = w, start = start, end = end, step = step, specify = specify)
-            fig, axs = plt.subplots(figsize = (12,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
+            fig, axs = plt.subplots(figsize = (11,9), gridspec_kw = {"hspace" : 0, "wspace" : 0}, sharex = True, sharey = True)
         
         rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")        
         colorlist = ["forestgreen", "tomato", "mediumblue", "orange", "purple",
@@ -394,8 +394,8 @@ class Sep_plot(Sep_gen):
             textstr = "\n".join((f'e = {param[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 25, verticalalignment = "top", bbox = rect)
             handles, labels = axs.get_legend_handles_labels()
-            axs.legend(handles[0:12],labels[0:12], loc = "upper left", bbox_to_anchor = (1.03,1), fontsize = 20, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
-            plt.figtext(0.93, 0.01, "(a)", fontsize = 30)
+            axs.legend(handles[0:12],labels[0:12], loc = "upper left", bbox_to_anchor = (1.0005,1), fontsize = 20, borderpad = 0.5, labelspacing = 0.50, handlelength = 2, framealpha = 0.75)
+            plt.figtext(0.85, 0.01, "(a)", fontsize = 30)
             fig.tight_layout()
         
         # Saves to Figure Folder
@@ -787,17 +787,26 @@ class Sep_plot(Sep_gen):
         df_unity.to_csv(file_name, index = False)
         return tothistlist, evalhistlist
 
-    def CompleteHistLoad(self, which = "Log", inclination = False):
+    def CompleteHistLoad(self, which = "Log", inclination = False, random = False):
         """
         """
         if inclination:
-            try:
-                file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
-                file_name1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
-                pd.read_csv(file_name)
-            except FileNotFoundError:
-                file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
-                file_name1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
+            if random:
+                try:
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                    file_name1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{"Log"}.csv'
+                    pd.read_csv(file_name)
+                except FileNotFoundError:
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                    file_name1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{"Log"}.csv'
+            else:
+                try:
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
+                    file_name1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
+                    pd.read_csv(file_name)
+                except FileNotFoundError:
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{which}.csv'
+                    file_name1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.wnum}_{"Log"}.csv'
         else:
             try:
                 file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_omegas_{self.wnum}_{which}.csv'
@@ -908,15 +917,20 @@ class Sep_plot(Sep_gen):
             except OSError:
                 plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/CompleteHist_{wnum}_LinLogPower.png")
         else:
-            try:
-                plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_{inum}_{which}.png')
-            except OSError:
-                plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_{inum}_{which}.png")
-
+            if random:
+                try:
+                    plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_random_{which}.png')
+                except OSError:
+                    plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_random_{which}.png")
+            else:
+                try:
+                    plt.savefig(f'/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_{inum}_{which}.png')
+                except OSError:
+                    plt.savefig(f"C:/Users/victo/College_Projects/Microlensing Separation/Figures/CompleteHist_incline_{inum}_{which}.png")
 
         return df
 
-    def UnityPlotHistGen(self, which, unity = False, circ = False, gamma_bool = False, inclination = False):
+    def UnityPlotHistGen(self, which, unity = False, circ = False, gamma_bool = False, inclination = False, random = False):
         """
         """
         totlist = []
@@ -963,8 +977,12 @@ class Sep_plot(Sep_gen):
         elif circ:
             tothistlist = Sep_gen.CircHistGen(param)
         elif inclination:
-            with Pool(processes = 12) as pool:
-                tothistlist = pool.map(Sep_gen.HistGen, param)
+            if random:
+                with Pool(processes = 12) as pool:
+                    tothistlist = pool.map(Sep_gen.RandGen, param)
+            else:
+                with Pool(processes = 12) as pool:
+                    tothistlist = pool.map(Sep_gen.HistGen, param)
                 # tothistlist = Sep_gen.HistGen(param[0])
         # print("pool finished")
         if gamma_bool:
@@ -1057,11 +1075,17 @@ class Sep_plot(Sep_gen):
                 except OSError:
                     file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
             elif inclination:
-                try:
-                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.inum}_{which}.csv'
-                    df_unity.to_csv(file_name, index = False)
-                except OSError:
-                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.inum}_{which}.csv'
+                if random:
+                    try:
+                        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                    except OSError:
+                        file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                else:
+                    try:
+                        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.inum}_{which}.csv'
+                        df_unity.to_csv(file_name, index = False)
+                    except OSError:
+                        file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.inum}_{which}.csv'
             else:
                 try:
                     file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
@@ -1954,9 +1978,10 @@ if __name__ == "__main__":
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
+    which = "Linear"
     alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
+    random = True # Used to swap between discrete and random sampling for inc and omega marg
     circ = False
     gamma_bool = False
     test = False
@@ -1973,12 +1998,12 @@ if __name__ == "__main__":
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    # tothist.CompleteHistLoad(which = which, inclination = inclination)
+    tothist.CompleteHistLoad(which = which, inclination = inclination, random = random)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
-    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination)
+    # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination, random = random)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

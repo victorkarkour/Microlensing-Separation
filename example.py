@@ -3,6 +3,7 @@ from scipy.stats import gamma
 import scipy.optimize as sc
 import pandas as pd
 import matplotlib.pyplot as plt
+import random
 
 # # Assume M and e are already defined, for example:
 # M = np.array([0.5, 1.0, 1.5]) # Example numpy array for Mean Anomaly
@@ -113,5 +114,13 @@ import matplotlib.pyplot as plt
 # axs.legend()
 # # axs.set_xscale("log")
 # plt.show()
-points_ecc = np.linspace(0, 0.99, 12)
-print(points_ecc)
+# points_ecc = np.linspace(0, 0.99, 12)
+# print(points_ecc)
+
+rand_float = random.uniform(0, 1)
+print(np.arccos(rand_float))
+
+rng = np.random.default_rng()
+random = rng.uniform(low = 0, high = np.pi/2, size = 1)
+print(random)
+print(np.pi/2)

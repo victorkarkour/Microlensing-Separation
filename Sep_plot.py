@@ -29,11 +29,12 @@ matplotlib.rcParams["xtick.minor.size"] = 8
 matplotlib.rcParams["ytick.minor.size"] = 8
 class Sep_plot(Sep_gen):
 
-    def __init__(self, numestep = 10, numdiv = 2, wnum = 10):# which = "Log":
+    def __init__(self, numestep = 10, numdiv = 2, wnum = 10, total_points = 200):# which = "Log":
         self.numestep = numestep
         self.numdiv = numdiv
         # self.which = which
         self.wnum = wnum
+        self.total_points = total_points
         self.wstep = np.arange(0, np.pi/2, wnum)
 
         self.inum = wnum
@@ -942,6 +943,7 @@ class Sep_plot(Sep_gen):
         esteplist = []*self.numdiv
         param = []
         unity_data = {}
+        points = self.total_points
         
         
         # Slices estep into parts for parallelization
@@ -965,7 +967,7 @@ class Sep_plot(Sep_gen):
             if inclination and not gamma_bool:
                 eccent = np.linspace(0,0.99,12)
                 for val in eccent:
-                    param.append((0.002, 20, True, which, val, self.wnum, self.inum, None ,repeat(obj)))
+                    param.append((0.002, 20, True, which, val, self.wnum, self.inum, points ,repeat(obj)))
         else:
             obj = Sep_gen()
             param = [0.002, 20, True, which, estep[0], self.wnum, self.inum, repeat(obj)]
@@ -1064,7 +1066,10 @@ class Sep_plot(Sep_gen):
             if not circ and not inclination:
                 file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
             elif inclination:
-                file_name = f'/home/karkour.2/Results/UnityHist_inclines_{self.inum}_{which}.csv'
+                if random:
+                    file_name = f'/home/karkour.2/Results/UnityHist_inclines_random_{which}.csv'
+                else:
+                    file_name = f'/home/karkour.2/Results/UnityHist_inclines_{self.inum}_{which}.csv'
             else:
                 file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.wnum}_0002_circular_{which}.csv'
         else:
@@ -1977,6 +1982,7 @@ if __name__ == "__main__":
     numdiv = 4 
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
+    total_points = 100 # THIS DETERMINES THE TOTAL NUMBER OF POINTS IN RANDOM SAMPLING
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Linear"
     alpha = 2 # For test = True, this becomes the comparison to which
@@ -1990,7 +1996,7 @@ if __name__ == "__main__":
     # specify = []
     specify = [0.5, np.pi/3]
     w_int = 0
-    tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum)
+    tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum, total_points = total_points)
     # for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):
     # rlist = tothist.MultiPlotProj(w = w_int, start = 0.5, end = 20, step = 0.5, specify = specify)
     # specify = [eccentricity, inclination]

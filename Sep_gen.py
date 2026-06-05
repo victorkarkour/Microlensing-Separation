@@ -763,7 +763,7 @@ class Sep_gen:
     def RandGen(param):
         """
         """
-        step, end, inclination, which, estep_outer, inum, wnum, esteplist ,_ = param
+        step, end, inclination, which, estep_outer, inum, wnum, points,_ = param
         
         # Dictionary for storing Rchange results
         totlinlist = []
@@ -788,7 +788,7 @@ class Sep_gen:
         
         # Only works if estep_outer has values in the list
         estep = estep_outer
-        for point in np.arange(20):
+        for point in np.arange(points):
             
             # Initialize randomness
             wstep = random.uniform(0,np.pi/2)

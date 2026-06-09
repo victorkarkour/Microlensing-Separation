@@ -440,7 +440,10 @@ class Sep_gen:
             else:
                 if coords:
                     totlindict = []
-                stepthrough = np.arange(0.5, end + step, step)
+                if not estep == "random":
+                    stepthrough = np.arange(0.5, end + step, step)
+                else:
+                    stepthrough = [random.uniform(0.5,20.5) for _ in range(10000)]
                 for aval in stepthrough:
                     x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
                     r = np.sqrt(x**2+y**2)
@@ -456,6 +459,7 @@ class Sep_gen:
                             totlindict[aval] += len(conlin[0])
                         else:
                             totlindict[aval] = len(conlin[0])
+                print(e, i, w)
                 return totlindict, xlist, ylist, totgammadict 
         elif Linear == "Log":
             if not inclination:
@@ -500,7 +504,10 @@ class Sep_gen:
                 return totlindict, xlist, ylist, totlogdict, totpowerdict
             else:
                 # Log Portion
-                stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
+                if not estep == "random":
+                    stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
+                else:
+                    stepthrough = [random.uniform(0.5,20.5) for _ in range(10000)]
                 for aval in stepthrough:
                     if isinstance(i, np.ndarray):
                         for ival in i:
@@ -797,8 +804,7 @@ class Sep_gen:
             istep = np.arccos(cosstep)
             
             # Each omega calculates its own data groups
-            param = [estep, istep, wstep, end, step, which, inclination, 0]  
-            
+            param = [estep, istep, wstep, end, step, which, inclination, "random"]  
 
             # Multi Processing
             steptotlist = Sep_gen.Rchange(param = param)
@@ -835,9 +841,6 @@ class Sep_gen:
         print(f"end time: {totaltime:.4f} seconds, {estep_outer}")
 
         return tothistlist, totgammahistlist
-
-
-
 
     def CircHistGen(param):
         """

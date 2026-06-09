@@ -794,11 +794,11 @@ class Sep_plot(Sep_gen):
         if inclination:
             if random:
                 try:
-                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                    file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}_{self.total_points}.csv'
                     file_name1 = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{"Log"}.csv'
                     pd.read_csv(file_name)
                 except FileNotFoundError:
-                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                    file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}_{self.total_points}.csv'
                     file_name1 = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{"Log"}.csv'
             else:
                 try:
@@ -1067,7 +1067,7 @@ class Sep_plot(Sep_gen):
                 file_name = f'/home/karkour.2/Results/UnityHist_eccent_incline_{self.numestep}_0002_{which}.csv'
             elif inclination:
                 if random:
-                    file_name = f'/home/karkour.2/Results/UnityHist_inclines_random_{which}.csv'
+                    file_name = f'/home/karkour.2/Results/UnityHist_inclines_random_{which}_{self.total_points}.csv'
                 else:
                     file_name = f'/home/karkour.2/Results/UnityHist_inclines_{self.inum}_{which}.csv'
             else:
@@ -1082,9 +1082,10 @@ class Sep_plot(Sep_gen):
             elif inclination:
                 if random:
                     try:
-                        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                        file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}_{total_points}.csv'
+                        df_unity.to_csv(file_name, index = False)
                     except OSError:
-                        file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}.csv'
+                        file_name = f'/Users/victo/College_Projects/Microlensing Separation/Results/UnityHist_inclines_random_{which}_{total_points}.csv'
                 else:
                     try:
                         file_name = f'/College_Projects/Microlensing Separation/Results/UnityHist_inclines_{self.inum}_{which}.csv'
@@ -1982,7 +1983,7 @@ if __name__ == "__main__":
     numdiv = 4 
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
-    total_points = 100 # THIS DETERMINES THE TOTAL NUMBER OF POINTS IN RANDOM SAMPLING
+    total_points = 5 # THIS DETERMINES THE TOTAL NUMBER OF POINTS IN RANDOM SAMPLING
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
     which = "Linear"
     alpha = 2 # For test = True, this becomes the comparison to which

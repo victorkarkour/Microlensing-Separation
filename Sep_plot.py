@@ -27,6 +27,15 @@ matplotlib.rcParams["xtick.major.size"] = 16
 matplotlib.rcParams["ytick.major.size"] = 16
 matplotlib.rcParams["xtick.minor.size"] = 8
 matplotlib.rcParams["ytick.minor.size"] = 8
+matplotlib.rcParams["axes.linewidth"] = 3
+matplotlib.rcParams["xtick.major.width"] = 3
+matplotlib.rcParams["xtick.minor.width"] = 2
+matplotlib.rcParams["ytick.major.width"] = 3
+matplotlib.rcParams["ytick.minor.width"] = 2
+matplotlib.rcParams["xtick.top"] = True
+matplotlib.rcParams["xtick.direction"] = "out"
+matplotlib.rcParams["ytick.right"] = True
+matplotlib.rcParams["ytick.direction"] = "out"
 class Sep_plot(Sep_gen):
 
     def __init__(self, numestep = 10, numdiv = 2, wnum = 10, total_points = 200):# which = "Log":
@@ -531,22 +540,22 @@ class Sep_plot(Sep_gen):
                 # if j == 0 or j == 4 or j == 8:
                 if j == 8:
                     ax.tick_params(axis = "both", labelbottom = True, labelleft = True)
-                    ax.set_xlabel(r"Semimajor Axis ${a/R_E}$", fontsize = 25)    
+                    ax.set_xlabel(r"Semimajor Axis, ${a/R_E}$", fontsize = 25)    
                     ax.set_ylabel(r"Probability Density", fontsize = 25)
                     # else:
                     #     ax.tick_params(axis = "both", labelbottom = True, labelleft = False)
                 else:
-                    ax.set_yticks([])
-                    ax.set_xticks([])
+                    # ax.set_yticks([])
+                    # ax.set_xticks([])
                     ax.tick_params(axis = "both", labelbottom = False, labelleft = False)
-                if j == 11:
+                if j == 0:
                     handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
                     if which == "Linear":
                         labels = ["Linear"]
                     else:
                         labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$"]
                         
-                    ax.legend(handles = handles, labels = labels, loc = "best", fontsize = 10)
+                    ax.legend(handles = handles, labels = labels, loc = "lower right", fontsize = 14)
 
                 if w == 0:
                     value = "0"
@@ -1988,8 +1997,8 @@ if __name__ == "__main__":
     test = False
     unity = False
     dist = ""
-    # specify = []
-    specify = [0.5, np.pi/3]
+    specify = []
+    # specify = [0.5, np.pi/3]
     w_int = 0
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum, total_points = total_points)
     # for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):

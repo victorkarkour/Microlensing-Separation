@@ -460,7 +460,7 @@ class Sep_gen:
                         else:
                             totlindict[aval] = len(conlin[0])
                 print(e, i, w)
-                return totlindict, xlist, ylist, totgammadict 
+                return totlindict, xlist, ylist 
         elif Linear == "Log":
             if not inclination:
                 # Log Portion

@@ -1519,9 +1519,7 @@ class Sep_plot(Sep_gen):
         ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # Dashdotted
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
         if alpha_step == -2:
-            ax.legend(loc = "lower right")
-        else:
-            ax.legend(loc = "best")
+            ax.legend(loc = "lower right", fontsize = 40)
         if alpha_step == 0:
             value = "0"
             text_string = r"$\alpha = 0$"
@@ -1541,14 +1539,10 @@ class Sep_plot(Sep_gen):
             text_string = r"$\alpha = 2$"
         else:
             return("Warning: Input correct version of alpha_step (idk just do it right man).")
-        if (alpha_step != 2 and alpha_step != 1) and (alpha_step != 0):
-            plt.figtext(0.705, 0.4, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
-        elif alpha_step == 0:
-            plt.figtext(0.73, 0.4, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
-        elif alpha_step == 1:
-            plt.figtext(0.35, 0.66, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
+        if alpha_step != 1:
+            plt.figtext(0.205, 0.845, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
         else:
-            plt.figtext(0.28, 0.66, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
+            plt.figtext(0.28, 0.85, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
 
         median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
         median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
@@ -1985,7 +1979,7 @@ if __name__ == "__main__":
     inum = wnum
     total_points = 5 # THIS DETERMINES THE TOTAL NUMBER OF POINTS IN RANDOM SAMPLING
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Linear"
+    which = "Log"
     alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     random = True # Used to swap between discrete and random sampling for inc and omega marg
@@ -2005,12 +1999,12 @@ if __name__ == "__main__":
     
    # CompleteHistLoad includes Omega and Inclination marginalization!
     # tothist.CompleteHistGen(which = which, unity = unity)
-    tothist.CompleteHistLoad(which = which, inclination = inclination, random = random)
+    # tothist.CompleteHistLoad(which = which, inclination = inclination, random = random)
     
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination, random = random)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

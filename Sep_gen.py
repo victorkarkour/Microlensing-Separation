@@ -443,7 +443,7 @@ class Sep_gen:
                 if not estep == "random":
                     stepthrough = np.arange(0.5, end + step, step)
                 else:
-                    stepthrough = [random.uniform(0.5,20.5) for _ in range(10000)]
+                    stepthrough = np.random.uniform(0.5,20.5,10000)
                 for aval in stepthrough:
                     x, y, t = Sep_gen.OrbGeoAlt(a = aval, e = e, i = i ,w = w)
                     r = np.sqrt(x**2+y**2)
@@ -507,7 +507,9 @@ class Sep_gen:
                 if not estep == "random":
                     stepthrough = Sep_gen.stepdata(1, 0.5, end, 10000)
                 else:
-                    stepthrough = [random.uniform(0.5,20.5) for _ in range(10000)]
+                    min_step = np.log10(0.5)
+                    max_step = np.log10(20.5)
+                    stepthrough = 10**np.random.uniform(min_step, max_step, 10000)
                 for aval in stepthrough:
                     if isinstance(i, np.ndarray):
                         for ival in i:

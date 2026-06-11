@@ -897,7 +897,30 @@ class Sep_gen:
             
         return tothistlist
 
-        
+    def PredOrb(i, e):
+        """
+        """
+        pred = []
+        # Create semi-major and minor axis for sweeping
+        a_step = np.arange(0.5,20.5, 0.0001)   
+        b_step = a_step * np.cos(i)
+        # Create initial radius for check     
+        r_min = a_step*(1-e)
+        r_max = a_step*(1+e)
+        # r_minor = r*np.cos(i) # according to "Removing the tilt from a visual binary's orbit" website
+        r_check = 1
+
+        for step in range(len(r_min)):
+            # Conditions to add 
+            r = r_min[step]
+            if r-r_check <= 0.01:
+                pred.append(a_step[step])
+            
+            r = r_max[step]
+            if r-r_check <= 0.01:
+                pred.append(a_step[step])
+
+        return pred
 # param = [0, 1, np.pi/2, 0, 0, 0.1]
-# x = Sep_gen()
-# print(x.OrbGeoAlt())
+x = Sep_gen()
+print(len(Sep_gen.PredOrb(50, 0.7)))

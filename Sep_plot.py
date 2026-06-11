@@ -1330,17 +1330,17 @@ class Sep_plot(Sep_gen):
                     gammanorm_test_plus_1 = np.abs(1 / (np.sum(gammahist_test_plus_1) * logbinsize))
                     gammanorm_test_plus_2 = np.abs(1 / (np.sum(gammahist_test_plus_2) * logbinsize))
                     
-                    StepPatch = ax.stairs(gammahist_test_minus_2 * gammanorm_test_minus_2, bins, linestyle = "--", ec = "blue", label = rf"Transformed Gamma for $\alpha = -2$ (Log)") 
-                    StepPatch = ax.stairs(gammahist_test_minus_1 * gammanorm_test_minus_1, bins, linestyle = "--", ec = "r", label = rf"Computed $\alpha = -1$ (Log)")
-                    StepPatch = ax.stairs(gammahist_test_0 * gammanorm_test_0, bins, linestyle = "--", ec = "g", label = rf"Transformed $\alpha = 0$ (Log)") 
-                    StepPatch = ax.stairs(gammahist_test_plus_1 * gammanorm_test_plus_1, bins, linestyle = "--", ec = "purple", label = rf"Transformed $\alpha = 1$ (Log)")
-                    StepPatch = ax.stairs(gammahist_test_plus_2 * gammanorm_test_plus_2, bins, linestyle = "--", ec = "orange", label = rf"Transformed $\alpha = 2$ (Log)")
+                    StepPatch = ax.stairs(gammahist_test_minus_2 * gammanorm_test_minus_2, bins, linestyle = "--", lw = 2, ec = "blue", label = rf"$\alpha = -2$") 
+                    StepPatch = ax.stairs(gammahist_test_minus_1 * gammanorm_test_minus_1, bins, linestyle = "--", lw = 2, ec = "r", label = rf"Computed $\alpha = -1$")
+                    StepPatch = ax.stairs(gammahist_test_0 * gammanorm_test_0, bins, linestyle = "--", lw = 2, ec = "g", label = rf"$\alpha = 0$") 
+                    StepPatch = ax.stairs(gammahist_test_plus_1 * gammanorm_test_plus_1, bins, linestyle = "--", lw = 2, ec = "purple", label = rf"$\alpha = 1$")
+                    StepPatch = ax.stairs(gammahist_test_plus_2 * gammanorm_test_plus_2, bins, linestyle = "--", lw = 2, ec = "orange", label = rf"$\alpha = 2$")
                 
-                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, ec = "blue", lw = 0.5, label = rf"Transformed Gamma for $\alpha = -2$ ({which})")
-                StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, ec = "r", lw = 0.5, label = rf"Transformed $\alpha = -1$ ({which})")
-                StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, ec = "g", lw = 0.5, label = rf"Computed $\alpha = 0$ ({which})")
-                StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, ec = "purple", lw = 0.5, label = rf"Transfomred $\alpha = 1$ ({which})")
-                StepPatch = ax.stairs(gammahist_5 * gammanorm_final_5, bins, ec = "orange", lw = 0.5, label = rf"Transformed $\alpha = 2$ ({which})")           
+                StepPatch = ax.stairs(gammahist_1 * gammanorm_final_1, bins, ec = "blue", lw = 1, label = rf"$\alpha = -2$")
+                StepPatch = ax.stairs(gammahist_2 * gammanorm_final_2, bins, ec = "r", lw = 1, label = rf"$\alpha = -1$")
+                StepPatch = ax.stairs(gammahist_3 * gammanorm_final_3, bins, ec = "g", lw = 1, label = rf"Computed $\alpha = 0$")
+                StepPatch = ax.stairs(gammahist_4 * gammanorm_final_4, bins, ec = "purple", lw = 1, label = rf"$\alpha = 1$")
+                StepPatch = ax.stairs(gammahist_5 * gammanorm_final_5, bins, ec = "orange", lw = 1, label = rf" $\alpha = 2$")           
         else:
             if not circ:
                 if test:
@@ -1408,7 +1408,10 @@ class Sep_plot(Sep_gen):
 
         # ax.grid(True,color = "grey", linestyle="--", linewidth="0.5", axis = "x", which = "both")
         ax.set_xlim(0.5,20.5)
-        ax.set_ylim(0,10)
+        if test:
+            ax.set_ylim(0,5)
+        else:
+            ax.set_ylim(0,10)
         ax.set_xscale("log")
         ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
         ax.set_xlabel(r"Semimajor Axis, $a/R_E$", fontsize = 35)    
@@ -1988,10 +1991,10 @@ if __name__ == "__main__":
     inum = wnum
     total_points = 5 # THIS DETERMINES THE TOTAL NUMBER OF POINTS IN RANDOM SAMPLING
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Log"
-    alpha = 2 # For test = True, this becomes the comparison to which
+    which = "Linear"
+    alpha = -1 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
-    random = True # Used to swap between discrete and random sampling for inc and omega marg
+    random = False # Used to swap between discrete and random sampling for inc and omega marg
     circ = False
     gamma_bool = False
     test = False
@@ -2013,7 +2016,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination, random = random)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)

@@ -922,5 +922,5 @@ class Sep_gen:
 
         return pred
 # param = [0, 1, np.pi/2, 0, 0, 0.1]
-x = Sep_gen()
-print(len(Sep_gen.PredOrb(50, 0.7)))
+# x = Sep_gen()
+# print(len(Sep_gen.PredOrb(50, 0.7)))

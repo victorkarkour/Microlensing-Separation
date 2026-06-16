@@ -19,6 +19,7 @@ from Sep_gen import Sep_gen
 import os
 import matplotlib.gridspec as gridspec
 import statistics as stats
+from scipy.interpolate import interp1d
 
 matplotlib.use("Agg")
 matplotlib.rcParams["axes.labelsize"] = 25
@@ -433,7 +434,7 @@ class Sep_plot(Sep_gen):
         if which == "Linear":
             colorlist = ["green", "black"]
         else:
-            colorlist = ["green", "red", "blue"]
+            colorlist = ["green", "red", "blue", "black"]
         
         # Data
         rlist, param = self.DataHist(w = w, step = step, end = end, which = which, specify = specify) 
@@ -553,22 +554,175 @@ class Sep_plot(Sep_gen):
                     if which == "Linear":
                         labels = ["Linear"]
                     else:
-                        labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$"]
+                        labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$", r"Expected Peaks $e$"]
                         
                     ax.legend(handles = handles, labels = labels, loc = "lower right", fontsize = 14)
 
                 if w == 0:
                     value = "0"
                     text_string = "(a)"
+                    if j == 0:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 1:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.1547, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 2:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 3:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Next is infinity
+                    elif j == 4:
+                        ax.vlines(0.666667, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 5:
+                        ax.vlines(0.666667, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 6:
+                        ax.vlines(0.666667, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2.77555, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 7:
+                        ax.vlines(0.666667, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity again
+                    elif j == 8:
+                        ax.vlines(0.526316, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 9:
+                        ax.vlines(0.526316, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 10:
+                        ax.vlines(0.526316, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(11.8626, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 11:
+                        ax.vlines(0.526316, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity
                 elif w == (np.pi)/6:
                     value = "pi_6"
                     text_string = ""
+                    if j == 0:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 1:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.1547, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 2:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 3:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Next is infinity
+                    elif j == 4:
+                        ax.vlines(0.666667, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 5:
+                        ax.vlines(0.684611, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2.1239, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 6:
+                        ax.vlines(0.70678, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.843267, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2.12156, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(3.39525, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 7:
+                        ax.vlines(0.713644, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.86834, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity again
+                    elif j == 8:
+                        ax.vlines(0.526316, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 9:
+                        ax.vlines(0.543181, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10.5218, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 10:
+                        ax.vlines(0.579128, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(15.9151, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 11:
+                        ax.vlines(0.597925, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(8.80238, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity
                 elif w == (np.pi)/3:
                     value = "pi_3"
                     text_string = "(b)"
+                    if j == 0:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 1:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.1547, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 2:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 3:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Next is infinity
+                    elif j == 4:
+                        ax.vlines(0.666667, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 5:
+                        ax.vlines(0.732387, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2.25816, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 6:
+                        ax.vlines(0.838165, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.46563, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.57672, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(3.83894, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 7:
+                        ax.vlines(0.868517, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.53518, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity again
+                    elif j == 8:
+                        ax.vlines(0.526316, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 9:
+                        ax.vlines(0.583312, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(11.25, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 10:
+                        ax.vlines(0.772227, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(18.9042, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 11:
+                        ax.vlines(0.928938, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(5.66578, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity
                 elif w == (np.pi)/2:
                     value = "pi_2"
                     text_string = "(c)"
+                    if j == 0:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 1:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.1547, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 2:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 3:
+                        ax.vlines(1, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Next is infinity
+                    elif j == 4:
+                        ax.vlines(0.666667, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 5:
+                        ax.vlines(0.7698, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(2.3094, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 6:
+                        ax.vlines(1.08866, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(1.33333, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(4, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 7:
+                        ax.vlines(1.1547, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity again
+                    elif j == 8:
+                        ax.vlines(0.526316, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(10, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 9:
+                        ax.vlines(0.607737, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(11.547, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 10:
+                        ax.vlines(1.05263, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        ax.vlines(20, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                    elif j == 11:
+                        ax.vlines(2.29416, 0, 1, transform = ax.get_xaxis_transform(), colors = 'k', lw = 2)
+                        # Infinity
                 else:
                     return("Warning: Input correct version of pi (idk just do it right man).")
                     
@@ -651,12 +805,14 @@ class Sep_plot(Sep_gen):
             textstr = "\n".join((f'e = {iterparam[0]}', rf'i = {round(np.degrees(param[1]))}$\degree$'))
             axs.text(0.05, 0.95, textstr, transform = axs.transAxes, fontsize = 25, verticalalignment = "top", bbox = rect)
             # axs.grid(False,color = "grey", linestyle="--", linewidth="0.25", axis = "x", which = "both")
-            # axs.vlines(1/(1-iterparam[0]), 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', alpha = 0.75, label = r"Expected Peak $e$")
+            axs.vlines(0.666667, 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', lw = 2)
+            axs.vlines(2, 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', lw = 2)
+            axs.vlines(2.77555, 0, 1, transform = axs.get_xaxis_transform(), colors = 'k', lw = 2)
             handles = [patches.Rectangle((0,0),1,1,color = c, ec = "w") for c in colorlist]
             if which == "Linear":
                 labels = ["Linear"]
             else:
-                labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$"]
+                labels = [r"$\alpha = 0$ (Linear)", r"$\alpha = -1$ (Log)", r"$\alpha = 1$", r"Expected Peaks $e$"]
                 
             axs.legend(handles = handles, labels = labels, loc = "upper right", fontsize = 20)
             plt.figtext(0.93, 0.01, "(b)", fontsize = 30)
@@ -879,7 +1035,7 @@ class Sep_plot(Sep_gen):
                 norm_log = np.abs(1 / (logbinsize * hist_log.sum()))
 
                 StepPatch = ax.stairs(hist * norm, logbins, edgecolor = colorlist[0], fill = False, lw = 2, label = f"{which}")
-                StepPatch_log = ax.stairs(hist_log * norm_log, logbins, edgecolor = colorlist[1], fill = False, lw = 2, label = "Log")
+                # StepPatch_log = ax.stairs(hist_log * norm_log, logbins, edgecolor = colorlist[1], fill = False, lw = 2, label = "Log")
 
             # Limits
             limit = [x for x in np.arange(0.5, 20 + 0.5 , 0.5)]
@@ -1464,7 +1620,6 @@ class Sep_plot(Sep_gen):
         amax = 21
         # Make log bins for all
         bins = np.geomspace(amin,amax, nbin)
-
         try: 
             if test: # Only works for Log currently
                 print("Test flag activated")
@@ -1488,27 +1643,14 @@ class Sep_plot(Sep_gen):
             df_stats_2["cumul_gamma"] = np.cumsum(df_stats_2["gamma list"]) / np.abs(sum(df_stats_2["gamma list"]))
             df_stats_2["cumul_circ"] = np.cumsum(df_stats_2["circular list"]) / np.abs(sum(df_stats_2["circular list"]))
             df_stats_2["bins"] = bins[:-1]
-        df_stats["cumulative"] = 0
-        df_stats["cumul_gamma"] = 0
-        df_stats["cumul_circ"] = np.cumsum(df_stats["circular list"]) / np.abs(sum(df_stats["circular list"]))
+
         df_stats["bins"] = bins[:-1]
-
-
-        hist = df_stats["final list"].to_numpy()
-        # Make Gamma Calculation
-        gammanorm = np.abs(1/ (np.sum(df_stats["gamma list"])))
-
-        cumulative = 0
-        cumul_gamma = 0
-        cumul_norm = np.abs(1 / (sum(df_stats["final list"])))
-        for i in range(len(df_stats["final list"])):
-            cumulative = cumulative + df_stats.loc[i, "final list"]
-            cumul_gamma = cumul_gamma + df_stats.loc[i, "gamma list"]
-            df_stats.loc[i, "cumulative"] = cumulative
-            df_stats.loc[i, "cumul_gamma"] = cumul_gamma
-        df_stats["cumul_norm"] = df_stats["cumulative"] * cumul_norm
-        df_stats["cumul_gamma"] = df_stats["cumul_gamma"] * gammanorm
+        df_stats.index = df_stats["bins"]
+        df_stats["cumul_circ"] = np.cumsum(df_stats["circular list"]) / np.abs(sum(df_stats["circular list"]))
+        df_stats["cumul_norm"] = np.cumsum(df_stats["final list"]) / np.abs(sum(df_stats["final list"]))
+        df_stats["cumul_gamma"] = np.cumsum(df_stats["gamma list"]) / np.abs(sum(df_stats["gamma list"]))
         fig, ax = plt.subplots(figsize = (9,9), sharex=True,sharey=True,gridspec_kw=dict(hspace=0,wspace=0))
+
         if test:
             ax.plot(bins[:-1], df_stats_2["cumul_norm"], ls = "-", c = "red", lw = 3, alpha = 1, label = f"Uniform (Linear @ alpha = {alpha_step})") # Normal Line NORMAL DIST.
             ax.plot(bins[:-1], df_stats_2["cumul_gamma"], ls = "--", c = "purple", lw = 3, alpha = 1, label = f"Gamma (Linear)") # Dashed Line GAMMA DIST.
@@ -1527,9 +1669,10 @@ class Sep_plot(Sep_gen):
         ax.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
         ax.hlines(0.5, xmin = 0, xmax = 200, color = "k", ls = (0, (5, 8)), alpha = 0.75, lw = 3) # Loosely Dashed
         ax.hlines(0.5+(0.6827/2), xmin = 0, xmax = 200, color = "k", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # Dotted
-        ax.hlines(0.5-(0.6287/2), xmin = 0, xmax = 200, color = "k", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # ^
+        ax.hlines(0.5-(0.6827/2), xmin = 0, xmax = 200, color = "k", ls = (0, (1, 1)), alpha = 0.75, lw = 3) # ^
         ax.hlines(0.5+(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # Dashdotted
         ax.hlines(0.5-(0.95/2), xmin = 0, xmax = 200, color = "k", ls = (0, (3, 5, 1, 5)), alpha = 0.75, lw = 3) # ^
+        # ax.grid(True, axis = "x", c = "grey", lw = 2, alpha = 0.75, which = "both")
         if alpha_step == -2:
             ax.legend(loc = "lower right", fontsize = 40)
         if alpha_step == 0:
@@ -1556,48 +1699,45 @@ class Sep_plot(Sep_gen):
         else:
             plt.figtext(0.28, 0.85, text_string, fontsize = 35, bbox = dict(boxstyle = "round", alpha = 0.75, facecolor = "white", ec = "grey"))
 
-        median = round(df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.495) & (df_stats["cumul_norm"] <= 0.515)].values[0],3)
-        median_gamma = round(df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.495) & (df_stats["cumul_gamma"] <= 0.595)].values[0],3)
-        median_circ = round(df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.475) & (df_stats["cumul_circ"] <= 0.535)].values[0],3)
-
+        
         # Upper Lower Percentages
-        upper_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.8165) & (df_stats["cumul_gamma"] <= 0.8415)].values[0]
-        lower_68_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.1495) & (df_stats["cumul_gamma"] <= 0.1715)].values[0]
-        upper_95_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.9535) & (df_stats["cumul_gamma"] <= 0.9865)].values[0]
-        lower_95_gamma = df_stats["bins"].loc[(df_stats["cumul_gamma"] >= 0.0205) & (df_stats["cumul_gamma"] <= 0.0465)].values[0] 
-        
-        upper_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.8165) & (df_stats["cumul_norm"] <= 0.8415)].values[0]
-        lower_68 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.1495) & (df_stats["cumul_norm"] <= 0.1715)].values[0]
-        upper_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.9535) & (df_stats["cumul_norm"] <= 0.9865)].values[0]
-        lower_95 = df_stats["bins"].loc[(df_stats["cumul_norm"] >= 0.0205) & (df_stats["cumul_norm"] <= 0.0265)].values[0]
-        
-        upper_68_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.8265) & (df_stats["cumul_circ"] <= 0.8515)].values[0]
-        lower_68_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.1445) & (df_stats["cumul_circ"] <= 0.3215)].values[0]
-        upper_95_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.9535) & (df_stats["cumul_circ"] <= 0.9865)].values[0]
-        lower_95_circ = df_stats["bins"].loc[(df_stats["cumul_circ"] >= 0.0155) & (df_stats["cumul_circ"] <= 0.1000)].values[0]
+        quantiles = [0.025, 0.16, 0.5, 0.84, 0.975]
 
+        # 2. Build the linear interpolation function
+        linear_interp_norm = interp1d(df_stats["cumul_norm"], df_stats["bins"], kind='linear')
+        linear_interp_gamma = interp1d(df_stats["cumul_gamma"], df_stats["bins"], kind='linear')
+        linear_interp_circ = interp1d(df_stats["cumul_circ"], df_stats["bins"], kind='linear')
+
+        # 3. Predict values at Confidence Intervals
+        lower_95, lower_68, median, upper_68, upper_95 = linear_interp_norm(quantiles)  # Returns array([1.5, 2.0, 2.5])
+        lower_95_gamma, lower_68_gamma, median_gamma, upper_68_gamma, upper_95_gamma = linear_interp_gamma(quantiles)
+        lower_95_circ, lower_68_circ, median_circ, upper_68_circ, upper_95_circ = linear_interp_circ(quantiles)
+        
         np.set_printoptions(legacy = "1.25")
 
-        # Roudn up percents
+        # Round up percents
+        percent_med = round(median, 3)
         percent_68 = round(lower_68,3), round(upper_68,3)
         percent_95 = round(lower_95,3), round(upper_95,3)
-        
+
+        percent_med_gamma = round(median_gamma, 3)
         percent_68_gamma = round(lower_68_gamma,3), round(upper_68_gamma,3)
         percent_95_gamma = round(lower_95_gamma,3), round(upper_95_gamma,3)
         
+        percent_med_circ = round(median_circ, 3)
         percent_68_circ = round(lower_68_circ,3), round(upper_68_circ,3)
         percent_95_circ = round(lower_95_circ,3), round(upper_95_circ,3)
         
         # IMPORT STATS TO HELP WITH 68% 95% VALUES
         statistics = [median, percent_68, percent_95]
         print(f"Stats for  Uniform distribution and alpha = {alpha_step}: ")
-        print(' Median: ', median, " 68% Intervals: ", percent_68, " 95% Intervals: ", percent_95)
+        print(' Median: ', percent_med, " 68% Intervals: ", percent_68, " 95% Intervals: ", percent_95)
         
         print(f"Stats for  Gamma distribution and alpha = {alpha_step}: ")
-        print(' Median: ', median_gamma, " 68% Intervals: ", percent_68_gamma, " 95% Intervals: ", percent_95_gamma)
+        print(' Median: ', percent_med_gamma, " 68% Intervals: ", percent_68_gamma, " 95% Intervals: ", percent_95_gamma)
         
         print(f"Stats for  Circular distribution and alpha = {alpha_step}: ")
-        print(' Median: ', median_circ, " 68% Intervals: ", percent_68_circ, " 95% Intervals: ", percent_95_circ)
+        print(' Median: ', percent_med_circ, " 68% Intervals: ", percent_68_circ, " 95% Intervals: ", percent_95_circ)
         
         # rect = dict(boxstyle = "round", alpha = 1, facecolor = "white")
         # textstr = "\n".join((f'Median: {median}', f'68% Intervals: {percent_68}', f'95% Intervals: {percent_95}'))
@@ -1989,10 +2129,10 @@ if __name__ == "__main__":
     numdiv = 4 
     wnum = 100 # THIS DETERMINES HOW MANY POSITIONS IN THE ARRAY THERE ARE
     inum = wnum
-    total_points = 5 # THIS DETERMINES THE TOTAL NUMBER OF POINTS IN RANDOM SAMPLING
+    total_points = 10000 # THIS DETERMINES THE TOTAL NUMBER OF POINTS IN RANDOM SAMPLING
     # FOR REAL LINEAR, alpha = 0, FOR REAL LOG, alpha = -1, FOR REAL POWER, alpha = 1
-    which = "Linear"
-    alpha = -1 # For test = True, this becomes the comparison to which
+    which = "Log"
+    alpha = 2 # For test = True, this becomes the comparison to which
     inclination = True # KEEP IN MIND THIS VALUE
     random = False # Used to swap between discrete and random sampling for inc and omega marg
     circ = False
@@ -2000,8 +2140,8 @@ if __name__ == "__main__":
     test = False
     unity = False
     dist = ""
-    specify = []
-    # specify = [0.5, np.pi/3]
+    # specify = []
+    specify = [0.5, np.pi/3]
     w_int = 0
     tothist = Sep_plot(numestep=numestep, numdiv=numdiv, wnum = wnum, total_points = total_points)
     # for w_int in np.arange(0, np.pi/2+np.pi/6, np.pi/6):
@@ -2016,7 +2156,7 @@ if __name__ == "__main__":
     # UnityPlotHistGen includes Inclination and Eccentricity Marginalization!
     # folder = tothist.UnityPlotHistGen(which = which, unity = unity, circ = circ, gamma_bool = gamma_bool, inclination = inclination, random = random)
     # load = tothist.UnityPlotHistLoad(which = which, alpha_step = alpha, dist = dist, circ = circ, test = test)
-    # cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
+    cdf = tothist.statistics(which = which, alpha_step = alpha, test = test)
     
     # Note: stepalpha function can also combine uniform and circular distributions!
     # alpha = tothist.stepalpha(which = which, alpha = alpha, circ = circ)
